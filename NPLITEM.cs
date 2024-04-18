@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text.Json.Nodes;
 
@@ -21,6 +19,7 @@ namespace NPLTOOL
             }
         }
         public string _path;
+        public string Key;
         public bool Recursive = false;
         public string Action = "";
         public string Importer = "";
@@ -28,8 +27,6 @@ namespace NPLTOOL
         public string[] Watch;
         public string[] ProcessorParameters;
         public string[] Parameters;
-
-        public string Key;
 
         public void Add(string param, object value)
         {
