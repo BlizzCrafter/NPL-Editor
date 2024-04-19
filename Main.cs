@@ -43,6 +43,8 @@ namespace NPLTOOL
 
         protected override void Initialize()
         {
+            Window.Title = "NPL-TOOL";
+
             _graphics.GraphicsDevice.PresentationParameters.BackBufferWidth = _graphics.PreferredBackBufferWidth;
             _graphics.GraphicsDevice.PresentationParameters.BackBufferHeight = _graphics.PreferredBackBufferHeight;
 
