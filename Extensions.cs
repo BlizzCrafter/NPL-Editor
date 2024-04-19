@@ -6,7 +6,7 @@ namespace NPLTOOL
     {
         public static Vector4 ToSystemVector4(this Microsoft.Xna.Framework.Color color)
         {
-            return new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255);
+            return new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
         }
 
         public static Microsoft.Xna.Framework.Color ToXNA(this Vector4 color)
