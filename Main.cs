@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using NPLTOOL.GUI;
+using NPLTOOL.Parameter;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -175,41 +176,86 @@ namespace NPLTOOL
                             }
                             else if (itemKey == "processorParam")
                             {
-                                ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetFrameHeight() - ImGui.GetStyle().IndentSpacing - ImGui.GetStyle().ItemSpacing.X);
+                                ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
                                 if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
                                 {
-                                    foreach (var parameter in itemValue.AsObject())
+                                    if (ImGui.BeginTable("Checkmarks", 2, ImGuiTableFlags.NoClip))
                                     {
-                                        var parameterKey = parameter.Key; //e.g. ColorKeyColor
-                                        var parameterValue = parameter.Value; //e.g. 255,0,255,255
-
-                                        var index = nplItem.GetParameterIndex(parameterKey, true);
-
-                                        if (parameterKey == "ColorKeyColor")
+                                        var itemCount = 0;
+                                        foreach (var parameter in itemValue.AsObject())
                                         {
-                                            string[] rgbValues = parameterValue.ToString().Split(',');
-                                            int red = int.Parse(rgbValues[0]);
-                                            int green = int.Parse(rgbValues[1]);
-                                            int blue = int.Parse(rgbValues[2]);
-                                            int alpha = int.Parse(rgbValues[3]);
-                                            var color = new Color(red, green, blue, alpha).ToSystemVector4();
+                                            var parameterKey = parameter.Key; //e.g. ColorKeyColor
+                                            var parameterValue = parameter.Value; //e.g. 255,0,255,255
 
-                                            ImGui.PushStyleColor(ImGuiCol.Button, color);
-                                            ImGui.BeginDisabled(true);
-                                            ImGui.Button(" ", new Num.Vector2(ImGui.GetFrameHeight())); ImGui.SameLine();
-                                            ImGui.EndDisabled();
-                                            ImGui.PopStyleColor();
-                                            if (ImGui.InputTextWithHint(parameterKey, itemValue.ToString(), ref nplItem.ProcessorParameters[index], 9999))
+                                            itemCount++;
+                                            var columnPos = itemCount % 2;
+
+                                            if (columnPos == 1)
                                             {
-                                                var sColor = nplItem.ProcessorParameters[index].Split(':');
+                                                ImGui.TableNextRow();
+                                                ImGui.TableSetupColumn("Column 1");
+                                                ImGui.TableSetupColumn("Column 2");
+                                                ImGui.TableSetColumnIndex(0);
+                                            }
+                                            else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
 
-                                                nplItem.ProcessorParameters[index] = nplItem.GetParameterString(parameterKey, sColor[1]);
+                                            if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyColor)
+                                            {
+                                                if (ImGui.ColorEdit4(parameterKey, ref nplItem.ProcessorParameters.ColorKeyColor, ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoTooltip))
+                                                {
+                                                    var xColor = nplItem.ProcessorParameters.ColorKeyColor.ToXNA();
+                                                    var sColor = $"{xColor.R},{xColor.G},{xColor.B},{xColor.A}";
 
-                                                ModifyDataParam(data.Key, itemKey, parameterKey, sColor[1],
-                                                    out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, sColor,
+                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyEnabled)
+                                                {
+                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.ColorKeyEnabled))
+                                                    {
+                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.ColorKeyEnabled.ToString(),
+                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                    }
+                                                }
+                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.GenerateMipmaps)
+                                                {
+                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.GenerateMipmaps))
+                                                    {
+                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.GenerateMipmaps.ToString(),
+                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                    }
+                                                }
+                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.PremultiplyAlpha)
+                                                {
+                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.PremultiplyAlpha))
+                                                    {
+                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.PremultiplyAlpha.ToString(),
+                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                    }
+                                                }
+                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ResizeToPowerOfTwo)
+                                                {
+                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.ResizeToPowerOfTwo))
+                                                    {
+                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.ResizeToPowerOfTwo.ToString(),
+                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                    }
+                                                }
+                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.MakeSquare)
+                                                {
+                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.MakeSquare))
+                                                    {
+                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.MakeSquare.ToString(),
+                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
+                                                    }
+                                                }
                                             }
                                         }
                                     }
+                                    ImGui.EndTable();
                                     ImGui.TreePop();
                                 }
                                 ImGui.PopItemWidth();

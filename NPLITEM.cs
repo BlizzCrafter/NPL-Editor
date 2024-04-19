@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.Json.Nodes;
+using NPLTOOL.Parameter;
 
 namespace NPLTOOL
 {
@@ -25,8 +26,8 @@ namespace NPLTOOL
         public string Importer = "";
         public string Processor = "";
         public string[] Watch;
-        public string[] ProcessorParameters;
         public string[] Parameters;
+        public ProcessorParameter ProcessorParameters;
 
         public void Add(string param, object value)
         {
@@ -53,17 +54,16 @@ namespace NPLTOOL
                     break; 
                 case "processorParam":
                     {
-                        if (ProcessorParameters == null) ProcessorParameters = new string[0];
+                        ProcessorParameters ??= new ProcessorParameter();
 
                         var itemArray = ((JsonObject)value).ToArray();
-                        Array.Resize(ref ProcessorParameters, itemArray.Length);
 
                         for (int i = 0; i < itemArray.Length; i++)
                         {
                             var parameterKey = itemArray[i].Key; //e.g. ColorKeyColor
                             var parameterValue = itemArray[i].Value; //e.g. 255,0,255,255
-
-                            ProcessorParameters[i] = GetParameterString(parameterKey, parameterValue);
+                                                        
+                            ProcessorParameters.SetParameter(Enum.Parse<ParameterKey>(parameterKey), parameterValue.ToString());
                         }
                     }
                     break;
@@ -83,11 +83,9 @@ namespace NPLTOOL
             return $"{param}:{value}";
         }
 
-        public int GetParameterIndex(string itemKey, bool processorParameter = false)
+        public int GetParameterIndex(string itemKey)
         {
             var list = Parameters.ToList();
-
-            if (processorParameter) list = ProcessorParameters.ToList();
 
             var parameter = list.Find(x => x.StartsWith(itemKey));
             return list.IndexOf(parameter);
