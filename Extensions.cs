@@ -11,7 +11,13 @@ namespace NPLTOOL
 
         public static Microsoft.Xna.Framework.Color ToXNA(this Vector4 color)
         {
-            return new Microsoft.Xna.Framework.Color(color.X * 255f, color.Y * 255f, color.Z * 255f, color.W * 255);
+            return new Microsoft.Xna.Framework.Color(
+                (byte)(Microsoft.Xna.Framework.MathHelper.Clamp(color.X, 0f, 1f) * 255f),
+                (byte)(Microsoft.Xna.Framework.MathHelper.Clamp(color.Y, 0f, 1f) * 255f),
+                (byte)(Microsoft.Xna.Framework.MathHelper.Clamp(color.Z, 0f, 1f) * 255f),
+                (byte)(Microsoft.Xna.Framework.MathHelper.Clamp(color.W, 0f, 1f) * 255f)
+            );
+        }
         }
     }
 }
