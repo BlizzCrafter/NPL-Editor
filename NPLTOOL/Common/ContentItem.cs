@@ -3,10 +3,10 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using NPLTOOL.Parameter;
 
-namespace NPLTOOL
+namespace NPLTOOL.Common
 {
-    public class NPLITEM
-    {   
+    public class ContentItem
+    {
         public string Path
         {
             get => _path;
@@ -20,14 +20,21 @@ namespace NPLTOOL
             }
         }
         public string _path;
-        public string Key;
-        public bool Recursive = false;
-        public string Action = "";
-        public string Importer = "";
-        public string Processor = "";
+        public readonly string Category;
+        public bool Recursive;
+        public string Action;
+        public string Importer;
+        public string Processor;
+        public int SelectedImporterIndex;
+        public int SelectedProcessorIndex;
         public string[] Watch;
         public string[] Parameters;
         public ProcessorParameter ProcessorParameters;
+
+        public ContentItem(string category)
+        {
+            Category = category;
+        }
 
         public void Add(string param, object value)
         {
@@ -37,7 +44,7 @@ namespace NPLTOOL
                     Path = value.ToString();
                     break;
                 case "recursive":
-                    Recursive = (string.Compare(value.ToString(), "true", true) == 0);
+                    Recursive = string.Compare(value.ToString(), "true", true) == 0;
                     break;
                 case "action":
                     Action = value.ToString();
@@ -51,7 +58,7 @@ namespace NPLTOOL
                             Watch[i] = itemArray[i].ToString();
                         }
                     }
-                    break; 
+                    break;
                 case "processorParam":
                     {
                         ProcessorParameters ??= new ProcessorParameter();
@@ -62,7 +69,7 @@ namespace NPLTOOL
                         {
                             var parameterKey = itemArray[i].Key; //e.g. ColorKeyColor
                             var parameterValue = itemArray[i].Value; //e.g. 255,0,255,255
-                                                        
+
                             ProcessorParameters.SetParameter(Enum.Parse<ParameterKey>(parameterKey), parameterValue.ToString());
                         }
                     }
