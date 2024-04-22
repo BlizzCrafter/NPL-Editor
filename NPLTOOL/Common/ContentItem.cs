@@ -29,7 +29,7 @@ namespace NPLTOOL.Common
         public int SelectedProcessorIndex;
         public string[] Watch;
         public string[] Parameters;
-        public ProcessorParameter ProcessorParameters;
+        public TextureProcessorParameter TextureProcessorParameters;
 
         public ContentItem(string category)
         {
@@ -61,7 +61,7 @@ namespace NPLTOOL.Common
                     break;
                 case "processorParam":
                     {
-                        ProcessorParameters ??= new ProcessorParameter();
+                        TextureProcessorParameters ??= new TextureProcessorParameter();
 
                         var itemArray = ((JsonObject)value).ToArray();
 
@@ -70,7 +70,7 @@ namespace NPLTOOL.Common
                             var parameterKey = itemArray[i].Key; //e.g. ColorKeyColor
                             var parameterValue = itemArray[i].Value; //e.g. 255,0,255,255
 
-                            ProcessorParameters.SetParameter(Enum.Parse<ParameterKey>(parameterKey), parameterValue.ToString());
+                            TextureProcessorParameters.SetParameter(Enum.Parse<ParameterKey>(parameterKey), parameterValue.ToString());
                         }
                     }
                     break;

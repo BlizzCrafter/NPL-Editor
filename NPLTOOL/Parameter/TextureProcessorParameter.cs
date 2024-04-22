@@ -25,7 +25,7 @@ namespace NPLTOOL.Parameter
         TextureFormat
     }
 
-    public class ProcessorParameter
+    public class TextureProcessorParameter
     {
         public Vector4 ColorKeyColor;
         public bool ColorKeyEnabled;
