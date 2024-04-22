@@ -1,11 +1,13 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using NPLTOOL.Common;
 using NPLTOOL.GUI;
 using NPLTOOL.Parameter;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Color = Microsoft.Xna.Framework.Color;
@@ -24,7 +26,7 @@ namespace NPLTOOL
         private JsonNode _jsonObject;
         private string _nplJsonFilePath;
 
-        private List<NPLITEM> NPLITEMS = new List<NPLITEM>();
+        private List<ContentItem> NPLITEMS = new List<ContentItem>();
 
         public Main()
         {
@@ -44,7 +46,7 @@ namespace NPLTOOL
 
         protected override void Initialize()
         {
-            Window.Title = "NPL-TOOL";
+            Window.Title = "NPL Editor";
 
             _graphics.GraphicsDevice.PresentationParameters.BackBufferWidth = _graphics.PreferredBackBufferWidth;
             _graphics.GraphicsDevice.PresentationParameters.BackBufferHeight = _graphics.PreferredBackBufferHeight;
@@ -119,16 +121,11 @@ namespace NPLTOOL
             if (ImGui.Begin("JsonTree", ref dummyBool, windowFlags))
             {
                 var root = _jsonObject["root"];
-                //Debug.WriteLine(root.ToString());
 
                 var references = _jsonObject["references"].AsArray();
-                foreach (var reference in references)
-                {
-                    //Debug.WriteLine(reference.ToString());
-                }
+                PipelineTypes.Load(references.Select(x => x.ToString()).ToArray());
 
                 var content = _jsonObject["content"]["contentList"];
-                //Debug.WriteLine(content.ToString());
 
                 dynamic modifiedDataKey = null;
                 dynamic modifiedItemKey = null;
@@ -136,21 +133,17 @@ namespace NPLTOOL
                 dynamic modifiedDataValue = null;
                 foreach (var data in _jsonObject["content"].AsObject())
                 {
-                    var nplItem = new NPLITEM();
-                    nplItem.Key = data.Key;
-                    // data.Key = contentList
+                    var nplItem = new ContentItem(data.Key); //e.g. data.Key = contentList
 
-                    var category = _jsonObject["content"][data.Key];
-                    //Debug.WriteLine(category.ToString());
+                    var categoryObject = _jsonObject["content"][data.Key];
 
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
                     if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                     {
-                        foreach (var inData in category.AsObject())
+                        foreach (var categoryItem in categoryObject.AsObject())
                         {
-                            var itemKey = inData.Key; //path
-                            var itemValue = inData.Value; //value
-                            //Debug.WriteLine(itemKey);
+                            var itemKey = categoryItem.Key; //e.g. path
+                            var itemValue = categoryItem.Value; //e.g. "C:\\"
 
                             nplItem.Add(itemKey, itemValue);
 
@@ -168,7 +161,6 @@ namespace NPLTOOL
                                             ModifyData(data.Key, itemKey, itemValue, 
                                                 out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
                                         }
-                                        //Debug.WriteLine(arrData.ToString());
                                     }
                                     ImGui.TreePop();
                                 }
@@ -210,47 +202,44 @@ namespace NPLTOOL
                                                         out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
-                                            else
+                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyEnabled)
                                             {
-                                                if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyEnabled)
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.ColorKeyEnabled))
                                                 {
-                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.ColorKeyEnabled))
-                                                    {
-                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.ColorKeyEnabled.ToString(),
-                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                    }
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.ColorKeyEnabled.ToString(),
+                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
-                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.GenerateMipmaps)
+                                            }
+                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.GenerateMipmaps)
+                                            {
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.GenerateMipmaps))
                                                 {
-                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.GenerateMipmaps))
-                                                    {
-                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.GenerateMipmaps.ToString(),
-                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                    }
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.GenerateMipmaps.ToString(),
+                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
-                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.PremultiplyAlpha)
+                                            }
+                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.PremultiplyAlpha)
+                                            {
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.PremultiplyAlpha))
                                                 {
-                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.PremultiplyAlpha))
-                                                    {
-                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.PremultiplyAlpha.ToString(),
-                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                    }
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.PremultiplyAlpha.ToString(),
+                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
-                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ResizeToPowerOfTwo)
+                                            }
+                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ResizeToPowerOfTwo)
+                                            {
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.ResizeToPowerOfTwo))
                                                 {
-                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.ResizeToPowerOfTwo))
-                                                    {
-                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.ResizeToPowerOfTwo.ToString(),
-                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                    }
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.ResizeToPowerOfTwo.ToString(),
+                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
-                                                else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.MakeSquare)
+                                            }
+                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.MakeSquare)
+                                            {
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.MakeSquare))
                                                 {
-                                                    if (ImGui.Checkbox(parameterKey, ref nplItem.ProcessorParameters.MakeSquare))
-                                                    {
-                                                        ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.MakeSquare.ToString(),
-                                                            out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                    }
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ProcessorParameters.MakeSquare.ToString(),
+                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
                                         }
@@ -260,31 +249,48 @@ namespace NPLTOOL
                                 }
                                 ImGui.PopItemWidth();
                             }
-                            else
+                            else if (itemKey == "path")
                             {
-                                if (itemKey == "path")
+                                if (ImGui.InputTextWithHint(" ", itemValue.ToString(), ref nplItem._path, 9999))
                                 {
-                                    if (ImGui.InputTextWithHint(" ", itemValue.ToString(), ref nplItem._path, 9999))
-                                    {
-                                        itemValue = nplItem._path;
+                                    itemValue = nplItem._path;
 
-                                        ModifyData(data.Key, itemKey, itemValue,
-                                                out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
-                                    }
+                                    ModifyData(data.Key, itemKey, itemValue,
+                                            out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
                                 }
-                                else if (itemKey == "action")
-                                {
-                                    ImGui.InputTextWithHint(itemKey, itemValue.ToString(), ref nplItem.Action, 9999);
-                                }
-                                else if (itemKey == "recursive")
-                                {
-                                    ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
-                                }
-                                else
-                                {
-                                    var i = nplItem.GetParameterIndex(itemKey);
+                            }
+                            else if (itemKey == "action")
+                            {
+                                ImGui.InputTextWithHint(itemKey, itemValue.ToString(), ref nplItem.Action, 9999);
+                            }
+                            else if (itemKey == "recursive")
+                            {
+                                ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
+                            }
+                            else if (itemKey == "importer")
+                            {
+                                var index = PipelineTypes.GetImporterIndex(itemValue.ToString());
+                                nplItem.SelectedImporterIndex = index;
 
-                                    ImGui.InputTextWithHint(itemKey, itemValue.ToString(), ref nplItem.Parameters[i], 9999);
+                                if (ImGui.Combo(itemKey, ref nplItem.SelectedImporterIndex, PipelineTypes.ImporterNames, PipelineTypes.ImporterNames.Length))
+                                {
+                                    itemValue = PipelineTypes.ImporterTypes[nplItem.SelectedImporterIndex];
+
+                                    ModifyData(data.Key, itemKey, itemValue,
+                                        out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
+                                }
+                            }
+                            else if (itemKey == "processor")
+                            {
+                                var index = PipelineTypes.GetProcessorIndex(itemValue.ToString());
+                                nplItem.SelectedProcessorIndex = index;
+
+                                if (ImGui.Combo(itemKey, ref nplItem.SelectedProcessorIndex, PipelineTypes.ProcessorNames, PipelineTypes.ProcessorNames.Length))
+                                {
+                                    itemValue = PipelineTypes.ProcessorTypes[nplItem.SelectedProcessorIndex];
+
+                                    ModifyData(data.Key, itemKey, itemValue,
+                                        out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
                                 }
                             }
                         }

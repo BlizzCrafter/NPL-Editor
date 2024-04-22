@@ -12,6 +12,19 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\CppNet.dll" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\libmojoshader_64.dll" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\mgfxc" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\mgfxc.deps.json" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\mgfxc.dll" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\mgfxc.pdb" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\mgfxc.runtimeconfig.json" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\SharpDX.D3DCompiler.dll" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\SharpDX.D3DCompiler.xml" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\SharpDX.dll" />
+    <Content Remove="C:\Users\mhaer\.nuget\packages\monogame.framework.content.pipeline\3.8.1.303\contentFiles\any\net6.0\SharpDX.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
   </ItemGroup>
@@ -22,6 +35,7 @@
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.90.1.1" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
+    <PackageReference Include="MonoGame.Framework.Content.Pipeline" Version="3.8.1.303" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
