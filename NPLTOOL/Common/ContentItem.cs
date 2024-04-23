@@ -79,7 +79,7 @@ namespace NPLTOOL.Common
                         if (Parameters == null) Parameters = new string[1];
                         else Array.Resize(ref Parameters, Parameters.Length + 1);
 
-                        Parameters[Parameters.Length - 1] = GetParameterString(param, value);
+                        Parameters[^1] = GetParameterString(param, value);
                     }
                     break;
             }
