@@ -23,20 +23,34 @@ namespace NPLTOOL.Common
         public readonly string Category;
         public bool Recursive;
         public string Action;
-        public string Importer;
-        public string Processor;
         public int SelectedImporterIndex;
         public int SelectedProcessorIndex;
         public string[] Watch;
         public string[] Parameters;
-        public TextureProcessorParameter TextureProcessorParameters;
+        public ProcessorTypeDescription Processor;
 
-        public ContentItem(string category)
+        private IParameterProcessor _parameterProcessor;
+
+        public ContentItem(string category, string processorKey)
         {
             Category = category;
+
+            if (!string.IsNullOrEmpty(processorKey))
+            {
+                Processor = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processorKey));
+                if (Processor != null && Processor.Properties != null && Processor.Properties.Any())
+                {
+                    if (processorKey == TextureProcessorParameter.ProcessorType) _parameterProcessor = new TextureProcessorParameter();
+                }
+            }
         }
 
-        public void Add(string param, object value)
+        public T ParameterProcessor<T>() where T : class
+        {
+            return _parameterProcessor as T;
+        }
+
+        public void SetParameter(string param, object value)
         {
             switch (param)
             {
@@ -61,16 +75,14 @@ namespace NPLTOOL.Common
                     break;
                 case "processorParam":
                     {
-                        TextureProcessorParameters ??= new TextureProcessorParameter();
-
                         var itemArray = ((JsonObject)value).ToArray();
 
                         for (int i = 0; i < itemArray.Length; i++)
                         {
                             var parameterKey = itemArray[i].Key; //e.g. ColorKeyColor
-                            var parameterValue = itemArray[i].Value; //e.g. 255,0,255,255
+                            var parameterValue = itemArray[i].Value; //e.g. "255,0,255,255"
 
-                            TextureProcessorParameters.SetParameter(Enum.Parse<ParameterKey>(parameterKey), parameterValue.ToString());
+                            _parameterProcessor.SetValue(parameterKey, parameterValue.ToString());
                         }
                     }
                     break;

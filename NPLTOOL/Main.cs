@@ -26,7 +26,7 @@ namespace NPLTOOL
         private JsonNode _jsonObject;
         private string _nplJsonFilePath;
 
-        private List<ContentItem> NPLITEMS = new List<ContentItem>();
+        private readonly List<ContentItem> NPLITEMS = new();
 
         public Main()
         {
@@ -133,7 +133,8 @@ namespace NPLTOOL
                 dynamic modifiedDataValue = null;
                 foreach (var data in _jsonObject["content"].AsObject())
                 {
-                    var nplItem = new ContentItem(data.Key); //e.g. data.Key = contentList
+                    var processor = data.Value["processor"]?.ToString();
+                    var nplItem = new ContentItem(data.Key, processor); //e.g. data.Key = contentList
 
                     var categoryObject = _jsonObject["content"][data.Key];
 
@@ -145,7 +146,7 @@ namespace NPLTOOL
                             var itemKey = categoryItem.Key; //e.g. path
                             var itemValue = categoryItem.Value; //e.g. "C:\\"
 
-                            nplItem.Add(itemKey, itemValue);
+                            nplItem.SetParameter(itemKey, itemValue);
 
                             if (itemKey == "watch")
                             {
@@ -193,9 +194,10 @@ namespace NPLTOOL
 
                                             if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyColor)
                                             {
-                                                if (ImGui.ColorEdit4(parameterKey, ref nplItem.TextureProcessorParameters.ColorKeyColor, ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoTooltip))
+                                                if (ImGui.ColorEdit4(parameterKey, ref nplItem.ParameterProcessor<TextureProcessorParameter>().ColorKeyColor,
+                                                    ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoTooltip))
                                                 {
-                                                    var xColor = nplItem.TextureProcessorParameters.ColorKeyColor.ToXNA();
+                                                    var xColor = nplItem.ParameterProcessor<TextureProcessorParameter>().ColorKeyColor.ToXNA();
                                                     var sColor = $"{xColor.R},{xColor.G},{xColor.B},{xColor.A}";
 
                                                     ModifyDataParam(data.Key, itemKey, parameterKey, sColor,
@@ -204,41 +206,41 @@ namespace NPLTOOL
                                             }
                                             else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyEnabled)
                                             {
-                                                if (ImGui.Checkbox(parameterKey, ref nplItem.TextureProcessorParameters.ColorKeyEnabled))
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ParameterProcessor<TextureProcessorParameter>().ColorKeyEnabled))
                                                 {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.TextureProcessorParameters.ColorKeyEnabled.ToString(),
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ParameterProcessor<TextureProcessorParameter>().ColorKeyEnabled.ToString(),
                                                         out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
                                             else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.GenerateMipmaps)
                                             {
-                                                if (ImGui.Checkbox(parameterKey, ref nplItem.TextureProcessorParameters.GenerateMipmaps))
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ParameterProcessor<TextureProcessorParameter>().GenerateMipmaps))
                                                 {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.TextureProcessorParameters.GenerateMipmaps.ToString(),
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ParameterProcessor<TextureProcessorParameter>().GenerateMipmaps.ToString(),
                                                         out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
                                             else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.PremultiplyAlpha)
                                             {
-                                                if (ImGui.Checkbox(parameterKey, ref nplItem.TextureProcessorParameters.PremultiplyAlpha))
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ParameterProcessor<TextureProcessorParameter>().PremultiplyAlpha))
                                                 {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.TextureProcessorParameters.PremultiplyAlpha.ToString(),
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ParameterProcessor<TextureProcessorParameter>().PremultiplyAlpha.ToString(),
                                                         out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
                                             else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ResizeToPowerOfTwo)
                                             {
-                                                if (ImGui.Checkbox(parameterKey, ref nplItem.TextureProcessorParameters.ResizeToPowerOfTwo))
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ParameterProcessor<TextureProcessorParameter>().ResizeToPowerOfTwo))
                                                 {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.TextureProcessorParameters.ResizeToPowerOfTwo.ToString(),
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ParameterProcessor<TextureProcessorParameter>().ResizeToPowerOfTwo.ToString(),
                                                         out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
                                             else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.MakeSquare)
                                             {
-                                                if (ImGui.Checkbox(parameterKey, ref nplItem.TextureProcessorParameters.MakeSquare))
+                                                if (ImGui.Checkbox(parameterKey, ref nplItem.ParameterProcessor<TextureProcessorParameter>().MakeSquare))
                                                 {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.TextureProcessorParameters.MakeSquare.ToString(),
+                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.ParameterProcessor<TextureProcessorParameter>().MakeSquare.ToString(),
                                                         out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
                                                 }
                                             }
@@ -272,9 +274,11 @@ namespace NPLTOOL
                                 var index = PipelineTypes.GetImporterIndex(itemValue.ToString());
                                 nplItem.SelectedImporterIndex = index;
 
-                                if (ImGui.Combo(itemKey, ref nplItem.SelectedImporterIndex, PipelineTypes.ImporterNames, PipelineTypes.ImporterNames.Length))
+                                var importerNames = PipelineTypes.Importers.Select(x => x.DisplayName).ToArray();
+
+                                if (ImGui.Combo(itemKey, ref nplItem.SelectedImporterIndex, importerNames, importerNames.Length))
                                 {
-                                    itemValue = PipelineTypes.ImporterTypes[nplItem.SelectedImporterIndex];
+                                    itemValue = PipelineTypes.Importers[nplItem.SelectedImporterIndex].TypeName;
 
                                     ModifyData(data.Key, itemKey, itemValue,
                                         out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
@@ -285,9 +289,11 @@ namespace NPLTOOL
                                 var index = PipelineTypes.GetProcessorIndex(itemValue.ToString());
                                 nplItem.SelectedProcessorIndex = index;
 
-                                if (ImGui.Combo(itemKey, ref nplItem.SelectedProcessorIndex, PipelineTypes.ProcessorNames, PipelineTypes.ProcessorNames.Length))
+                                var processorNames = PipelineTypes.Processors.Select(x => x.DisplayName).ToArray();
+
+                                if (ImGui.Combo(itemKey, ref nplItem.SelectedProcessorIndex, processorNames, processorNames.Length))
                                 {
-                                    itemValue = PipelineTypes.ProcessorTypes[nplItem.SelectedProcessorIndex];
+                                    itemValue = PipelineTypes.Processors[nplItem.SelectedProcessorIndex].TypeName;
 
                                     ModifyData(data.Key, itemKey, itemValue,
                                         out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);

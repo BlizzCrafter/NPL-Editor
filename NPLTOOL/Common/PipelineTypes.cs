@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Content.Pipeline;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +10,135 @@ using System.Reflection;
 
 namespace NPLTOOL.Common
 {
+    public class ImporterTypeDescription
+    {
+        public string TypeName;
+        public string DisplayName;
+        public string DefaultProcessor;
+        public IEnumerable<string> FileExtensions;
+        public Type OutputType;
+
+        public ImporterTypeDescription()
+        {
+            TypeName = "Invalid / Missing Importer";
+        }
+
+        public override string ToString()
+        {
+            return TypeName;
+        }
+
+        public override int GetHashCode()
+        {
+            return TypeName == null ? 0 : TypeName.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as ImporterTypeDescription;
+            if (other == null)
+                return false;
+
+            if (string.IsNullOrEmpty(other.TypeName) != string.IsNullOrEmpty(TypeName))
+                return false;
+
+            return TypeName.Equals(other.TypeName);
+        }
+    }
+    public class ProcessorTypeDescription
+    {
+        public class Property
+        {
+            public string Name;
+            public string DisplayName;
+            public Type Type;
+            public object DefaultValue;
+            public bool Browsable;
+
+            public override string ToString()
+            {
+                return Name;
+            }
+        }
+
+        public class ProcessorPropertyCollection : IEnumerable<Property>
+        {
+            private readonly Property[] _properties;
+
+            public ProcessorPropertyCollection(IEnumerable<Property> properties)
+            {
+                _properties = properties.ToArray();
+            }
+
+            public Property this[int index]
+            {
+                get
+                {
+                    return _properties[index];
+                }
+                set
+                {
+                    _properties[index] = value;
+                }
+            }
+
+            public Property this[string name]
+            {
+                get
+                {
+                    foreach (var p in _properties)
+                    {
+                        if (p.Name.Equals(name))
+                            return p;
+                    }
+
+                    throw new IndexOutOfRangeException();
+                }
+
+                set
+                {
+                    for (var i = 0; i < _properties.Length; i++)
+                    {
+                        var p = _properties[i];
+                        if (p.Name.Equals(name))
+                        {
+                            _properties[i] = value;
+                            return;
+                        }
+
+                    }
+
+                    throw new IndexOutOfRangeException();
+                }
+            }
+
+            public bool Contains(string name)
+            {
+                return _properties.Any(e => e.Name == name);
+            }
+
+            public IEnumerator<Property> GetEnumerator()
+            {
+                return _properties.AsEnumerable().GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return _properties.GetEnumerator();
+            }
+        }
+
+        public string TypeName;
+        public string DisplayName;
+        public ProcessorPropertyCollection Properties;
+        public Type InputType;
+
+        public override string ToString()
+        {
+            return TypeName;
+        }
+    }
+
     public class PipelineTypes
     {
         [DebuggerDisplay("ImporterInfo: {Type.Name}")]
@@ -40,13 +171,11 @@ namespace NPLTOOL.Common
             }
         }
 
+        public static ImporterTypeDescription[] Importers { get; private set; }
+        public static ProcessorTypeDescription[] Processors { get; private set; }
+
         private static List<ImporterInfo> _importers;
         private static List<ProcessorInfo> _processors;
-
-        public static string[] ImporterNames;
-        public static string[] ProcessorNames;
-        public static string[] ImporterTypes;
-        public static string[] ProcessorTypes;
 
         public static int GetImporterIndex(string value)
         {
@@ -78,10 +207,6 @@ namespace NPLTOOL.Common
         {
             _importers = null;
             _processors = null;
-            ImporterNames = null;
-            ImporterTypes = null;
-            ProcessorNames = null;
-            ProcessorTypes = null;
         }
 
         public static void Load(string[] references)
@@ -93,10 +218,6 @@ namespace NPLTOOL.Common
         {
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
-            ImporterNames = Array.Empty<string>();
-            ImporterTypes = Array.Empty<string>();
-            ProcessorNames = Array.Empty<string>();
-            ProcessorTypes = Array.Empty<string>();
 
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -131,6 +252,87 @@ namespace NPLTOOL.Common
                     continue;
                 }
             }
+
+            var importerDescriptions = new ImporterTypeDescription[_importers.Count];
+            var cur = 0;
+            foreach (var item in _importers)
+            {
+                // Find the abstract base class ContentImporter<T>.
+                var baseType = item.Type.BaseType;
+                while (!baseType.IsAbstract)
+                    baseType = baseType.BaseType;
+
+                var outputType = baseType.GetGenericArguments()[0];
+                var name = item.Attribute.DisplayName;
+                if (string.IsNullOrEmpty(name))
+                    name = item.GetType().Name;
+                var desc = new ImporterTypeDescription()
+                {
+                    TypeName = item.Type.Name,
+                    DisplayName = name,
+                    DefaultProcessor = item.Attribute.DefaultProcessor,
+                    FileExtensions = item.Attribute.FileExtensions,
+                    OutputType = outputType,
+                };
+                importerDescriptions[cur] = desc;
+                cur++;
+            }
+
+            Importers = importerDescriptions;
+
+
+            var processorDescriptions = new ProcessorTypeDescription[_processors.Count];
+
+            const BindingFlags bindings = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+            
+            cur = 0;
+            foreach (var item in _processors)
+            {
+                var obj = Activator.CreateInstance(item.Type);
+                var typeProperties = item.Type.GetProperties(bindings);
+                var properties = new List<ProcessorTypeDescription.Property>();
+                foreach (var i in typeProperties)
+                {
+                    var attrs = i.GetCustomAttributes(true);
+                    var name = i.Name;
+                    var browsable = true;
+                    var defvalue = i.GetValue(obj, null);
+
+                    foreach (var a in attrs)
+                    {
+                        if (a is BrowsableAttribute)
+                            browsable = (a as BrowsableAttribute).Browsable;
+                        else if (a is DisplayNameAttribute)
+                            name = (a as DisplayNameAttribute).DisplayName;
+                    }
+
+                    var p = new ProcessorTypeDescription.Property()
+                    {
+                        Name = i.Name,
+                        DisplayName = name,
+                        Type = i.PropertyType,
+                        DefaultValue = defvalue,
+                        Browsable = browsable
+                    };
+                    properties.Add(p);
+                }
+
+                var inputType = (obj as IContentProcessor).InputType;
+                var desc = new ProcessorTypeDescription()
+                {
+                    TypeName = item.Type.Name,
+                    DisplayName = item.Attribute.DisplayName,
+                    Properties = new ProcessorTypeDescription.ProcessorPropertyCollection(properties),
+                    InputType = inputType,
+                };
+                if (string.IsNullOrEmpty(desc.DisplayName))
+                    desc.DisplayName = desc.TypeName;
+
+                processorDescriptions[cur] = desc;
+                cur++;
+            }
+
+            Processors = processorDescriptions;
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
@@ -156,10 +358,6 @@ namespace NPLTOOL.Common
                         importerAttribute.DisplayName = t.Name;
                         _importers.Add(new ImporterInfo(importerAttribute, t));
                     }
-                    Array.Resize(ref ImporterNames, ImporterNames.Length + 1);
-                    ImporterNames[ImporterNames.Length - 1] = _importers.Last().Name;
-                    Array.Resize(ref ImporterTypes, ImporterTypes.Length + 1);
-                    ImporterTypes[ImporterTypes.Length - 1] = _importers.Last().Type.Name;
                 }
                 else if (t.GetInterface(@"IContentProcessor") == typeof(IContentProcessor))
                 {
@@ -169,10 +367,6 @@ namespace NPLTOOL.Common
                         var processorAttribute = attributes[0] as ContentProcessorAttribute;
                         _processors.Add(new ProcessorInfo(processorAttribute, t));
                     }
-                    Array.Resize(ref ProcessorNames, ProcessorNames.Length + 1);
-                    ProcessorNames[ProcessorNames.Length - 1] = _processors.Last().Name;
-                    Array.Resize(ref ProcessorTypes, ProcessorTypes.Length + 1);
-                    ProcessorTypes[ProcessorTypes.Length - 1] = _processors.Last().Type.Name;
                 }
             }
         }
