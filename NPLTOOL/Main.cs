@@ -33,15 +33,15 @@ namespace NPLTOOL
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = 800;
             _graphics.PreferredBackBufferHeight = 500;
-            
-            //Window.AllowUserResizing = true;
 
             // Currently not usable in DesktopGL because of this bug:
             // https://github.com/MonoGame/MonoGame/issues/7914
             _graphics.PreferMultiSampling = false;
 
-            Content.RootDirectory = "Content";
+            Window.AllowUserResizing = true;
             IsMouseVisible = true;
+
+            Content.RootDirectory = "Content";
         }
 
         protected override void Initialize()
