@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json.Nodes;
-using NPLTOOL.Parameter;
+using static NPLTOOL.Common.ProcessorTypeDescription;
 
 namespace NPLTOOL.Common
 {
@@ -27,27 +28,22 @@ namespace NPLTOOL.Common
         public int SelectedProcessorIndex;
         public string[] Watch;
         public string[] Parameters;
+        public ImporterTypeDescription Importer;
         public ProcessorTypeDescription Processor;
 
-        private IParameterProcessor _parameterProcessor;
-
-        public ContentItem(string category, string processorKey)
+        public ContentItem(string category, string importerKey, string processorKey)
         {
             Category = category;
+
+            if (!string.IsNullOrEmpty(importerKey))
+            {
+                Importer = PipelineTypes.Importers.ToList().Find(x => x.TypeName.Equals(importerKey));
+            }
 
             if (!string.IsNullOrEmpty(processorKey))
             {
                 Processor = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processorKey));
-                if (Processor != null && Processor.Properties != null && Processor.Properties.Any())
-                {
-                    if (processorKey == TextureProcessorParameter.ProcessorType) _parameterProcessor = new TextureProcessorParameter();
-                }
             }
-        }
-
-        public T ParameterProcessor<T>() where T : class
-        {
-            return _parameterProcessor as T;
         }
 
         public void SetParameter(string param, object value)
@@ -82,7 +78,7 @@ namespace NPLTOOL.Common
                             var parameterKey = itemArray[i].Key; //e.g. ColorKeyColor
                             var parameterValue = itemArray[i].Value; //e.g. "255,0,255,255"
 
-                            _parameterProcessor.SetValue(parameterKey, parameterValue.ToString());
+                            Property(parameterKey).Value = parameterValue.ToString();
                         }
                     }
                     break;
@@ -97,6 +93,21 @@ namespace NPLTOOL.Common
             }
         }
 
+        public Property Property(string parameterKey)
+        {
+            return Processor.Properties[parameterKey];
+        }
+
+        public bool BoolProperty(string parameterKey)
+        {
+            return Processor.Properties[parameterKey].ToBool();
+        }
+
+        public Vector4 Vector4Property(string parameterKey)
+        {
+            return Processor.Properties[parameterKey].ToVector4();
+        }
+
         public string GetParameterString(string param, object value)
         {
             return $"{param}:{value}";
@@ -108,6 +119,18 @@ namespace NPLTOOL.Common
 
             var parameter = list.Find(x => x.StartsWith(itemKey));
             return list.IndexOf(parameter);
+        }
+
+        public int GetImporterIndex()
+        {
+            var index = PipelineTypes.GetImporterIndex(Importer.TypeName);
+            return SelectedImporterIndex = index;
+        }
+
+        public int GetProcessorIndex()
+        {
+            var index = PipelineTypes.GetProcessorIndex(Processor.TypeName);
+            return SelectedProcessorIndex = index;
         }
     }
 }

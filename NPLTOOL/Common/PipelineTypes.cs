@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 
 namespace NPLTOOL.Common
@@ -52,8 +53,19 @@ namespace NPLTOOL.Common
             public string Name;
             public string DisplayName;
             public Type Type;
+            public object Value;
             public object DefaultValue;
             public bool Browsable;
+
+            public bool ToBool()
+            {
+                return Value.ToString().ToBool();
+            }
+
+            public Vector4 ToVector4()
+            {
+                return Value.ToString().ToVector4();
+            }
 
             public override string ToString()
             {
@@ -311,6 +323,7 @@ namespace NPLTOOL.Common
                         Name = i.Name,
                         DisplayName = name,
                         Type = i.PropertyType,
+                        Value = defvalue,
                         DefaultValue = defvalue,
                         Browsable = browsable
                     };
