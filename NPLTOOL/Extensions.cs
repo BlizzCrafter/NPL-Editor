@@ -14,6 +14,11 @@ namespace NPLTOOL
             );
         }
 
+        public static string Parsable(this Microsoft.Xna.Framework.Color color)
+        {
+            return $"{color.R},{color.G},{color.B},{color.A}";
+        }
+
         public static Vector4 ToVector4(this string value)
         {
             string[] rgbValues = value.Split(',');

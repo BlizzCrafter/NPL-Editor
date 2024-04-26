@@ -314,6 +314,10 @@ namespace NPLTOOL.Common
                     var name = i.Name;
                     var browsable = true;
                     var defvalue = i.GetValue(obj, null);
+                    if (defvalue is Microsoft.Xna.Framework.Color color)
+                    {
+                        defvalue = color.Parsable();
+                    }
 
                     foreach (var a in attrs)
                     {
