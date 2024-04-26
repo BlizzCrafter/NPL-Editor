@@ -194,6 +194,25 @@ namespace NPLTOOL.Common
         private static List<ImporterInfo> _importers;
         private static List<ProcessorInfo> _processors;
 
+        public static void GetTypeDescriptions(
+            string fileExtension,
+            out ImporterTypeDescription outImporter,
+            out ProcessorTypeDescription outProcessor)
+        {
+            outImporter = null;
+            outProcessor = null;
+
+            foreach (var importer in Importers)
+            {
+                if (importer.FileExtensions.Any(extension => extension.Equals(fileExtension)))
+                {
+                    outImporter = importer;
+                    outProcessor = Processors.ToList().Find(x => x.TypeName.Equals(importer.DefaultProcessor));
+                    break;
+                }
+            }
+        }
+
         public static int GetImporterIndex(string value)
         {
             var info = _importers.Find(x => x.Type.Name.Equals(value));

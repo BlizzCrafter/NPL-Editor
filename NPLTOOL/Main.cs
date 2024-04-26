@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using NPLTOOL.Common;
 using NPLTOOL.GUI;
 using System;
-using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -16,15 +16,50 @@ namespace NPLTOOL
 {
     public class Main : Game
     {
+        public class ModifyDataDescriptor
+        {
+            public string DataKey { get; private set; }
+            public string ItemKey { get; private set; }
+            public string ParamKey { get; private set; }
+            public dynamic Value { get; private set; }
+
+            public bool HasData { get; private set; } = false;
+            public bool ParamModify { get; private set; } = false;
+
+            public void Reset()
+            {
+                HasData = false;
+                ParamModify = false;
+
+                DataKey = string.Empty;
+                ItemKey = string.Empty;
+                ParamKey = string.Empty;
+                Value = null;
+            }
+
+            public void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "") 
+            {
+                HasData = true;
+
+                DataKey = dataKey;
+                ItemKey = itemKey;
+                ParamKey = paramKey;
+                Value = dataValue;
+
+                if (!string.IsNullOrEmpty(paramKey))
+                {
+                    ParamModify = true;
+                }
+            }
+        }
+
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer _imGuiRenderer;
-
-        private Num.Vector3 clear_color = new Num.Vector3(114f / 255f, 144f / 255f, 154f / 255f);
+        private Num.Vector3 _clearColor = new(114f / 255f, 144f / 255f, 154f / 255f);
 
         private JsonNode _jsonObject;
         private string _nplJsonFilePath;
-
-        private readonly List<ContentItem> NPLITEMS = new();
+        private ModifyDataDescriptor _modifyData = new();
 
         public Main()
         {
@@ -71,7 +106,7 @@ namespace NPLTOOL
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(new Color(clear_color.X, clear_color.Y, clear_color.Z));
+            GraphicsDevice.Clear(new Color(_clearColor.X, _clearColor.Y, _clearColor.Z));
 
             _imGuiRenderer.BeforeLayout(gameTime);
             ImGuiLayout();
@@ -111,14 +146,36 @@ namespace NPLTOOL
 
                 var content = _jsonObject["content"]["contentList"];
 
-                dynamic modifiedDataKey = null;
-                dynamic modifiedItemKey = null;
-                dynamic modifiedItemParamKey = null;
-                dynamic modifiedDataValue = null;
                 foreach (var data in _jsonObject["content"].AsObject())
                 {
                     var importer = data.Value["importer"]?.ToString();
                     var processor = data.Value["processor"]?.ToString();
+                    var processorParam = data.Value["processorParam"]?.ToString();
+                    if (importer == null || processor == null)
+                    {
+                        PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
+                            out var outImporter, out var outProcessor);
+
+                        importer = outImporter.TypeName;
+                        processor = outProcessor.TypeName;
+
+                        data.Value["importer"] = importer;
+                        data.Value["processor"] = processor;
+                    }
+                    if (processorParam == null)
+                    {
+                        JsonObject props = new();
+                        var properties = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
+                        if (properties != null && properties.Any())
+                        {
+                            foreach (var property in properties)
+                            {
+                                props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
+                            }
+                            data.Value["processorParam"] = props;
+                        }
+                    }
+
                     var nplItem = new ContentItem(data.Key, importer, processor); //e.g. data.Key = contentList
 
                     var categoryObject = _jsonObject["content"][data.Key];
@@ -144,8 +201,7 @@ namespace NPLTOOL
                                         {
                                             itemValue[i] = nplItem.Watch[i];
 
-                                            ModifyData(data.Key, itemKey, itemValue, 
-                                                out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
+                                            _modifyData.Set(data.Key, itemKey, itemValue);
                                         }
                                     }
                                     ImGui.TreePop();
@@ -157,7 +213,7 @@ namespace NPLTOOL
                                 ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
                                 if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
                                 {
-                                    if (ImGui.BeginTable("Checkmarks", 2, ImGuiTableFlags.NoClip))
+                                    if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
                                     {
                                         var itemCount = 0;
                                         foreach (var parameter in itemValue.AsObject())
@@ -177,57 +233,23 @@ namespace NPLTOOL
                                             }
                                             else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
 
-                                            if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyColor)
+                                            if (nplItem.Property(parameterKey).Type == typeof(bool))
                                             {
-                                                if (ColorEdit(nplItem, parameterKey))
-                                                {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.Property(parameterKey).Value,
-                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                }
+                                                Checkbox(nplItem, data.Key, itemKey, parameterKey);
                                             }
-                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ColorKeyEnabled)
+                                            else if (nplItem.Property(parameterKey).Type == typeof(float))
                                             {
-                                                if (Checkbox(nplItem, parameterKey))
-                                                {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.Property(parameterKey).Value,
-                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                }
+                                                InputFloat(nplItem, data.Key, itemKey, parameterKey);
                                             }
-                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.GenerateMipmaps)
+                                            else if (nplItem.Property(parameterKey).Type == typeof(Color))
                                             {
-                                                if (Checkbox(nplItem, parameterKey))
-                                                {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.Property(parameterKey).Value,
-                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                }
+                                                ColorEdit(nplItem, data.Key, itemKey, parameterKey);
                                             }
-                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.PremultiplyAlpha)
+                                            else if (nplItem.Property(parameterKey).Type.IsEnum)
                                             {
-                                                if (Checkbox(nplItem, parameterKey))
-                                                {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.Property(parameterKey).Value,
-                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                }
+                                                ComboEnum(nplItem, data.Key, itemKey, parameterKey);
                                             }
-                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.ResizeToPowerOfTwo)
-                                            {
-                                                if (Checkbox(nplItem, parameterKey))
-                                                {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.Property(parameterKey).Value,
-                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                }
-                                            }
-                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.MakeSquare)
-                                            {
-                                                if (Checkbox(nplItem, parameterKey))
-                                                {
-                                                    ModifyDataParam(data.Key, itemKey, parameterKey, nplItem.Property(parameterKey).Value,
-                                                        out modifiedDataKey, out modifiedItemKey, out modifiedItemParamKey, out modifiedDataValue);
-                                                }
-                                            }
-                                            else if (Enum.Parse<ParameterKey>(parameterKey) == ParameterKey.TextureFormat)
-                                            {
-                                            }
+                                            else TextInput(nplItem, data.Key, itemKey, parameterKey);
                                         }
                                     }
                                     ImGui.EndTable();
@@ -240,9 +262,7 @@ namespace NPLTOOL
                                 if (ImGui.InputTextWithHint(" ", itemValue.ToString(), ref nplItem._path, 9999))
                                 {
                                     itemValue = nplItem._path;
-
-                                    ModifyData(data.Key, itemKey, itemValue,
-                                            out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
+                                    _modifyData.Set(data.Key, itemKey, itemValue);
                                 }
                             }
                             else if (itemKey == "action")
@@ -255,10 +275,9 @@ namespace NPLTOOL
                             }
                             else if (itemKey == "importer" || itemKey == "processor")
                             {
-                                if (Combo(nplItem, itemKey, out string value))
+                                if (ComboTypeDesciptors(nplItem, itemKey, out string value))
                                 {
-                                    ModifyData(data.Key, itemKey, value,
-                                        out modifiedDataKey, out modifiedItemKey, out modifiedDataValue);
+                                    _modifyData.Set(data.Key, itemKey, value);
                                 }
                             }
                         }
@@ -266,20 +285,30 @@ namespace NPLTOOL
                     }
                     ImGui.PopItemWidth();
                 }
-                if (modifiedItemParamKey != null)
-                {
-                    _jsonObject["content"][modifiedDataKey][modifiedItemKey][modifiedItemParamKey] = modifiedDataValue;
-                    WriteContentNPL();
-                }
-                else if (modifiedDataKey != null && modifiedItemKey != null && modifiedDataValue != null)
-                {
-                    _jsonObject["content"][modifiedDataKey][modifiedItemKey] = modifiedDataValue;
-                    WriteContentNPL();
-                }
+                ModifyData();                
             }
             ImGui.End();
 
             ImGui.End();
+        }
+
+        private void ModifyData()
+        {
+            if (_modifyData != null && _modifyData.HasData)
+            {
+                if (_modifyData.ParamModify)
+                {
+                    _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey][_modifyData.ParamKey] = _modifyData.Value;
+                    WriteContentNPL();
+                    _modifyData.Reset();
+                }
+                else
+                {
+                    _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey] = _modifyData.Value;
+                    WriteContentNPL();
+                    _modifyData.Reset();
+                }
+            }
         }
 
         private void WriteContentNPL()
@@ -291,25 +320,7 @@ namespace NPLTOOL
             File.WriteAllText(_nplJsonFilePath, jsonString);
         }
 
-        private void ModifyData(
-            dynamic dataKey, dynamic itemKey, dynamic itemValue,
-            out dynamic modifiedDataKey, out dynamic modifiedItemKey, out dynamic modifiedDataValue)
-        {
-            modifiedDataKey = dataKey;
-            modifiedItemKey = itemKey;
-            modifiedDataValue = itemValue;
-        }
-        private void ModifyDataParam(
-            dynamic dataKey, dynamic itemKey, dynamic itemParameter, dynamic itemValue, 
-            out dynamic modifiedDataKey, out dynamic modifiedItemKey, out dynamic modifiedItemParameter, out dynamic modifiedDataValue)
-        {
-            modifiedDataKey = dataKey;
-            modifiedItemKey = itemKey;
-            modifiedItemParameter = itemParameter;
-            modifiedDataValue = itemValue;
-        }
-
-        private bool ColorEdit(ContentItem nplItem, string parameterKey)
+        private bool ColorEdit(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
             var value = nplItem.Vector4Property(parameterKey);
 
@@ -320,26 +331,61 @@ namespace NPLTOOL
                 var sColor = $"{xColor.R},{xColor.G},{xColor.B},{xColor.A}";
 
                 nplItem.Property(parameterKey).Value = sColor;
-
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
         }
 
-        private bool Checkbox(ContentItem nplItem, string parameterKey)
+        private bool Checkbox(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
             var value = nplItem.BoolProperty(parameterKey);
 
             if (ImGui.Checkbox(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value.ToString();
-
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
         }
 
-        private bool Combo(ContentItem nplItem, string itemKey, out string value)
+        private bool InputFloat(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        {
+            var value = nplItem.FloatProperty(parameterKey);
+            if (ImGui.InputFloat(parameterKey, ref value))
+            {
+                nplItem.Property(parameterKey).Value = value;
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                return true;
+            }
+            return false;
+        }
+
+        private bool Combo(ContentItem nplItem, string parameterKey, string[] names)
+        {
+            var property = nplItem.Property(parameterKey);
+            var selectedIndex = names.ToList().IndexOf(property.Value.ToString());
+            if (ImGui.Combo(parameterKey, ref selectedIndex, names, names.Length))
+            {
+                nplItem.Property(parameterKey).Value = names[selectedIndex].ToString();
+                return true;
+            }
+            return false;
+        }
+
+        private void ComboEnum(
+            ContentItem nplItem,
+            string dataKey, string itemKey, string parameterKey)
+        {
+            var names = Enum.GetNames(nplItem.Property(parameterKey).Type);
+            if (Combo(nplItem, parameterKey, names))
+            {
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+            }
+        }
+
+        private bool ComboTypeDesciptors(ContentItem nplItem, string itemKey, out string value)
         {
             if (itemKey == "importer")
             {
@@ -366,6 +412,18 @@ namespace NPLTOOL
                 }
             }
             value = string.Empty;
+            return false;
+        }
+
+        private bool TextInput(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        {
+            var paramValue = nplItem.Property(parameterKey).Value.ToString();
+            if (ImGui.InputText(parameterKey, ref paramValue, 9999))
+            {
+                nplItem.Property(parameterKey).Value = paramValue; 
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                return true;
+            }
             return false;
         }
     }
