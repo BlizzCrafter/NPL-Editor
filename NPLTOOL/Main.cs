@@ -374,7 +374,7 @@ namespace NPLTOOL
             return false;
         }
 
-        private void ComboEnum(
+        private bool ComboEnum(
             ContentItem nplItem,
             string dataKey, string itemKey, string parameterKey)
         {
@@ -382,7 +382,9 @@ namespace NPLTOOL
             if (Combo(nplItem, parameterKey, names))
             {
                 _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                return true;
             }
+            return false;
         }
 
         private bool ComboTypeDesciptors(ContentItem nplItem, string itemKey, out string value)
