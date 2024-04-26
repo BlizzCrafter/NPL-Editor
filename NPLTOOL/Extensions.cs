@@ -28,5 +28,10 @@ namespace NPLTOOL
         {
             return bool.Parse(value);
         }
+
+        public static float ToFloat(this string value)
+        {
+            return float.Parse(value);
+        }
     }
 }

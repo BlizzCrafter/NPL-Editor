@@ -103,6 +103,11 @@ namespace NPLTOOL.Common
             return Processor.Properties[parameterKey].ToBool();
         }
 
+        public float FloatProperty(string parameterKey)
+        {
+            return Processor.Properties[parameterKey].ToFloat();
+        }
+
         public Vector4 Vector4Property(string parameterKey)
         {
             return Processor.Properties[parameterKey].ToVector4();

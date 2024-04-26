@@ -62,6 +62,11 @@ namespace NPLTOOL.Common
                 return Value.ToString().ToBool();
             }
 
+            public float ToFloat()
+            {
+                return Value.ToString().ToFloat();
+            }
+
             public Vector4 ToVector4()
             {
                 return Value.ToString().ToVector4();
