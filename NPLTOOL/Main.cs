@@ -374,9 +374,7 @@ namespace NPLTOOL
             return false;
         }
 
-        private bool ComboEnum(
-            ContentItem nplItem,
-            string dataKey, string itemKey, string parameterKey)
+        private bool ComboEnum(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
             var names = Enum.GetNames(nplItem.Property(parameterKey).Type);
             if (Combo(nplItem, parameterKey, names))
