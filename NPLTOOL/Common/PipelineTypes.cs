@@ -62,6 +62,16 @@ namespace NPLTOOL.Common
                 return Value.ToString().ToBool();
             }
 
+            public int ToInt()
+            {
+                return Value.ToString().ToInt();
+            }
+
+            public double ToDouble()
+            {
+                return Value.ToString().ToInt();
+            }
+
             public float ToFloat()
             {
                 return Value.ToString().ToFloat();

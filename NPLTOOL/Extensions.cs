@@ -34,6 +34,16 @@ namespace NPLTOOL
             return bool.Parse(value);
         }
 
+        public static int ToInt(this string value)
+        {
+            return int.Parse(value);
+        }
+
+        public static double ToDouble(this string value)
+        {
+            return double.Parse(value);
+        }
+
         public static float ToFloat(this string value)
         {
             return float.Parse(value);

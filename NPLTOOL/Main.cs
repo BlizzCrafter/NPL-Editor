@@ -200,7 +200,6 @@ namespace NPLTOOL
                                         if (ImGui.InputTextWithHint($"##{i}", itemValue[i].ToString(), ref nplItem.Watch[i], 9999))
                                         {
                                             itemValue[i] = nplItem.Watch[i];
-
                                             _modifyData.Set(data.Key, itemKey, itemValue);
                                         }
                                     }
@@ -236,6 +235,14 @@ namespace NPLTOOL
                                             if (nplItem.Property(parameterKey).Type == typeof(bool))
                                             {
                                                 Checkbox(nplItem, data.Key, itemKey, parameterKey);
+                                            }
+                                            else if (nplItem.Property(parameterKey).Type == typeof(int))
+                                            {
+                                                InputInt(nplItem, data.Key, itemKey, parameterKey);
+                                            }
+                                            else if (nplItem.Property(parameterKey).Type == typeof(double))
+                                            {
+                                                InputDouble(nplItem, data.Key, itemKey, parameterKey);
                                             }
                                             else if (nplItem.Property(parameterKey).Type == typeof(float))
                                             {
@@ -344,6 +351,30 @@ namespace NPLTOOL
             if (ImGui.Checkbox(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value.ToString();
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                return true;
+            }
+            return false;
+        }
+
+        private bool InputInt(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        {
+            var value = nplItem.IntProperty(parameterKey);
+            if (ImGui.InputInt(parameterKey, ref value))
+            {
+                nplItem.Property(parameterKey).Value = value;
+                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                return true;
+            }
+            return false;
+        }
+
+        private bool InputDouble(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        {
+            var value = nplItem.DoubleProperty(parameterKey);
+            if (ImGui.InputDouble(parameterKey, ref value))
+            {
+                nplItem.Property(parameterKey).Value = value;
                 _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }

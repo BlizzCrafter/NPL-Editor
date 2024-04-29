@@ -100,7 +100,17 @@ namespace NPLTOOL.Common
 
         public bool BoolProperty(string parameterKey)
         {
-            return Processor.Properties[parameterKey].ToBool();
+            return Processor.Properties[parameterKey].ToBool();        
+        }
+
+        public int IntProperty(string parameterKey)
+        {
+            return Processor.Properties[parameterKey].ToInt();
+        }
+
+        public double DoubleProperty(string parameterKey)
+        {
+            return Processor.Properties[parameterKey].ToDouble();
         }
 
         public float FloatProperty(string parameterKey)
