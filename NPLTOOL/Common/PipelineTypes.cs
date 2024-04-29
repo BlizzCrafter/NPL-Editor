@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Content.Pipeline;
+using Serilog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -262,11 +263,14 @@ namespace NPLTOOL.Common
 
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
         {
+            Log.Information("Loading References ...");
+
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
 
+            var assemblyCount = 0;
+            var assemblyErrors = 0;
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
             foreach (var file in Directory.GetFiles(appPath, "*.dll"))
             {
                 var assemblyName = Path.GetFileNameWithoutExtension(file);
@@ -275,25 +279,37 @@ namespace NPLTOOL.Common
                 {
                     if (!assembly.ToString().Contains("MonoGame"))
                         continue;
+                    
+                    assemblyCount++;
+
+                    Log.Information("Load Assembly '{0}'", Path.GetFileName(file));
 
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
+
+                    Log.Information("Done! ^.^");
                 }
-                catch { }
+                catch { assemblyErrors++; }
             }
 
             foreach (var path in assemblyPaths)
             {
+                assemblyCount++;
+
                 try
                 {
-                    var a = Assembly.LoadFrom(path);
-                    var types = a.GetTypes();
+                    Log.Information("Load Assembly '{0}'", Path.GetFileName(path));
+
+                    var assembly = Assembly.LoadFrom(path);
+                    var types = assembly.GetTypes();
                     ProcessTypes(types);
+
+                    Log.Information("Done! ^.^");
                 }
                 catch (Exception e)
                 {
-                    //TODO: Use Serilog
-                    Debug.WriteLine("Failed to load assembly '{0}': {1}", Path.GetFileName(path), e.Message);
+                    assemblyErrors++;
+                    Log.Error("Failed to load assembly '{0}': {1}", Path.GetFileName(path), e.Message);
                     continue;
                 }
             }
@@ -381,8 +397,9 @@ namespace NPLTOOL.Common
                 processorDescriptions[cur] = desc;
                 cur++;
             }
-
             Processors = processorDescriptions;
+
+            Log.Information("Loaded {0} of {1} References.", assemblyCount - assemblyErrors, assemblyCount);
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
@@ -398,7 +415,9 @@ namespace NPLTOOL.Common
                     if (attributes.Length != 0)
                     {
                         var importerAttribute = attributes[0] as ContentImporterAttribute;
-                        _importers.Add(new ImporterInfo(importerAttribute, t));
+                        var importer = new ImporterInfo(importerAttribute, t);
+                        _importers.Add(importer);
+                        Log.Verbose("Importer Added: '{0}'", importer.Name);
                     }
                     else
                     {
@@ -406,7 +425,9 @@ namespace NPLTOOL.Common
                         var importerAttribute = new ContentImporterAttribute(".*");
                         importerAttribute.DefaultProcessor = "";
                         importerAttribute.DisplayName = t.Name;
-                        _importers.Add(new ImporterInfo(importerAttribute, t));
+                        var importer = new ImporterInfo(importerAttribute, t);
+                        _importers.Add(importer);
+                        Log.Verbose("Importer Added: '{0}'", importer.Name);
                     }
                 }
                 else if (t.GetInterface(@"IContentProcessor") == typeof(IContentProcessor))
@@ -415,7 +436,9 @@ namespace NPLTOOL.Common
                     if (attributes.Length != 0)
                     {
                         var processorAttribute = attributes[0] as ContentProcessorAttribute;
-                        _processors.Add(new ProcessorInfo(processorAttribute, t));
+                        var processor = new ProcessorInfo(processorAttribute, t);
+                        _processors.Add(processor);
+                        Log.Verbose("Processor Added: '{0}'", processor.Name);
                     }
                 }
             }

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using NPLTOOL.Common;
 using NPLTOOL.GUI;
+using Serilog;
 using System;
 using System.Data;
 using System.IO;
@@ -87,6 +88,8 @@ namespace NPLTOOL
             _imGuiRenderer = new ImGuiRenderer(this);
 
             base.Initialize();
+
+            Log.Information("App Initialized.");
         }
 
         protected override void LoadContent()
@@ -439,7 +442,7 @@ namespace NPLTOOL
         {
             if (itemKey == "importer")
             {
-                var selectedIndex = nplItem.GetImporterIndex();
+                var selectedIndex = nplItem.GetImporterIndex();                
                 var names = PipelineTypes.Importers.Select(x => x.DisplayName).ToArray();
 
                 if (ImGui.Combo(itemKey, ref selectedIndex, names, names.Length))
