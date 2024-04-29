@@ -132,171 +132,171 @@ namespace NPLTOOL
             ImGui.SetNextWindowPos(viewport.Pos);
             ImGui.SetNextWindowSize(viewport.Size);
             ImGui.SetNextWindowViewport(viewport.ID);
-            ImGui.Begin("Main", ref dummyBool, mainWindowFlags);
-
-            ImGui.SetNextWindowPos(viewport.Pos);
-            ImGui.SetNextWindowSize(viewport.Size);
-            ImGui.SetNextWindowViewport(viewport.ID);
-            if (ImGui.Begin("JsonTree", ref dummyBool, windowFlags))
+            if (ImGui.Begin("Main", ref dummyBool, mainWindowFlags))
             {
-                var root = _jsonObject["root"];
-
-                var references = _jsonObject["references"].AsArray();
-                PipelineTypes.Load(references.Select(x => x.ToString()).ToArray());
-
-                var content = _jsonObject["content"]["contentList"];
-
-                foreach (var data in _jsonObject["content"].AsObject())
+                ImGui.SetNextWindowPos(viewport.Pos);
+                ImGui.SetNextWindowSize(viewport.Size);
+                ImGui.SetNextWindowViewport(viewport.ID);
+                if (ImGui.Begin("JsonTree", ref dummyBool, windowFlags))
                 {
-                    var importer = data.Value["importer"]?.ToString();
-                    var processor = data.Value["processor"]?.ToString();
-                    var processorParam = data.Value["processorParam"]?.ToString();
-                    if (importer == null || processor == null)
-                    {
-                        PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
-                            out var outImporter, out var outProcessor);
+                    var root = _jsonObject["root"];
 
-                        importer = outImporter.TypeName;
-                        processor = outProcessor.TypeName;
+                    var references = _jsonObject["references"].AsArray();
+                    PipelineTypes.Load(references.Select(x => x.ToString()).ToArray());
 
-                        data.Value["importer"] = importer;
-                        data.Value["processor"] = processor;
-                    }
-                    if (processorParam == null)
+                    var content = _jsonObject["content"]["contentList"];
+
+                    foreach (var data in _jsonObject["content"].AsObject())
                     {
-                        JsonObject props = new();
-                        var properties = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
-                        if (properties != null && properties.Any())
+                        var importer = data.Value["importer"]?.ToString();
+                        var processor = data.Value["processor"]?.ToString();
+                        var processorParam = data.Value["processorParam"]?.ToString();
+                        if (importer == null || processor == null)
                         {
-                            foreach (var property in properties)
-                            {
-                                props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
-                            }
-                            data.Value["processorParam"] = props;
+                            PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
+                                out var outImporter, out var outProcessor);
+
+                            importer = outImporter.TypeName;
+                            processor = outProcessor.TypeName;
+
+                            data.Value["importer"] = importer;
+                            data.Value["processor"] = processor;
                         }
-                    }
-
-                    var nplItem = new ContentItem(data.Key, importer, processor); //e.g. data.Key = contentList
-
-                    var categoryObject = _jsonObject["content"][data.Key];
-
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
-                    if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
-                    {
-                        foreach (var categoryItem in categoryObject.AsObject())
+                        if (processorParam == null)
                         {
-                            var itemKey = categoryItem.Key; //e.g. path
-                            var itemValue = categoryItem.Value; //e.g. "C:\\"
-
-                            nplItem.SetParameter(itemKey, itemValue);
-
-                            if (itemKey == "watch")
+                            JsonObject props = new();
+                            var properties = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
+                            if (properties != null && properties.Any())
                             {
-                                ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
-                                if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
+                                foreach (var property in properties)
                                 {
-                                    for (int i = 0; i < itemValue.AsArray().Count; i++)
-                                    {
-                                        if (ImGui.InputTextWithHint($"##{i}", itemValue[i].ToString(), ref nplItem.Watch[i], 9999))
-                                        {
-                                            itemValue[i] = nplItem.Watch[i];
-                                            _modifyData.Set(data.Key, itemKey, itemValue);
-                                        }
-                                    }
-                                    ImGui.TreePop();
+                                    props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
                                 }
-                                ImGui.PopItemWidth();
-                            }
-                            else if (itemKey == "processorParam")
-                            {
-                                ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
-                                if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
-                                {
-                                    if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
-                                    {
-                                        var itemCount = 0;
-                                        foreach (var parameter in itemValue.AsObject())
-                                        {
-                                            var parameterKey = parameter.Key; //e.g. ColorKeyColor
-                                            var parameterValue = parameter.Value; //e.g. 255,0,255,255
-
-                                            itemCount++;
-                                            var columnPos = itemCount % 2;
-
-                                            if (columnPos == 1)
-                                            {
-                                                ImGui.TableNextRow();
-                                                ImGui.TableSetupColumn("Column 1");
-                                                ImGui.TableSetupColumn("Column 2");
-                                                ImGui.TableSetColumnIndex(0);
-                                            }
-                                            else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
-
-                                            if (nplItem.Property(parameterKey).Type == typeof(bool))
-                                            {
-                                                Checkbox(nplItem, data.Key, itemKey, parameterKey);
-                                            }
-                                            else if (nplItem.Property(parameterKey).Type == typeof(int))
-                                            {
-                                                InputInt(nplItem, data.Key, itemKey, parameterKey);
-                                            }
-                                            else if (nplItem.Property(parameterKey).Type == typeof(double))
-                                            {
-                                                InputDouble(nplItem, data.Key, itemKey, parameterKey);
-                                            }
-                                            else if (nplItem.Property(parameterKey).Type == typeof(float))
-                                            {
-                                                InputFloat(nplItem, data.Key, itemKey, parameterKey);
-                                            }
-                                            else if (nplItem.Property(parameterKey).Type == typeof(Color))
-                                            {
-                                                ColorEdit(nplItem, data.Key, itemKey, parameterKey);
-                                            }
-                                            else if (nplItem.Property(parameterKey).Type.IsEnum)
-                                            {
-                                                ComboEnum(nplItem, data.Key, itemKey, parameterKey);
-                                            }
-                                            else TextInput(nplItem, data.Key, itemKey, parameterKey);
-                                        }
-                                    }
-                                    ImGui.EndTable();
-                                    ImGui.TreePop();
-                                }
-                                ImGui.PopItemWidth();
-                            }
-                            else if (itemKey == "path")
-                            {
-                                if (ImGui.InputTextWithHint(" ", itemValue.ToString(), ref nplItem._path, 9999))
-                                {
-                                    itemValue = nplItem._path;
-                                    _modifyData.Set(data.Key, itemKey, itemValue);
-                                }
-                            }
-                            else if (itemKey == "action")
-                            {
-                                ImGui.InputTextWithHint(itemKey, itemValue.ToString(), ref nplItem.Action, 9999);
-                            }
-                            else if (itemKey == "recursive")
-                            {
-                                ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
-                            }
-                            else if (itemKey == "importer" || itemKey == "processor")
-                            {
-                                if (ComboTypeDesciptors(nplItem, itemKey, out string value))
-                                {
-                                    _modifyData.Set(data.Key, itemKey, value);
-                                }
+                                data.Value["processorParam"] = props;
                             }
                         }
-                        ImGui.TreePop();
+
+                        var nplItem = new ContentItem(data.Key, importer, processor); //e.g. data.Key = contentList
+
+                        var categoryObject = _jsonObject["content"][data.Key];
+
+                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
+                        if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
+                        {
+                            foreach (var categoryItem in categoryObject.AsObject())
+                            {
+                                var itemKey = categoryItem.Key; //e.g. path
+                                var itemValue = categoryItem.Value; //e.g. "C:\\"
+
+                                nplItem.SetParameter(itemKey, itemValue);
+
+                                if (itemKey == "watch")
+                                {
+                                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
+                                    if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
+                                    {
+                                        for (int i = 0; i < itemValue.AsArray().Count; i++)
+                                        {
+                                            if (ImGui.InputTextWithHint($"##{i}", itemValue[i].ToString(), ref nplItem.Watch[i], 9999))
+                                            {
+                                                itemValue[i] = nplItem.Watch[i];
+                                                _modifyData.Set(data.Key, itemKey, itemValue);
+                                            }
+                                        }
+                                        ImGui.TreePop();
+                                    }
+                                    ImGui.PopItemWidth();
+                                }
+                                else if (itemKey == "processorParam")
+                                {
+                                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
+                                    if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
+                                    {
+                                        if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
+                                        {
+                                            var itemCount = 0;
+                                            foreach (var parameter in itemValue.AsObject())
+                                            {
+                                                var parameterKey = parameter.Key; //e.g. ColorKeyColor
+                                                var parameterValue = parameter.Value; //e.g. 255,0,255,255
+
+                                                itemCount++;
+                                                var columnPos = itemCount % 2;
+
+                                                if (columnPos == 1)
+                                                {
+                                                    ImGui.TableNextRow();
+                                                    ImGui.TableSetupColumn("Column 1");
+                                                    ImGui.TableSetupColumn("Column 2");
+                                                    ImGui.TableSetColumnIndex(0);
+                                                }
+                                                else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
+
+                                                if (nplItem.Property(parameterKey).Type == typeof(bool))
+                                                {
+                                                    Checkbox(nplItem, data.Key, itemKey, parameterKey);
+                                                }
+                                                else if (nplItem.Property(parameterKey).Type == typeof(int))
+                                                {
+                                                    InputInt(nplItem, data.Key, itemKey, parameterKey);
+                                                }
+                                                else if (nplItem.Property(parameterKey).Type == typeof(double))
+                                                {
+                                                    InputDouble(nplItem, data.Key, itemKey, parameterKey);
+                                                }
+                                                else if (nplItem.Property(parameterKey).Type == typeof(float))
+                                                {
+                                                    InputFloat(nplItem, data.Key, itemKey, parameterKey);
+                                                }
+                                                else if (nplItem.Property(parameterKey).Type == typeof(Color))
+                                                {
+                                                    ColorEdit(nplItem, data.Key, itemKey, parameterKey);
+                                                }
+                                                else if (nplItem.Property(parameterKey).Type.IsEnum)
+                                                {
+                                                    ComboEnum(nplItem, data.Key, itemKey, parameterKey);
+                                                }
+                                                else TextInput(nplItem, data.Key, itemKey, parameterKey);
+                                            }
+                                        }
+                                        ImGui.EndTable();
+                                        ImGui.TreePop();
+                                    }
+                                    ImGui.PopItemWidth();
+                                }
+                                else if (itemKey == "path")
+                                {
+                                    if (ImGui.InputTextWithHint(" ", itemValue.ToString(), ref nplItem._path, 9999))
+                                    {
+                                        itemValue = nplItem._path;
+                                        _modifyData.Set(data.Key, itemKey, itemValue);
+                                    }
+                                }
+                                else if (itemKey == "action")
+                                {
+                                    ImGui.InputTextWithHint(itemKey, itemValue.ToString(), ref nplItem.Action, 9999);
+                                }
+                                else if (itemKey == "recursive")
+                                {
+                                    ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
+                                }
+                                else if (itemKey == "importer" || itemKey == "processor")
+                                {
+                                    if (ComboTypeDesciptors(nplItem, itemKey, out string value))
+                                    {
+                                        _modifyData.Set(data.Key, itemKey, value);
+                                    }
+                                }
+                            }
+                            ImGui.TreePop();
+                        }
+                        ImGui.PopItemWidth();
                     }
-                    ImGui.PopItemWidth();
+                    ModifyData();
+                    ImGui.End();
                 }
-                ModifyData();                
+                ImGui.End();
             }
-            ImGui.End();
-
-            ImGui.End();
         }
 
         private void ModifyData()
