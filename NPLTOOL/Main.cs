@@ -37,7 +37,7 @@ namespace NPLTOOL
                 Value = null;
             }
 
-            public void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "") 
+            public void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "")
             {
                 HasData = true;
 
@@ -97,7 +97,7 @@ namespace NPLTOOL
             string workingDir = Directory.GetCurrentDirectory();
             string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
             _nplJsonFilePath = Path.Combine(projDir, "Content.npl");
-            
+
             var jsonString = File.ReadAllText(_nplJsonFilePath);
             _jsonObject = JsonNode.Parse(jsonString);
 
@@ -119,8 +119,8 @@ namespace NPLTOOL
         {
             bool dummyBool = true;
 
-            var mainWindowFlags = 
-                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize 
+            var mainWindowFlags =
+                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
                 | ImGuiWindowFlags.NoBackground;
 
@@ -139,10 +139,29 @@ namespace NPLTOOL
                 ImGui.SetNextWindowViewport(viewport.ID);
                 if (ImGui.Begin("JsonTree", ref dummyBool, windowFlags))
                 {
-                    var root = _jsonObject["root"];
+                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
+                    if (ImGui.TreeNodeEx("settings", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
+                    {
+                        ImGui.BeginDisabled();
+                        var root = _jsonObject["root"];
+                        var rootValue = root.ToString();
+                        ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.ReadOnly);
+                        ImGui.EndDisabled();
 
-                    var references = _jsonObject["references"].AsArray();
-                    PipelineTypes.Load(references.Select(x => x.ToString()).ToArray());
+                        var references = _jsonObject["references"].AsArray();
+                        for (int i = 0; i < references.Count; i++)
+                        {
+                            var data = references[i].ToString();
+                            if (ImGui.InputText("reference", ref data, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                            {
+                                references[i] = data;
+                                PipelineTypes.Reset();
+                            }
+                        }
+                        PipelineTypes.Load(references.Select(x => x.ToString()).ToArray());
+                        ImGui.TreePop();
+                        ImGui.PopItemWidth();
+                    }
 
                     var content = _jsonObject["content"]["contentList"];
 
@@ -451,7 +470,7 @@ namespace NPLTOOL
             var paramValue = nplItem.Property(parameterKey).Value.ToString();
             if (ImGui.InputText(parameterKey, ref paramValue, 9999))
             {
-                nplItem.Property(parameterKey).Value = paramValue; 
+                nplItem.Property(parameterKey).Value = paramValue;
                 _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
