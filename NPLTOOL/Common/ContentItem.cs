@@ -138,14 +138,22 @@ namespace NPLTOOL.Common
 
         public int GetImporterIndex()
         {
-            var index = PipelineTypes.GetImporterIndex(Importer.TypeName);
-            return SelectedImporterIndex = index;
+            if (Importer != null)
+            {
+                var index = PipelineTypes.GetImporterIndex(Importer.TypeName);
+                return SelectedImporterIndex = index;
+            }
+            return -1;
         }
 
         public int GetProcessorIndex()
         {
-            var index = PipelineTypes.GetProcessorIndex(Processor.TypeName);
-            return SelectedProcessorIndex = index;
+            if (Processor != null)
+            {
+                var index = PipelineTypes.GetProcessorIndex(Processor.TypeName);
+                return SelectedProcessorIndex = index;
+            }
+            return -1;
         }
     }
 }
