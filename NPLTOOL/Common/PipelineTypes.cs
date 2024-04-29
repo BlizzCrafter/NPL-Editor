@@ -290,11 +290,10 @@ namespace NPLTOOL.Common
                     var types = a.GetTypes();
                     ProcessTypes(types);
                 }
-                catch
+                catch (Exception e)
                 {
-                    //Logger.LogWarning(null, null, "Failed to load assembly '{0}': {1}", assemblyPath, e.Message);
-                    // The assembly failed to load... nothing
-                    // we can do but ignore it.
+                    //TODO: Use Serilog
+                    Debug.WriteLine("Failed to load assembly '{0}': {1}", Path.GetFileName(path), e.Message);
                     continue;
                 }
             }
