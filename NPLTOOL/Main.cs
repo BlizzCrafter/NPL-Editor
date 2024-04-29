@@ -197,7 +197,7 @@ namespace NPLTOOL
                                     {
                                         for (int i = 0; i < itemValue.AsArray().Count; i++)
                                         {
-                                            if (ImGui.InputTextWithHint($"##{i}", itemValue[i].ToString(), ref nplItem.Watch[i], 9999))
+                                            if (ImGui.InputText($"##{i}", ref nplItem.Watch[i], 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                             {
                                                 itemValue[i] = nplItem.Watch[i];
                                                 _modifyData.Set(data.Key, itemKey, itemValue);
@@ -266,7 +266,7 @@ namespace NPLTOOL
                                 }
                                 else if (itemKey == "path")
                                 {
-                                    if (ImGui.InputTextWithHint(" ", itemValue.ToString(), ref nplItem._path, 9999))
+                                    if (ImGui.InputText(" ", ref nplItem._path, 9999))
                                     {
                                         itemValue = nplItem._path;
                                         _modifyData.Set(data.Key, itemKey, itemValue);
@@ -274,7 +274,7 @@ namespace NPLTOOL
                                 }
                                 else if (itemKey == "action")
                                 {
-                                    ImGui.InputTextWithHint(itemKey, itemValue.ToString(), ref nplItem.Action, 9999);
+                                    ImGui.InputText(itemKey, ref nplItem.Action, 9999);
                                 }
                                 else if (itemKey == "recursive")
                                 {
