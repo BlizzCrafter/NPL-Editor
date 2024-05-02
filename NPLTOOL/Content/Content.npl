@@ -1,7 +1,7 @@
 {
   "root": "../../MonoGo.Samples.Content/Content/",
   "references": [
-    "C:/Users/mhaer/source/repos/NPLTOOL/NPLTOOL/MonoGo.Pipeline.dll"
+    "../../../MonoGo.Pipeline.dll"
   ],
   "content": {
     "contentList": {

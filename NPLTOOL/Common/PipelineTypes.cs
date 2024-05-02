@@ -270,13 +270,15 @@ namespace NPLTOOL.Common
 
             var assemblyCount = 0;
             var assemblyErrors = 0;
-            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            foreach (var file in Directory.GetFiles(appPath, "*.dll"))
+
+            var workingDir = Directory.GetCurrentDirectory();
+            foreach (var file in Directory.GetFiles(workingDir, "*.dll"))
             {
-                var assemblyName = Path.GetFileNameWithoutExtension(file);
-                var assembly = Assembly.Load(assemblyName);
                 try
                 {
+                    var assemblyName = Path.GetFileNameWithoutExtension(file);
+                    var assembly = Assembly.Load(assemblyName);
+
                     if (!assembly.ToString().Contains("MonoGame"))
                         continue;
                     
@@ -300,7 +302,8 @@ namespace NPLTOOL.Common
                 {
                     Log.Information("Load Assembly '{0}'", Path.GetFileName(path));
 
-                    var assembly = Assembly.LoadFrom(path);
+                    var relativePath = Path.Combine(workingDir, path);
+                    var assembly = Assembly.LoadFrom(relativePath);
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
 
