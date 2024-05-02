@@ -95,12 +95,14 @@ namespace NPLTOOL
 
         protected override void LoadContent()
         {
-            //TODO: Use filepath of a startup argument instead.
-            //string[] args = Environment.GetCommandLineArgs();
-
+#if DEBUG
             string workingDir = Directory.GetCurrentDirectory();
             string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
-            _nplJsonFilePath = Path.Combine(projDir, "Content.npl");
+            _nplJsonFilePath = Path.Combine(projDir, "Content", "Content.npl");
+#else
+            string[] args = Environment.GetCommandLineArgs();
+            _nplJsonFilePath = args[1];
+#endif
 
             var jsonString = File.ReadAllText(_nplJsonFilePath);
             _jsonObject = JsonNode.Parse(jsonString);
