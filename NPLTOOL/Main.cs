@@ -289,7 +289,14 @@ namespace NPLTOOL
                                 }
                                 else if (itemKey == "action")
                                 {
-                                    ImGui.InputText(itemKey, ref nplItem.Action, 9999);
+                                    var actionIndex = nplItem.GetActionIndex();
+                                    var actionNames = Enum.GetNames(typeof(BuildAction));
+                                    if (ImGui.Combo(itemKey, ref actionIndex, actionNames, actionNames.Length))
+                                    {
+                                        itemValue = actionNames[actionIndex].ToLowerInvariant();
+                                        nplItem.Action = (BuildAction)Enum.Parse(typeof(BuildAction), itemValue.ToString(), true);
+                                        _modifyData.Set(data.Key, itemKey, itemValue);
+                                    }
                                 }
                                 else if (itemKey == "recursive")
                                 {

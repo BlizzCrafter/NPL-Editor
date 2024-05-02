@@ -6,6 +6,12 @@ using static NPLTOOL.Common.ProcessorTypeDescription;
 
 namespace NPLTOOL.Common
 {
+    public enum BuildAction
+    {
+        Build,
+        Copy,
+    }
+
     public class ContentItem
     {
         public string Path
@@ -23,11 +29,11 @@ namespace NPLTOOL.Common
         public string _path;
         public readonly string Category;
         public bool Recursive;
-        public string Action;
         public int SelectedImporterIndex;
         public int SelectedProcessorIndex;
         public string[] Watch;
         public string[] Parameters;
+        public BuildAction Action;
         public ImporterTypeDescription Importer;
         public ProcessorTypeDescription Processor;
 
@@ -57,7 +63,7 @@ namespace NPLTOOL.Common
                     Recursive = string.Compare(value.ToString(), "true", true) == 0;
                     break;
                 case "action":
-                    Action = value.ToString();
+                    Action = (BuildAction)Enum.Parse(typeof(BuildAction), value.ToString(), true);
                     break;
                 case "watch":
                     {
@@ -126,6 +132,12 @@ namespace NPLTOOL.Common
         public string GetParameterString(string param, object value)
         {
             return $"{param}:{value}";
+        }
+
+        public int GetActionIndex()
+        {
+            var actionList = Enum.GetNames(typeof(BuildAction)).ToList();
+            return actionList.IndexOf(Action.ToString());
         }
 
         public int GetParameterIndex(string itemKey)
