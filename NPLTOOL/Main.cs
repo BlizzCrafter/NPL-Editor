@@ -5,6 +5,7 @@ using NPLTOOL.Common;
 using NPLTOOL.GUI;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -168,37 +169,29 @@ namespace NPLTOOL
 
                     var content = _jsonObject["content"]["contentList"];
 
+                    JsonObject modifiedProcessorParam = null;
                     foreach (var data in _jsonObject["content"].AsObject())
                     {
-                        var importer = data.Value["importer"]?.ToString();
-                        var processor = data.Value["processor"]?.ToString();
+                        var importerName = data.Value["importer"]?.ToString();
+                        var processorName = data.Value["processor"]?.ToString();
                         var processorParam = data.Value["processorParam"]?.ToString();
-                        if (importer == null || processor == null)
+                        if (importerName == null || processorName == null)
                         {
                             PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
                                 out var outImporter, out var outProcessor);
 
-                            importer = outImporter.TypeName;
-                            processor = outProcessor.TypeName;
+                            importerName = outImporter.TypeName;
+                            processorName = outProcessor.TypeName;
 
-                            data.Value["importer"] = importer;
-                            data.Value["processor"] = processor;
+                            data.Value["importer"] = importerName;
+                            data.Value["processor"] = processorName;
                         }
                         if (processorParam == null)
                         {
-                            JsonObject props = new();
-                            var properties = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
-                            if (properties != null && properties.Any())
-                            {
-                                foreach (var property in properties)
-                                {
-                                    props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
-                                }
-                                data.Value["processorParam"] = props;
-                            }
+                            WriteJsonProcessorParameters(processorName, data);
                         }
 
-                        var nplItem = new ContentItem(data.Key, importer, processor); //e.g. data.Key = contentList
+                        var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
 
                         var categoryObject = _jsonObject["content"][data.Key];
 
@@ -306,6 +299,10 @@ namespace NPLTOOL
                                 {
                                     if (ComboTypeDesciptors(nplItem, itemKey, out string value))
                                     {
+                                        if (itemKey == "processor")
+                                        {
+                                            GetJsonProcessorParameters(value, out modifiedProcessorParam);
+                                        }
                                         _modifyData.Set(data.Key, itemKey, value);
                                     }
                                 }
@@ -314,17 +311,18 @@ namespace NPLTOOL
                         }
                         ImGui.PopItemWidth();
                     }
-                    ModifyData();
+                    ModifyData(modifiedProcessorParam);
                     ImGui.End();
                 }
                 ImGui.End();
             }
         }
 
-        private void ModifyData()
+        private void ModifyData(JsonObject modifiedProcessorParam)
         {
             if (_modifyData != null && _modifyData.HasData)
             {
+
                 if (_modifyData.ParamModify)
                 {
                     _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey][_modifyData.ParamKey] = _modifyData.Value;
@@ -333,10 +331,44 @@ namespace NPLTOOL
                 }
                 else
                 {
+                    if (_modifyData.ItemKey == "processor")
+                    {
+                        if (modifiedProcessorParam == null)
+                        {
+                            _jsonObject["content"][_modifyData.DataKey].AsObject().Remove("processorParam");
+                        }
+                        else _jsonObject["content"][_modifyData.DataKey]["processorParam"] = modifiedProcessorParam;
+                    }
+
                     _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey] = _modifyData.Value;
                     WriteContentNPL();
                     _modifyData.Reset();
                 }
+            }
+        }
+
+        private bool GetJsonProcessorParameters(string processor, out JsonObject props)
+        {
+            var properties = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
+            if (properties != null && properties.Any())
+            {
+                props = new JsonObject();
+                foreach (var property in properties)
+                {
+                    props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
+                }
+                return true;
+            }
+            props = null;
+            return false;
+        }
+
+        private void WriteJsonProcessorParameters(
+            string processor, KeyValuePair<string, JsonNode> data)
+        {
+            if (GetJsonProcessorParameters(processor, out JsonObject props))
+            {
+                data.Value["processorParam"] = props;
             }
         }
 
@@ -348,6 +380,8 @@ namespace NPLTOOL
             });
             File.WriteAllText(_nplJsonFilePath, jsonString);
         }
+
+        #region ImGui Widgets
 
         private bool ColorEdit(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
@@ -479,5 +513,7 @@ namespace NPLTOOL
             }
             return false;
         }
+
+        #endregion ImGui Widgets
     }
 }
