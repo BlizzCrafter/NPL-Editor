@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
-using static NPLTOOL.Common.ProcessorTypeDescription;
+using static NPLEditor.Common.ProcessorTypeDescription;
 
-namespace NPLTOOL.Common
+namespace NPLEditor.Common
 {
     public enum BuildAction
     {

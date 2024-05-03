@@ -1,4 +1,4 @@
-﻿namespace NPLTOOL
+﻿namespace NPLEditor
 {
     public static class FontAwesome
     {

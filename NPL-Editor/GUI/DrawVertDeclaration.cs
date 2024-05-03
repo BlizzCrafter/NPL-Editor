@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace NPLTOOL.GUI
+namespace NPLEditor.GUI
 {
     public static class DrawVertDeclaration
     {

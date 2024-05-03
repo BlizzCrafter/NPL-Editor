@@ -10,7 +10,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 
-namespace NPLTOOL.Common
+namespace NPLEditor.Common
 {
     public class ImporterTypeDescription
     {

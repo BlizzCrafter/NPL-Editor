@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NPLTOOL": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\mhaer\\source\\repos\\NPLTOOL\\NPLTOOL\\Content\\Content.npl"
+    }
+  }
+}

@@ -25,5 +25,5 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Information("--- INITIALIZE ---");
 
-using var game = new NPLTOOL.Main();
+using var game = new NPLEditor.Main();
 game.Run();

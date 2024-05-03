@@ -8,7 +8,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Num = System.Numerics;
 
-namespace NPLTOOL.GUI
+namespace NPLEditor.GUI
 {
     /// <summary>
     /// ImGui renderer for use with XNA-likes (FNA & MonoGame)

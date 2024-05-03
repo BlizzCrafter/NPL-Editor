@@ -1,8 +1,8 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using NPLTOOL.Common;
-using NPLTOOL.GUI;
+using NPLEditor.Common;
+using NPLEditor.GUI;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Text.Json.Nodes;
 using Color = Microsoft.Xna.Framework.Color;
 using Num = System.Numerics;
 
-namespace NPLTOOL
+namespace NPLEditor
 {
     public enum EditButtonPosition
     {

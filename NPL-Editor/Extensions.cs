@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace NPLTOOL
+namespace NPLEditor
 {
     public static class Extensions
     {
