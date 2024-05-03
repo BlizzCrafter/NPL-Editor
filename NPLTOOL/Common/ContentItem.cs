@@ -43,12 +43,12 @@ namespace NPLTOOL.Common
 
             if (!string.IsNullOrEmpty(importerKey))
             {
-                Importer = PipelineTypes.Importers.ToList().Find(x => x.TypeName.Equals(importerKey));
+                Importer = PipelineTypes.Importers?.ToList().Find(x => x.TypeName.Equals(importerKey));
             }
 
             if (!string.IsNullOrEmpty(processorKey))
             {
-                Processor = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processorKey));
+                Processor = PipelineTypes.Processors?.ToList().Find(x => x.TypeName.Equals(processorKey));
             }
         }
 

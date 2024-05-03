@@ -359,7 +359,7 @@ namespace NPLTOOL
 
         private bool GetJsonProcessorParameters(string processor, out JsonObject props)
         {
-            var properties = PipelineTypes.Processors.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
+            var properties = PipelineTypes.Processors?.ToList().Find(x => x.TypeName.Equals(processor))?.Properties;
             if (properties != null && properties.Any())
             {
                 props = new JsonObject();
