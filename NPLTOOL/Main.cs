@@ -16,6 +16,12 @@ using Num = System.Numerics;
 
 namespace NPLTOOL
 {
+    public enum EditButtonPosition
+    {
+        Before,
+        After
+    }
+
     public class Main : Game
     {
         public class ModifyDataDescriptor
@@ -145,35 +151,39 @@ namespace NPLTOOL
                 ImGui.SetNextWindowViewport(viewport.ID);
                 if (ImGui.Begin("JsonTree", ref dummyBool, windowFlags))
                 {
+                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
                     if (ImGui.TreeNodeEx("settings", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                     {
+                        ImGui.PopStyleColor();
+
                         ImGui.BeginDisabled();
                         var root = _jsonObject["root"];
                         var rootValue = root.ToString();
                         ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.ReadOnly);
                         ImGui.EndDisabled();
 
-                        var references = _jsonObject["references"].AsArray();
-                        for (int i = 0; i < references.Count; i++)
+                        var references = _jsonObject["references"].AsArray();                        
+                        ArrayEditor("Reference", references, out _, out _, out bool itemChanged);
                         {
-                            var data = references[i].ToString();
-                            if (ImGui.InputText("reference", ref data, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
-                            {
-                                references[i] = data;
-                                PipelineTypes.Reset();
-                            }
+                            if (itemChanged) PipelineTypes.Reset();
                         }
-                        PipelineTypes.Load(references.Select(x => x.ToString()).ToArray());
+                        PipelineTypes.Load(references
+                            .Where(x => !string.IsNullOrEmpty(x.ToString()))
+                            .Select(x => x.ToString()).ToArray());
+                        
                         ImGui.TreePop();
-                        ImGui.PopItemWidth();
                     }
+                    ImGui.PopStyleColor();
+                    ImGui.PopItemWidth();
 
                     var content = _jsonObject["content"]["contentList"];
 
                     JsonObject modifiedProcessorParam = null;
                     foreach (var data in _jsonObject["content"].AsObject())
                     {
+                        EditButton(EditButtonPosition.Before, FontAwesome.Edit, 0, data.Key);
+
                         var importerName = data.Value["importer"]?.ToString();
                         var processorName = data.Value["processor"]?.ToString();
                         var processorParam = data.Value["processorParam"]?.ToString();
@@ -197,9 +207,12 @@ namespace NPLTOOL
 
                         var categoryObject = _jsonObject["content"][data.Key];
 
+                        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
                         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
                         if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                         {
+                            ImGui.PopStyleColor();
+                            if (data.Key == "contentList") ImGui.BeginDisabled();
                             foreach (var categoryItem in categoryObject.AsObject())
                             {
                                 var itemKey = categoryItem.Key; //e.g. path
@@ -209,20 +222,7 @@ namespace NPLTOOL
 
                                 if (itemKey == "watch")
                                 {
-                                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
-                                    if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
-                                    {
-                                        for (int i = 0; i < itemValue.AsArray().Count; i++)
-                                        {
-                                            if (ImGui.InputText($"##{i}", ref nplItem.Watch[i], 9999, ImGuiInputTextFlags.EnterReturnsTrue))
-                                            {
-                                                itemValue[i] = nplItem.Watch[i];
-                                                _modifyData.Set(data.Key, itemKey, itemValue);
-                                            }
-                                        }
-                                        ImGui.TreePop();
-                                    }
-                                    ImGui.PopItemWidth();
+                                    ArrayEditor("Watcher", categoryItem.Value.AsArray(), out _, out _, out _);
                                 }
                                 else if (itemKey == "processorParam")
                                 {
@@ -316,8 +316,10 @@ namespace NPLTOOL
                                     }
                                 }
                             }
+                            if (data.Key == "contentList") ImGui.EndDisabled();
                             ImGui.TreePop();
                         }
+                        ImGui.PopStyleColor();
                         ImGui.PopItemWidth();
                     }
                     ModifyData(modifiedProcessorParam);
@@ -331,7 +333,6 @@ namespace NPLTOOL
         {
             if (_modifyData != null && _modifyData.HasData)
             {
-
                 if (_modifyData.ParamModify)
                 {
                     _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey][_modifyData.ParamKey] = _modifyData.Value;
@@ -521,6 +522,67 @@ namespace NPLTOOL
                 return true;
             }
             return false;
+        }
+
+        private bool EditButton(EditButtonPosition position, string text, int id, string category = "")
+        {
+            if (category != "contentList")
+            {
+                if (position == EditButtonPosition.After) ImGui.SameLine();
+                ImGui.PushID($"##{id}");
+                if (ImGui.Button(text, new Num.Vector2(ImGui.GetFrameHeight())))
+                {
+                    if (position == EditButtonPosition.Before) ImGui.SameLine();
+                    return true;
+                }
+                ImGui.PopID();
+                if (position == EditButtonPosition.Before) ImGui.SameLine();
+                return false;
+            }
+            return false;
+        }
+
+        private void ArrayEditor(
+            string name,
+            JsonArray jsonArray,
+            out bool itemAdded,
+            out bool itemRemoved,
+            out bool itemChanged)
+        {
+            itemAdded = false;
+            itemRemoved = false;
+            itemChanged = false;
+
+            ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
+            if (ImGui.TreeNodeEx($"{FontAwesome.Plus} Add {name}", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
+            {
+                if (ImGui.IsItemClicked())
+                {
+                    itemAdded = true;
+                    jsonArray.Add("");
+                    WriteContentNPL();
+                }
+
+                for (int i = 0; i < jsonArray.Count; i++)
+                {
+                    var data = jsonArray[i].ToString();
+                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing * 2f);
+                    if (ImGui.InputText($"##{i}", ref data, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        itemChanged = true;
+                        jsonArray[i] = data;
+                    }
+                    ImGui.PopItemWidth();
+
+                    if (EditButton(EditButtonPosition.After, FontAwesome.TrashAlt, i))
+                    {
+                        itemRemoved = true;
+                        jsonArray.RemoveAt(i);
+                        WriteContentNPL();
+                    }
+                }
+                ImGui.TreePop();
+            }
         }
 
         #endregion ImGui Widgets
