@@ -68,7 +68,7 @@ namespace NPLTOOL.Common
                 case "watch":
                     {
                         var itemArray = (JsonArray)value;
-                        if (Watch == null) Watch = new string[itemArray.Count];
+                        Watch ??= new string[itemArray.Count];
                         for (int i = 0; i < itemArray.Count; i++)
                         {
                             Watch[i] = itemArray[i].ToString();
@@ -78,7 +78,6 @@ namespace NPLTOOL.Common
                 case "processorParam":
                     {
                         var itemArray = ((JsonObject)value).ToArray();
-
                         for (int i = 0; i < itemArray.Length; i++)
                         {
                             var parameterKey = itemArray[i].Key; //e.g. ColorKeyColor
@@ -106,27 +105,27 @@ namespace NPLTOOL.Common
 
         public bool BoolProperty(string parameterKey)
         {
-            return Processor.Properties[parameterKey].ToBool();        
+            return Property(parameterKey).ToBool();        
         }
 
         public int IntProperty(string parameterKey)
         {
-            return Processor.Properties[parameterKey].ToInt();
+            return Property(parameterKey).ToInt();
         }
 
         public double DoubleProperty(string parameterKey)
         {
-            return Processor.Properties[parameterKey].ToDouble();
+            return Property(parameterKey).ToDouble();
         }
 
         public float FloatProperty(string parameterKey)
         {
-            return Processor.Properties[parameterKey].ToFloat();
+            return Property(parameterKey).ToFloat();
         }
 
         public Vector4 Vector4Property(string parameterKey)
         {
-            return Processor.Properties[parameterKey].ToVector4();
+            return Property(parameterKey).ToVector4();
         }
 
         public string GetParameterString(string param, object value)
