@@ -26,7 +26,7 @@ namespace NPLTOOL.Common
                 }
             }
         }
-        public string _path;
+        private string _path;
         public readonly string Category;
         public bool Recursive;
         public int SelectedImporterIndex;

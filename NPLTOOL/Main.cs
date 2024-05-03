@@ -349,9 +349,11 @@ namespace NPLTOOL
                                     }
                                     else if (itemKey == "path")
                                     {
-                                        if (ImGui.InputText(" ", ref nplItem._path, 9999))
+                                        var path = nplItem.Path;
+                                        if (ImGui.InputText(" ", ref path, 9999))
                                         {
-                                            itemValue = nplItem._path;
+                                            nplItem.Path = path;
+                                            itemValue = path;
                                             _modifyData.Set(data.Key, itemKey, itemValue);
                                         }
                                     }
