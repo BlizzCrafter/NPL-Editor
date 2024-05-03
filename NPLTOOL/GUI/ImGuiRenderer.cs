@@ -183,12 +183,12 @@ namespace NPLTOOL.GUI
             style.Colors[(int)ImGuiCol.Border] = new Num.Vector4(0.43f, 0.43f, 0.50f, 0.50f);
             style.Colors[(int)ImGuiCol.BorderShadow] = new Num.Vector4(0.00f, 0.00f, 0.00f, 0.00f);
             style.Colors[(int)ImGuiCol.FrameBg] = new Num.Vector4(0.33f, 0.38f, 0.45f, 1.00f);
-            style.Colors[(int)ImGuiCol.FrameBgHovered] = new Num.Vector4(0.17f, 0.20f, 0.24f, 1.00f);
+            style.Colors[(int)ImGuiCol.FrameBgHovered] = new Num.Vector4(0.286f, 0.333f, 0.392f, 1.000f);
             style.Colors[(int)ImGuiCol.FrameBgActive] = new Num.Vector4(0.41f, 0.47f, 0.56f, 1.00f);
             style.Colors[(int)ImGuiCol.TitleBg] = new Num.Vector4(0.63f, 0.49f, 0.00f, 1.00f); ;
             style.Colors[(int)ImGuiCol.TitleBgActive] = new Num.Vector4(0.89f, 0.70f, 0.00f, 1.00f);
             style.Colors[(int)ImGuiCol.TitleBgCollapsed] = new Num.Vector4(0.00f, 0.00f, 0.00f, 0.51f);
-            style.Colors[(int)ImGuiCol.MenuBarBg] = new Num.Vector4(0.10f, 0.10f, 0.10f, 1.00f);
+            style.Colors[(int)ImGuiCol.MenuBarBg] = new Num.Vector4(0.10f, 0.10f, 0.10f, 0.00f);
             style.Colors[(int)ImGuiCol.ScrollbarBg] = new Num.Vector4(0.33f, 0.38f, 0.45f, 1.00f);
             style.Colors[(int)ImGuiCol.ScrollbarGrab] = new Num.Vector4(0.90f, 0.70f, 0.00f, 1.00f);
             style.Colors[(int)ImGuiCol.ScrollbarGrabHovered] = new Num.Vector4(1.00f, 0.86f, 0.38f, 1.00f);
@@ -200,7 +200,7 @@ namespace NPLTOOL.GUI
             style.Colors[(int)ImGuiCol.ButtonHovered] = new Num.Vector4(0.89f, 0.77f, 0.33f, 1.00f);
             style.Colors[(int)ImGuiCol.ButtonActive] = new Num.Vector4(0.63f, 0.49f, 0.00f, 1.00f);
             style.Colors[(int)ImGuiCol.Header] = new Num.Vector4(0.329f, 0.380f, 0.451f, 1.000f);
-            style.Colors[(int)ImGuiCol.HeaderHovered] = new Num.Vector4(0.246f, 0.285f, 0.337f, 1.000f);
+            style.Colors[(int)ImGuiCol.HeaderHovered] = new Num.Vector4(0.286f, 0.333f, 0.392f, 1.000f);
             style.Colors[(int)ImGuiCol.HeaderActive] = new Num.Vector4(0.432f, 0.500f, 0.592f, 1.000f);
             style.Colors[(int)ImGuiCol.Separator] = new Num.Vector4(0.90f, 0.70f, 0.00f, 1.00f);
             style.Colors[(int)ImGuiCol.SeparatorHovered] = new Num.Vector4(0.90f, 0.70f, 0.00f, 1.00f);
