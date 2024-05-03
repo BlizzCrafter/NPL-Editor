@@ -209,7 +209,8 @@ namespace NPLTOOL
                     if (_settingsVisible)
                     {
                         EditButton(EditButtonPosition.Before, FontAwesome.Edit, 0, true, true);
-
+                        
+                        ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
                         ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
                         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
                         if (ImGui.TreeNodeEx("settings", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
@@ -270,6 +271,7 @@ namespace NPLTOOL
 
                         var categoryObject = _jsonObject["content"][data.Key];
 
+                        ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
                         ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
                         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
                         if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
@@ -600,11 +602,17 @@ namespace NPLTOOL
             ImGui.PushID($"##{id}");
             if (small)
             {
+                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBgHovered]);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBgActive]);
                 if (ImGui.SmallButton(text))
                 {
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
                     return true;
                 }
+                ImGui.PopStyleColor();
+                ImGui.PopStyleColor();
+                ImGui.PopStyleColor();
             }
             else
             {
