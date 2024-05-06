@@ -24,17 +24,17 @@ namespace NPLEditor
 
     public class Main : Game
     {
-        public class ModifyDataDescriptor
+        public static class ModifyDataDescriptor
         {
-            public string DataKey { get; private set; }
-            public string ItemKey { get; private set; }
-            public string ParamKey { get; private set; }
-            public dynamic Value { get; private set; }
+            public static string DataKey { get; private set; }
+            public static string ItemKey { get; private set; }
+            public static string ParamKey { get; private set; }
+            public static dynamic Value { get; private set; }
 
-            public bool HasData { get; private set; } = false;
-            public bool ParamModify { get; private set; } = false;
+            public static bool HasData { get; private set; } = false;
+            public static bool ParamModify { get; private set; } = false;
 
-            public void Reset()
+            public static void Reset()
             {
                 HasData = false;
                 ParamModify = false;
@@ -45,7 +45,7 @@ namespace NPLEditor
                 Value = null;
             }
 
-            public void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "")
+            public static void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "")
             {
                 HasData = true;
 
@@ -70,7 +70,6 @@ namespace NPLEditor
         private bool _treeNodesCollapsed = false;
         private bool _settingsVisible = true;
         private bool _contentListVisible = true;
-        private ModifyDataDescriptor _modifyData = new();
 
         public Main()
         {
@@ -356,7 +355,7 @@ namespace NPLEditor
                                         {
                                             nplItem.Path = path;
                                             itemValue = path;
-                                            _modifyData.Set(data.Key, itemKey, itemValue);
+                                            ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
                                         }
                                     }
                                     else if (itemKey == "action")
@@ -367,7 +366,7 @@ namespace NPLEditor
                                         {
                                             itemValue = actionNames[actionIndex].ToLowerInvariant();
                                             nplItem.Action = (BuildAction)Enum.Parse(typeof(BuildAction), itemValue.ToString(), true);
-                                            _modifyData.Set(data.Key, itemKey, itemValue);
+                                            ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
                                         }
                                     }
                                     else if (itemKey == "recursive")
@@ -382,7 +381,7 @@ namespace NPLEditor
                                             {
                                                 GetJsonProcessorParameters(value, out modifiedProcessorParam);
                                             }
-                                            _modifyData.Set(data.Key, itemKey, value);
+                                            ModifyDataDescriptor.Set(data.Key, itemKey, value);
                                         }
                                     }
                                     if (isContentList) ImGui.EndDisabled();
@@ -402,28 +401,28 @@ namespace NPLEditor
 
         private void ModifyData(JsonObject modifiedProcessorParam)
         {
-            if (_modifyData != null && _modifyData.HasData)
+            if (ModifyDataDescriptor.HasData)
             {
-                if (_modifyData.ParamModify)
+                if (ModifyDataDescriptor.ParamModify)
                 {
-                    _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey][_modifyData.ParamKey] = _modifyData.Value;
+                    _jsonObject["content"][ModifyDataDescriptor.DataKey][ModifyDataDescriptor.ItemKey][ModifyDataDescriptor.ParamKey] = ModifyDataDescriptor.Value;
                     WriteContentNPL();
-                    _modifyData.Reset();
+                    ModifyDataDescriptor.Reset();
                 }
                 else
                 {
-                    if (_modifyData.ItemKey == "processor")
+                    if (ModifyDataDescriptor.ItemKey == "processor")
                     {
                         if (modifiedProcessorParam == null)
                         {
-                            _jsonObject["content"][_modifyData.DataKey].AsObject().Remove("processorParam");
+                            _jsonObject["content"][ModifyDataDescriptor.DataKey].AsObject().Remove("processorParam");
                         }
-                        else _jsonObject["content"][_modifyData.DataKey]["processorParam"] = modifiedProcessorParam;
+                        else _jsonObject["content"][ModifyDataDescriptor.DataKey]["processorParam"] = modifiedProcessorParam;
                     }
 
-                    _jsonObject["content"][_modifyData.DataKey][_modifyData.ItemKey] = _modifyData.Value;
+                    _jsonObject["content"][ModifyDataDescriptor.DataKey][ModifyDataDescriptor.ItemKey] = ModifyDataDescriptor.Value;
                     WriteContentNPL();
-                    _modifyData.Reset();
+                    ModifyDataDescriptor.Reset();
                 }
             }
         }
@@ -475,7 +474,7 @@ namespace NPLEditor
                 var sColor = $"{xColor.R},{xColor.G},{xColor.B},{xColor.A}";
 
                 nplItem.Property(parameterKey).Value = sColor;
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
@@ -488,7 +487,7 @@ namespace NPLEditor
             if (ImGui.Checkbox(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value.ToString();
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
@@ -500,7 +499,7 @@ namespace NPLEditor
             if (ImGui.InputInt(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value;
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
@@ -512,7 +511,7 @@ namespace NPLEditor
             if (ImGui.InputDouble(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value;
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
@@ -524,7 +523,7 @@ namespace NPLEditor
             if (ImGui.InputFloat(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value;
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
@@ -547,7 +546,7 @@ namespace NPLEditor
             var names = Enum.GetNames(nplItem.Property(parameterKey).Type);
             if (Combo(nplItem, parameterKey, names))
             {
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
@@ -589,7 +588,7 @@ namespace NPLEditor
             if (ImGui.InputText(parameterKey, ref paramValue, 9999))
             {
                 nplItem.Property(parameterKey).Value = paramValue;
-                _modifyData.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
+                ModifyDataDescriptor.Set(dataKey, itemKey, nplItem.Property(parameterKey).Value, parameterKey);
                 return true;
             }
             return false;
