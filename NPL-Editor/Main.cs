@@ -16,14 +16,14 @@ using Num = System.Numerics;
 
 namespace NPLEditor
 {
-    public enum EditButtonPosition
-    {
-        Before,
-        After
-    }
-
     public class Main : Game
     {
+        public enum EditButtonPosition
+        {
+            Before,
+            After
+        }
+
         public static class ModifyDataDescriptor
         {
             public static string DataKey { get; private set; }
