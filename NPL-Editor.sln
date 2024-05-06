@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NPL-Editor", "NPL-Editor\NPL-Editor.csproj", "{FAF0B562-75A4-493C-8703-C57AE8C8C3A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NPLEditor", "NPL-Editor\NPLEditor.csproj", "{FAF0B562-75A4-493C-8703-C57AE8C8C3A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
