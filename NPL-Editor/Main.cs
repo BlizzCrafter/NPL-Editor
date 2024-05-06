@@ -2,11 +2,13 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using NPLEditor.Common;
+using NPLEditor.Enums;
 using NPLEditor.GUI;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -59,20 +61,50 @@ namespace NPLEditor
                 ParamKey = string.Empty;
                 Value = null;
             }
+        }
+        public static class ModalDescriptor
+        {
+            public static string Title { get; private set; } = "";
+            public static string Message { get; private set; } = "";
+            public static bool IsOpen { get; private set; } = false;
 
-            public static void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "")
+            public static void SetFileNotFound(string filePath, string message)
             {
-                HasData = true;
+                string shortMessage = $"'{Path.GetFileName(filePath)}' not found.";
+                string longMessage = message;
+                Set(MessageType.FileNotFound, $"{shortMessage}\n\n{longMessage}");
+            }
 
-                DataKey = dataKey;
-                ItemKey = itemKey;
-                ParamKey = paramKey;
-                Value = dataValue;
-
-                if (!string.IsNullOrEmpty(paramKey))
+            public static void Set(MessageType messageType, string message)
+            {
+                switch (messageType)
                 {
-                    ParamModify = true;
+                    case MessageType.FileNotFound:
+                        {
+                            Title = $"{FontAwesome.ExclamationTriangle} error";
+                            break;
+                        }
+                    default: 
+                        {
+                            Title = $"{FontAwesome.ExclamationCircle} info";
+                            break;
+                        }
                 }
+                Set(Title, message);
+            }
+
+            public static void Set(string title, string message)
+            {
+                Title = title;
+                Message = message;
+                IsOpen = true;
+            }
+
+            public static void Reset()
+            {
+                Title = "";
+                Message = "";
+                IsOpen = false;
             }
         }
 
@@ -170,6 +202,34 @@ namespace NPLEditor
                 }
                 if (ImGui.BeginMenu("Help"))
                 {
+                    if (ImGui.BeginMenu("Logs"))
+                    {
+                        if (ImGui.MenuItem("All"))
+                        {
+                            if (File.Exists(AppSettings.AllLogPath))
+                            {
+                                ProcessStartInfo process = new(AppSettings.AllLogPath)
+                                {
+                                    UseShellExecute = true
+                                };
+                                Process.Start(process);
+                            }
+                            else ModalDescriptor.SetFileNotFound(AppSettings.AllLogPath, "Note: this log file will only be created on certain events.");
+                        }
+                        if (ImGui.MenuItem("Important"))
+                        {
+                            if (File.Exists(AppSettings.ImportantLogPath))
+                            {
+                                ProcessStartInfo process = new(AppSettings.ImportantLogPath)
+                                {
+                                    UseShellExecute = true
+                                };
+                                Process.Start(process);
+                            }
+                            else ModalDescriptor.SetFileNotFound(AppSettings.ImportantLogPath, "Note: this log file will only be created on errors or important events.");
+                        }
+                        ImGui.EndMenu();
+                    }
                     if (ImGui.MenuItem("About"))
                     {
 
@@ -177,6 +237,12 @@ namespace NPLEditor
                     ImGui.EndMenu();
                 }
                 ImGui.EndMenuBar();
+            }
+
+            if (ModalDescriptor.IsOpen)
+            {
+                ImGui.OpenPopup(ModalDescriptor.Title);
+                PopupModal(ModalDescriptor.Title, ModalDescriptor.Message);
             }
 
             if (changeTreeVisibility)
@@ -197,8 +263,6 @@ namespace NPLEditor
 
         protected virtual void ImGuiLayout()
         {
-            bool dummyBool = true;
-
             var mainWindowFlags =
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
                 | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
@@ -684,6 +748,38 @@ namespace NPLEditor
                 }
                 ImGui.TreePop();
             }
+        }
+
+        private bool PopupModal(string title, string message)
+        {
+            ImGuiWindowFlags modalWindowFlags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration
+                | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.Popup | ImGuiWindowFlags.NoCollapse;
+
+            ImGuiViewportPtr viewport = ImGui.GetMainViewport();
+
+            ImGui.SetNextWindowPos(viewport.GetCenter(), ImGuiCond.Always, new Num.Vector2(0.5f));
+            ImGui.SetNextWindowSize(new Num.Vector2(viewport.Size.X / 2f, 150f));
+            if (ImGui.BeginPopupModal(ModalDescriptor.Title, ref _dummyBoolIsOpen, modalWindowFlags))
+            {
+                ImGui.SeparatorText(title);
+
+                ImGui.SetCursorPos(new Num.Vector2(ImGui.GetStyle().ItemSpacing.X / 2f, ImGui.GetFrameHeight()));
+                ImGui.PushTextWrapPos(ImGui.GetContentRegionMax().X - 50 - (ImGui.GetStyle().ItemSpacing.X / 2f) * 2f);
+                ImGui.TextWrapped(message);
+                ImGui.PopTextWrapPos();
+
+                ImGui.SetCursorPos(new Num.Vector2(
+                    ImGui.GetContentRegionMax().X - 50 - ImGui.GetStyle().ItemSpacing.X / 2f,
+                    ImGui.GetContentRegionMax().Y - ImGui.GetFrameHeight() - ImGui.GetStyle().ItemSpacing.X / 2f));
+                if (ImGui.Button("OK", new Num.Vector2(50, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
+                {
+                    ModalDescriptor.Reset();
+                    ImGui.CloseCurrentPopup();
+                    return true;
+                }
+                ImGui.EndPopup();
+            }
+            return false;
         }
 
         #endregion ImGui Widgets
