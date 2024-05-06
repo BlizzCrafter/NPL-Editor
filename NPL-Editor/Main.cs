@@ -34,6 +34,21 @@ namespace NPLEditor
             public static bool HasData { get; private set; } = false;
             public static bool ParamModify { get; private set; } = false;
 
+            public static void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "")
+            {
+                HasData = true;
+
+                DataKey = dataKey;
+                ItemKey = itemKey;
+                ParamKey = paramKey;
+                Value = dataValue;
+
+                if (!string.IsNullOrEmpty(paramKey))
+                {
+                    ParamModify = true;
+                }
+            }
+
             public static void Reset()
             {
                 HasData = false;
@@ -70,6 +85,7 @@ namespace NPLEditor
         private bool _treeNodesCollapsed = false;
         private bool _settingsVisible = true;
         private bool _contentListVisible = true;
+        private bool _dummyBoolIsOpen = true;
 
         public Main()
         {
@@ -196,12 +212,12 @@ namespace NPLEditor
             ImGui.SetNextWindowPos(viewport.Pos);
             ImGui.SetNextWindowSize(viewport.Size);
             ImGui.SetNextWindowViewport(viewport.ID);
-            if (ImGui.Begin("Main", ref dummyBool, mainWindowFlags))
+            if (ImGui.Begin("Main", ref _dummyBoolIsOpen, mainWindowFlags))
             {
                 ImGui.SetNextWindowPos(viewport.Pos);
                 ImGui.SetNextWindowSize(viewport.Size);
                 ImGui.SetNextWindowViewport(viewport.ID);
-                if (ImGui.Begin("JsonTree", ref dummyBool, windowFlags))
+                if (ImGui.Begin("JsonTree", ref _dummyBoolIsOpen, windowFlags))
                 {
                     MenuBar();
 
