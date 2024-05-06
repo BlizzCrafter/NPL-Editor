@@ -1,21 +1,16 @@
 ﻿using Serilog;
-using System;
 using System.IO;
 
-string logsPath = Path.Combine(AppContext.BaseDirectory, "logs");
-Directory.CreateDirectory(logsPath);
+Directory.CreateDirectory(NPLEditor.AppSettings.LogsPath);
 
-string mainLogPath = Path.Combine(logsPath, "log.txt");
-string importantLogPath = Path.Combine(logsPath, "important.txt");
-
-if (File.Exists(mainLogPath)) File.Delete(mainLogPath);
+if (File.Exists(NPLEditor.AppSettings.AllLogPath)) File.Delete(NPLEditor.AppSettings.AllLogPath);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
-    .WriteTo.File(mainLogPath,
+    .WriteTo.File(NPLEditor.AppSettings.AllLogPath,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose,
         rollOnFileSizeLimit: true)
-    .WriteTo.File(importantLogPath,
+    .WriteTo.File(NPLEditor.AppSettings.ImportantLogPath,
         rollingInterval: RollingInterval.Day,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
         rollOnFileSizeLimit: true)
