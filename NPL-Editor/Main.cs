@@ -546,7 +546,6 @@ namespace NPLEditor
         private bool ColorEdit(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
             var value = nplItem.Vector4Property(parameterKey);
-
             if (ImGui.ColorEdit4(parameterKey, ref value,
                 ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoTooltip))
             {
@@ -563,7 +562,6 @@ namespace NPLEditor
         private bool Checkbox(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
             var value = nplItem.BoolProperty(parameterKey);
-
             if (ImGui.Checkbox(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value.ToString();
