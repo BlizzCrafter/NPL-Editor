@@ -165,7 +165,7 @@ namespace NPLEditor
                         {
                             AddContentDescriptor.Name = data.Key;
                             AddContentDescriptor.Category = data.Key;
-                            ModalDescriptor.Set(MessageType.EditContent, "Define name of your content.");
+                            ModalDescriptor.Set(MessageType.EditContent, "Set the name of your new content.");
                         }
 
                         var importerName = data.Value["importer"]?.ToString();
