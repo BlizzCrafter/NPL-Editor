@@ -96,102 +96,6 @@ namespace NPLEditor
             base.Draw(gameTime);
         }
 
-        private void MenuBar()
-        {
-            bool changeTreeVisibility = false;
-            if (ImGui.BeginMenuBar())
-            {
-                if (ImGui.BeginMenu("File"))
-                {
-                    if (ImGui.MenuItem("Add Content"))
-                    {
-                        ModalDescriptor.Set(MessageType.AddContent, "Define name and extension of your content.");
-                    }
-                    if (ImGui.MenuItem("Save"))
-                    {
-                        WriteContentNPL();
-                    }
-                    ImGui.EndMenu();
-                }
-                if (ImGui.BeginMenu("Options"))
-                {
-                    ImGui.SeparatorText("View");
-                    if (ImGui.MenuItem(_treeNodesCollapsed ? "Unfold Trees" : "Fold Trees"))
-                    {
-                        _treeNodesCollapsed = !_treeNodesCollapsed;
-                        changeTreeVisibility = true;
-                    }
-                    if (ImGui.MenuItem(_settingsVisible ? "Hide Settings" : "Show Settings"))
-                    {
-                        _settingsVisible = !_settingsVisible;
-                    }
-                    if (ImGui.MenuItem(_contentListVisible ? "Hide Content List" : "Show Content List"))
-                    {
-                        _contentListVisible = !_contentListVisible;
-                    }
-                    ImGui.EndMenu();
-                }
-                if (ImGui.BeginMenu("Help"))
-                {
-                    if (ImGui.BeginMenu("Logs"))
-                    {
-                        if (ImGui.MenuItem("All"))
-                        {
-                            if (File.Exists(AppSettings.AllLogPath))
-                            {
-                                ProcessStartInfo process = new(AppSettings.AllLogPath)
-                                {
-                                    UseShellExecute = true
-                                };
-                                Process.Start(process);
-                            }
-                            else ModalDescriptor.SetFileNotFound(AppSettings.AllLogPath, "Note: this log file will only be created on certain events.");
-                        }
-                        if (ImGui.MenuItem("Important"))
-                        {
-                            if (File.Exists(AppSettings.ImportantLogPath))
-                            {
-                                ProcessStartInfo process = new(AppSettings.ImportantLogPath)
-                                {
-                                    UseShellExecute = true
-                                };
-                                Process.Start(process);
-                            }
-                            else ModalDescriptor.SetFileNotFound(AppSettings.ImportantLogPath, "Note: this log file will only be created on errors or important events.");
-                        }
-                        ImGui.EndMenu();
-                    }
-                    if (ImGui.MenuItem("About"))
-                    {
-
-                    }
-                    ImGui.EndMenu();
-                }
-                ImGui.EndMenuBar();
-            }
-
-            if (ModalDescriptor.IsOpen)
-            {
-                ImGui.OpenPopup(ModalDescriptor.Title);
-                PopupModal(ModalDescriptor.Title, ModalDescriptor.Message);
-            }
-
-            if (changeTreeVisibility)
-            {
-                var ids = new List<string>
-                {
-                    "settings"
-                };
-                ids.AddRange(_jsonObject["content"].AsObject().Select(x => x.Key).ToArray());
-
-                foreach (var stringID in ids)
-                {
-                    var id = ImGui.GetID(stringID);
-                    ImGui.GetStateStorage().SetInt(id, _treeNodesCollapsed ? 0 : 1);
-                }
-            }
-        }
-
         protected virtual void ImGuiLayout()
         {
             var mainWindowFlags =
@@ -248,15 +152,21 @@ namespace NPLEditor
                         ImGui.PopItemWidth();
                     }
 
-                    var content = _jsonObject["content"]["contentList"];
-
                     JsonObject modifiedProcessorParam = null;
-                    foreach (var data in _jsonObject["content"].AsObject())
+                    var jsonContent = _jsonObject["content"].AsObject().AsEnumerable();
+                    for (int i = 0; i < jsonContent.Count(); i++)
                     {
-                        var isContentList = data.Key.Equals("contentList");
+                        var data = jsonContent.ToArray()[i];
+
+                        var isContentList = data.Key.Equals("contentList");                        
                         if (isContentList && !_contentListVisible) continue;
 
-                        EditButton(EditButtonPosition.Before, FontAwesome.Edit, 0, true, isContentList);
+                        if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true, isContentList))
+                        {
+                            AddContentDescriptor.Name = data.Key;
+                            AddContentDescriptor.Category = data.Key;
+                            ModalDescriptor.Set(MessageType.EditContent, "Define name of your content.");
+                        }
 
                         var importerName = data.Value["importer"]?.ToString();
                         var processorName = data.Value["processor"]?.ToString();
@@ -266,8 +176,8 @@ namespace NPLEditor
                             PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
                                 out var outImporter, out var outProcessor);
 
-                            importerName = outImporter.TypeName;
-                            processorName = outProcessor.TypeName;
+                            importerName = outImporter?.TypeName;
+                            processorName = outProcessor?.TypeName;
 
                             data.Value["importer"] = importerName;
                             data.Value["processor"] = processorName;
@@ -697,15 +607,111 @@ namespace NPLEditor
             }
         }
 
+        private void MenuBar()
+        {
+            bool changeTreeVisibility = false;
+            if (ImGui.BeginMenuBar())
+            {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Add Content"))
+                    {
+                        ModalDescriptor.Set(MessageType.AddContent, "Define name and extension of your content.");
+                    }
+                    if (ImGui.MenuItem("Save"))
+                    {
+                        WriteContentNPL();
+                    }
+                    ImGui.EndMenu();
+                }
+                if (ImGui.BeginMenu("Options"))
+                {
+                    ImGui.SeparatorText("View");
+                    if (ImGui.MenuItem(_treeNodesCollapsed ? "Unfold Trees" : "Fold Trees"))
+                    {
+                        _treeNodesCollapsed = !_treeNodesCollapsed;
+                        changeTreeVisibility = true;
+                    }
+                    if (ImGui.MenuItem(_settingsVisible ? "Hide Settings" : "Show Settings"))
+                    {
+                        _settingsVisible = !_settingsVisible;
+                    }
+                    if (ImGui.MenuItem(_contentListVisible ? "Hide Content List" : "Show Content List"))
+                    {
+                        _contentListVisible = !_contentListVisible;
+                    }
+                    ImGui.EndMenu();
+                }
+                if (ImGui.BeginMenu("Help"))
+                {
+                    if (ImGui.BeginMenu("Logs"))
+                    {
+                        if (ImGui.MenuItem("All"))
+                        {
+                            if (File.Exists(AppSettings.AllLogPath))
+                            {
+                                ProcessStartInfo process = new(AppSettings.AllLogPath)
+                                {
+                                    UseShellExecute = true
+                                };
+                                Process.Start(process);
+                            }
+                            else ModalDescriptor.SetFileNotFound(AppSettings.AllLogPath, "Note: this log file will only be created on certain events.");
+                        }
+                        if (ImGui.MenuItem("Important"))
+                        {
+                            if (File.Exists(AppSettings.ImportantLogPath))
+                            {
+                                ProcessStartInfo process = new(AppSettings.ImportantLogPath)
+                                {
+                                    UseShellExecute = true
+                                };
+                                Process.Start(process);
+                            }
+                            else ModalDescriptor.SetFileNotFound(AppSettings.ImportantLogPath, "Note: this log file will only be created on errors or important events.");
+                        }
+                        ImGui.EndMenu();
+                    }
+                    if (ImGui.MenuItem("About"))
+                    {
+
+                    }
+                    ImGui.EndMenu();
+                }
+                ImGui.EndMenuBar();
+            }
+
+            if (ModalDescriptor.IsOpen)
+            {
+                ImGui.OpenPopup(ModalDescriptor.Title);
+                PopupModal(ModalDescriptor.Title, ModalDescriptor.Message);
+            }
+
+            if (changeTreeVisibility)
+            {
+                var ids = new List<string>
+                {
+                    "settings"
+                };
+                ids.AddRange(_jsonObject["content"].AsObject().Select(x => x.Key).ToArray());
+
+                foreach (var stringID in ids)
+                {
+                    var id = ImGui.GetID(stringID);
+                    ImGui.GetStateStorage().SetInt(id, _treeNodesCollapsed ? 0 : 1);
+                }
+            }
+        }
+
         private bool PopupModal(string title, string message)
         {
             ImGuiWindowFlags modalWindowFlags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration
-            | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.Popup | ImGuiWindowFlags.NoCollapse;
+            | ImGuiWindowFlags.Modal | ImGuiWindowFlags.Popup | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize;
 
             ImGuiViewportPtr viewport = ImGui.GetMainViewport();
 
             ImGui.SetNextWindowPos(viewport.GetCenter(), ImGuiCond.Always, new Num.Vector2(0.5f));
-            ImGui.SetNextWindowSize(new Num.Vector2(viewport.Size.X / 2f, 150f));
+            //ImGui.SetNextWindowSize(new Num.Vector2(viewport.Size.X / 2f, ImGui.GetFrameHeight()));
             if (ImGui.BeginPopupModal(ModalDescriptor.Title, ref _dummyBoolIsOpen, modalWindowFlags))
             {
                 ImGui.SeparatorText(title);
@@ -715,18 +721,19 @@ namespace NPLEditor
                 ImGui.TextWrapped(message);
                 ImGui.PopTextWrapPos();
 
-                if (ModalDescriptor.MessageType == MessageType.AddContent)
+                if (ModalDescriptor.MessageType == MessageType.AddContent || ModalDescriptor.MessageType == MessageType.EditContent)
                 {
                     if (ImGui.InputTextWithHint("name", "textures / sound / music / etc.", ref AddContentDescriptor.Name, 9999))
                     {
                         Extensions.NumberlessRef(ref AddContentDescriptor.Name);
                     }
-                    ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref AddContentDescriptor.Extension, 9999);
+                    if (ModalDescriptor.MessageType != MessageType.EditContent)
+                    {
+                        ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref AddContentDescriptor.Extension, 9999);
+                    }
                 }
 
-                ImGui.SetCursorPos(new Num.Vector2(
-                    ImGui.GetContentRegionMax().X - 50 - ImGui.GetStyle().ItemSpacing.X / 2f,
-                    ImGui.GetContentRegionMax().Y - ImGui.GetFrameHeight() - ImGui.GetStyle().ItemSpacing.X / 2f));
+                ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - 50 - ImGui.GetStyle().ItemSpacing.X / 2f);
                 if (ImGui.Button("OK", new Num.Vector2(50, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
                 {
                     if (ModalDescriptor.MessageType == MessageType.AddContent)
@@ -739,6 +746,25 @@ namespace NPLEditor
                         };
 
                         _jsonObject["content"].AsObject().Add(AddContentDescriptor.Name, content);
+                        WriteContentNPL();
+                    }
+                    else if (ModalDescriptor.MessageType == MessageType.EditContent)
+                    {
+                        var node = _jsonObject["content"][AddContentDescriptor.Category];
+                        var nodeIndex = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().IndexOf(AddContentDescriptor.Category);
+                        var content = _jsonObject["content"].AsObject().ToList();
+
+                        foreach (var item in content)
+                        {
+                            _jsonObject["content"].AsObject().Remove(item.Key);
+                        }
+
+                        for (int i = 0; i < content.Count; i++)
+                        {
+                            if (i != nodeIndex) _jsonObject["content"].AsObject().Add(content[i]);
+                            else _jsonObject["content"].AsObject().Add(AddContentDescriptor.Name, node);
+                        }
+
                         WriteContentNPL();
                     }
                     AddContentDescriptor.Reset();

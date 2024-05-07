@@ -4,6 +4,7 @@
     {
         Default,
         AddContent,
+        EditContent,
         FileNotFound
     }
 }

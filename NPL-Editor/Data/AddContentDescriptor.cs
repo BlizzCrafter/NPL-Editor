@@ -6,6 +6,7 @@ namespace NPLEditor.Data
     {
         public static string Name = "";
         public static string Extension = "";
+        public static string Category = "";
 
         public static void MakeNumberless()
         {
@@ -16,6 +17,7 @@ namespace NPLEditor.Data
         {
             Name = "";
             Extension = "";
+            Category = "";
         }
     }
 }
