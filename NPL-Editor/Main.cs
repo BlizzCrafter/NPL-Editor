@@ -723,6 +723,8 @@ namespace NPLEditor
                 ImGui.TextWrapped(message);
                 ImGui.PopTextWrapPos();
 
+                ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
+
                 if (ModalDescriptor.MessageType == MessageType.AddContent || ModalDescriptor.MessageType == MessageType.EditContent)
                 {
                     buttonCount++;
