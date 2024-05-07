@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Linq;
+using System.Numerics;
 
 namespace NPLEditor
 {
@@ -47,6 +48,16 @@ namespace NPLEditor
         public static float ToFloat(this string value)
         {
             return float.Parse(value);
+        }
+
+        public static string Numberless(this string value)
+        {
+            return new(value.Where(c => !char.IsDigit(c)).ToArray());
+        }
+
+        public static void NumberlessRef(ref string value)
+        {
+            value = value.Numberless();
         }
     }
 }

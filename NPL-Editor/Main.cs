@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using NPLEditor.Common;
+using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;
 using Serilog;
@@ -24,88 +25,6 @@ namespace NPLEditor
         {
             Before,
             After
-        }
-
-        public static class ModifyDataDescriptor
-        {
-            public static string DataKey { get; private set; }
-            public static string ItemKey { get; private set; }
-            public static string ParamKey { get; private set; }
-            public static dynamic Value { get; private set; }
-
-            public static bool HasData { get; private set; } = false;
-            public static bool ParamModify { get; private set; } = false;
-
-            public static void Set(string dataKey, string itemKey, dynamic dataValue, string paramKey = "")
-            {
-                HasData = true;
-
-                DataKey = dataKey;
-                ItemKey = itemKey;
-                ParamKey = paramKey;
-                Value = dataValue;
-
-                if (!string.IsNullOrEmpty(paramKey))
-                {
-                    ParamModify = true;
-                }
-            }
-
-            public static void Reset()
-            {
-                HasData = false;
-                ParamModify = false;
-
-                DataKey = string.Empty;
-                ItemKey = string.Empty;
-                ParamKey = string.Empty;
-                Value = null;
-            }
-        }
-        public static class ModalDescriptor
-        {
-            public static string Title { get; private set; } = "";
-            public static string Message { get; private set; } = "";
-            public static bool IsOpen { get; private set; } = false;
-
-            public static void SetFileNotFound(string filePath, string message)
-            {
-                string shortMessage = $"'{Path.GetFileName(filePath)}' not found.";
-                string longMessage = message;
-                Set(MessageType.FileNotFound, $"{shortMessage}\n\n{longMessage}");
-            }
-
-            public static void Set(MessageType messageType, string message)
-            {
-                switch (messageType)
-                {
-                    case MessageType.FileNotFound:
-                        {
-                            Title = $"{FontAwesome.ExclamationTriangle} error";
-                            break;
-                        }
-                    default: 
-                        {
-                            Title = $"{FontAwesome.ExclamationCircle} info";
-                            break;
-                        }
-                }
-                Set(Title, message);
-            }
-
-            public static void Set(string title, string message)
-            {
-                Title = title;
-                Message = message;
-                IsOpen = true;
-            }
-
-            public static void Reset()
-            {
-                Title = "";
-                Message = "";
-                IsOpen = false;
-            }
         }
 
         private GraphicsDeviceManager _graphics;
@@ -182,6 +101,18 @@ namespace NPLEditor
             bool changeTreeVisibility = false;
             if (ImGui.BeginMenuBar())
             {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Add Content"))
+                    {
+                        ModalDescriptor.Set(MessageType.AddContent, "Define name and extension of your content.");
+                    }
+                    if (ImGui.MenuItem("Save"))
+                    {
+                        WriteContentNPL();
+                    }
+                    ImGui.EndMenu();
+                }
                 if (ImGui.BeginMenu("Options"))
                 {
                     ImGui.SeparatorText("View");
@@ -340,10 +271,15 @@ namespace NPLEditor
 
                             data.Value["importer"] = importerName;
                             data.Value["processor"] = processorName;
+
+                            ModifyDataDescriptor.ForceWrite = true;
                         }
                         if (processorParam == null)
                         {
-                            WriteJsonProcessorParameters(processorName, data);
+                            if (WriteJsonProcessorParameters(processorName, data))
+                            {
+                                ModifyDataDescriptor.ForceWrite = true;
+                            }
                         }
 
                         var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
@@ -505,6 +441,11 @@ namespace NPLEditor
                     ModifyDataDescriptor.Reset();
                 }
             }
+            else if (ModifyDataDescriptor.ForceWrite)
+            {
+                WriteContentNPL();
+                ModifyDataDescriptor.ForceWrite = false;
+            }
         }
 
         private bool GetJsonProcessorParameters(string processor, out JsonObject props)
@@ -523,13 +464,15 @@ namespace NPLEditor
             return false;
         }
 
-        private void WriteJsonProcessorParameters(
+        private bool WriteJsonProcessorParameters(
             string processor, KeyValuePair<string, JsonNode> data)
         {
             if (GetJsonProcessorParameters(processor, out JsonObject props))
             {
                 data.Value["processorParam"] = props;
+                return true;
             }
+            return false;
         }
 
         private void WriteContentNPL()
@@ -757,7 +700,7 @@ namespace NPLEditor
         private bool PopupModal(string title, string message)
         {
             ImGuiWindowFlags modalWindowFlags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration
-                | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.Popup | ImGuiWindowFlags.NoCollapse;
+            | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.Popup | ImGuiWindowFlags.NoCollapse;
 
             ImGuiViewportPtr viewport = ImGui.GetMainViewport();
 
@@ -772,11 +715,33 @@ namespace NPLEditor
                 ImGui.TextWrapped(message);
                 ImGui.PopTextWrapPos();
 
+                if (ModalDescriptor.MessageType == MessageType.AddContent)
+                {
+                    if (ImGui.InputTextWithHint("name", "textures / sound / music / etc.", ref AddContentDescriptor.Name, 9999))
+                    {
+                        Extensions.NumberlessRef(ref AddContentDescriptor.Name);
+                    }
+                    ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref AddContentDescriptor.Extension, 9999);
+                }
+
                 ImGui.SetCursorPos(new Num.Vector2(
                     ImGui.GetContentRegionMax().X - 50 - ImGui.GetStyle().ItemSpacing.X / 2f,
                     ImGui.GetContentRegionMax().Y - ImGui.GetFrameHeight() - ImGui.GetStyle().ItemSpacing.X / 2f));
                 if (ImGui.Button("OK", new Num.Vector2(50, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
                 {
+                    if (ModalDescriptor.MessageType == MessageType.AddContent)
+                    {
+                        JsonObject content = new()
+                        {
+                            ["path"] = AddContentDescriptor.Extension,
+                            ["recursive"] = "false",
+                            ["action"] = "build"
+                        };
+
+                        _jsonObject["content"].AsObject().Add(AddContentDescriptor.Name, content);
+                        WriteContentNPL();
+                    }
+                    AddContentDescriptor.Reset();
                     ModalDescriptor.Reset();
                     ImGui.CloseCurrentPopup();
                     return true;
