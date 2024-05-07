@@ -711,13 +711,12 @@ namespace NPLEditor
             ImGuiViewportPtr viewport = ImGui.GetMainViewport();
 
             ImGui.SetNextWindowPos(viewport.GetCenter(), ImGuiCond.Always, new Num.Vector2(0.5f));
-            //ImGui.SetNextWindowSize(new Num.Vector2(viewport.Size.X / 2f, ImGui.GetFrameHeight()));
             if (ImGui.BeginPopupModal(ModalDescriptor.Title, ref _dummyBoolIsOpen, modalWindowFlags))
             {
                 ImGui.SeparatorText(title);
 
                 ImGui.SetCursorPos(new Num.Vector2(ImGui.GetStyle().ItemSpacing.X / 2f, ImGui.GetFrameHeight()));
-                ImGui.PushTextWrapPos(ImGui.GetContentRegionMax().X - 50 - (ImGui.GetStyle().ItemSpacing.X / 2f) * 2f);
+                ImGui.PushTextWrapPos(viewport.Size.X / 2f - 50f);
                 ImGui.TextWrapped(message);
                 ImGui.PopTextWrapPos();
 
