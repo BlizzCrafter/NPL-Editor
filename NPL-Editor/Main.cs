@@ -713,15 +713,20 @@ namespace NPLEditor
             ImGui.SetNextWindowPos(viewport.GetCenter(), ImGuiCond.Always, new Num.Vector2(0.5f));
             if (ImGui.BeginPopupModal(ModalDescriptor.Title, ref _dummyBoolIsOpen, modalWindowFlags))
             {
+                var buttonCount = 1;
+                var buttonWidth = 60f;
+
                 ImGui.SeparatorText(title);
 
                 ImGui.SetCursorPos(new Num.Vector2(ImGui.GetStyle().ItemSpacing.X / 2f, ImGui.GetFrameHeight()));
-                ImGui.PushTextWrapPos(viewport.Size.X / 2f - 50f);
+                ImGui.PushTextWrapPos(viewport.Size.X / 2f - 120f);
                 ImGui.TextWrapped(message);
                 ImGui.PopTextWrapPos();
 
                 if (ModalDescriptor.MessageType == MessageType.AddContent || ModalDescriptor.MessageType == MessageType.EditContent)
                 {
+                    buttonCount++;
+
                     if (ImGui.InputTextWithHint("name", "textures / sound / music / etc.", ref AddContentDescriptor.Name, 9999))
                     {
                         Extensions.NumberlessRef(ref AddContentDescriptor.Name);
@@ -732,8 +737,10 @@ namespace NPLEditor
                     }
                 }
 
-                ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - 50 - ImGui.GetStyle().ItemSpacing.X / 2f);
-                if (ImGui.Button("OK", new Num.Vector2(50, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
+                ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
+
+                ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - (buttonWidth * buttonCount) - ImGui.GetStyle().ItemSpacing.X * buttonCount);
+                if (ImGui.Button("OK", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
                 {
                     if (ModalDescriptor.MessageType == MessageType.AddContent)
                     {
@@ -770,6 +777,19 @@ namespace NPLEditor
                     ModalDescriptor.Reset();
                     ImGui.CloseCurrentPopup();
                     return true;
+                }
+
+                bool hasCancel = (ModalDescriptor.MessageType & MessageType.Cancel) != 0;
+                if (hasCancel)
+                {
+                    ImGui.SameLine();
+                    if (ImGui.Button("Cancel", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
+                    {
+                        AddContentDescriptor.Reset();
+                        ModalDescriptor.Reset();
+                        ImGui.CloseCurrentPopup();
+                        return false;
+                    }
                 }
                 ImGui.EndPopup();
             }
