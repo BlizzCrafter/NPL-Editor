@@ -165,7 +165,7 @@ namespace NPLEditor
                         {
                             AddContentDescriptor.Name = data.Key;
                             AddContentDescriptor.Category = data.Key;
-                            ModalDescriptor.Set(MessageType.EditContent, "Set the name of your new content.");
+                            ModalDescriptor.Set(MessageType.EditContent, "Set the name for this content.");
                         }
 
                         var importerName = data.Value["importer"]?.ToString();
@@ -616,7 +616,7 @@ namespace NPLEditor
                 {
                     if (ImGui.MenuItem("Add Content"))
                     {
-                        ModalDescriptor.Set(MessageType.AddContent, "Define name and extension of your content.");
+                        ModalDescriptor.Set(MessageType.AddContent, "Set the name and the extension of your new content.");
                     }
                     if (ImGui.MenuItem("Save"))
                     {
