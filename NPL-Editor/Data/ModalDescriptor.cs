@@ -31,6 +31,11 @@ namespace NPLEditor.Data
                         Title = $"{FontAwesome.FolderPlus} add content";
                         break;
                     }
+                case MessageType.EditContent:
+                    {
+                        Title = $"{FontAwesome.Edit} edit content";
+                        break;
+                    }
                 default:
                     {
                         Title = $"{FontAwesome.ExclamationCircle} info";
