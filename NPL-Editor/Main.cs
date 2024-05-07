@@ -541,6 +541,12 @@ namespace NPLEditor
             File.WriteAllText(_nplJsonFilePath, jsonString);
         }
 
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            WriteContentNPL();
+            base.OnExiting(sender, args);
+        }
+
         #region ImGui Widgets
 
         private bool ColorEdit(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
