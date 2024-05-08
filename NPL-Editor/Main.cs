@@ -725,6 +725,7 @@ namespace NPLEditor
 
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
+                bool error = false;
                 if (ModalDescriptor.MessageType == MessageType.AddContent || ModalDescriptor.MessageType == MessageType.EditContent)
                 {
                     buttonCount++;
@@ -733,14 +734,23 @@ namespace NPLEditor
                     {
                         Extensions.NumberlessRef(ref AddContentDescriptor.Name);
                     }
-                    if (ModalDescriptor.MessageType != MessageType.EditContent)
+
+                    if (ModalDescriptor.MessageType == MessageType.AddContent)
                     {
+                        var existingItem = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().Find(x => x.Equals(AddContentDescriptor.Name));
+                        if (existingItem != null)
+                        {
+                            error = true;
+                            ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive], "Already Exists");
+                        }
+
                         ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref AddContentDescriptor.Extension, 9999);
                     }
                 }
 
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
+                if (error) ImGui.BeginDisabled();
                 ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - (buttonWidth * buttonCount) - ImGui.GetStyle().ItemSpacing.X * buttonCount);
                 if (ImGui.Button("OK", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
                 {
@@ -780,6 +790,7 @@ namespace NPLEditor
                     ImGui.CloseCurrentPopup();
                     return true;
                 }
+                if (error) ImGui.EndDisabled();
 
                 bool hasCancel = (ModalDescriptor.MessageType & MessageType.Cancel) != 0;
                 if (hasCancel)
