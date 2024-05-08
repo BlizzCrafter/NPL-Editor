@@ -424,8 +424,12 @@ namespace NPLEditor.Common
                     {
                         var importerAttribute = attributes[0] as ContentImporterAttribute;
                         var importer = new ImporterInfo(importerAttribute, t);
-                        _importers.Add(importer);
-                        Log.Verbose("Importer Added: '{0}'", importer.Name);
+                        if (!_importers.Select(x => x.Name).ToList().Contains(importer.Name))
+                        {
+                            _importers.Add(importer);
+                            Log.Verbose("Importer Added: '{0}'", importer.Name);
+                        }
+                        else Log.Warning("Importer NOT Added: '{0} [Reason: Already Added]'", importer.Name);
                     }
                     else
                     {
@@ -434,8 +438,12 @@ namespace NPLEditor.Common
                         importerAttribute.DefaultProcessor = "";
                         importerAttribute.DisplayName = t.Name;
                         var importer = new ImporterInfo(importerAttribute, t);
-                        _importers.Add(importer);
-                        Log.Verbose("Importer Added: '{0}'", importer.Name);
+                        if (!_importers.Select(x => x.Name).ToList().Contains(importer.Name))
+                        {
+                            _importers.Add(importer);
+                            Log.Verbose("Importer Added: '{0}'", importer.Name);
+                        }
+                        else Log.Warning("Importer NOT Added: '{0} [Reason: Already Added]'", importer.Name);
                     }
                 }
                 else if (t.GetInterface(@"IContentProcessor") == typeof(IContentProcessor))
@@ -445,8 +453,12 @@ namespace NPLEditor.Common
                     {
                         var processorAttribute = attributes[0] as ContentProcessorAttribute;
                         var processor = new ProcessorInfo(processorAttribute, t);
-                        _processors.Add(processor);
-                        Log.Verbose("Processor Added: '{0}'", processor.Name);
+                        if (!_processors.Select(x => x.Name).ToList().Contains(processor.Name))
+                        {
+                            _processors.Add(processor);
+                            Log.Verbose("Importer Added: '{0}'", processor.Name);
+                        }
+                        else Log.Warning("Processor NOT Added: '{0} [Reason: Already Added]'", processor.Name);
                     }
                 }
             }
