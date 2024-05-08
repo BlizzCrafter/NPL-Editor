@@ -205,6 +205,8 @@ namespace NPLEditor.Common
         private static List<ImporterInfo> _importers;
         private static List<ProcessorInfo> _processors;
 
+        public static bool IsDirty { get; private set; } = true;
+
         public static void GetTypeDescriptions(
             string fileExtension,
             out ImporterTypeDescription outImporter,
@@ -254,6 +256,8 @@ namespace NPLEditor.Common
         {
             _importers = null;
             _processors = null;
+
+            IsDirty = true;
         }
 
         public static void Load(string[] references)
@@ -406,6 +410,8 @@ namespace NPLEditor.Common
                 cur++;
             }
             Processors = processorDescriptions;
+            
+            IsDirty = false;
 
             Log.Information("Loaded {0} of {1} References.", assemblyCount - assemblyErrors, assemblyCount);
         }

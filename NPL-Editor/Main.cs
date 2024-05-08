@@ -147,43 +147,45 @@ namespace NPLEditor
                                 }
                             }
 
-                            var combinedReferences = new List<string>();
-                            foreach (var reference in references)
+                            if (PipelineTypes.IsDirty)
                             {
-                                if (File.Exists(reference.ToString()))
+                                var combinedReferences = new List<string>();
+                                foreach (var reference in references)
                                 {
-                                    combinedReferences.Add(Path.GetFullPath(reference.ToString()));
-                                }
-                                else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
-                                {
-                                    if (Glob.IsMatch(reference.ToString(), "*.dll"))
+                                    if (File.Exists(reference.ToString()))
                                     {
-                                        var dir = Path.GetDirectoryName(reference.ToString());
-                                        List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
-                                        foreach (var file in matchingFiles)
+                                        combinedReferences.Add(Path.GetFullPath(reference.ToString()));
+                                    }
+                                    else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
+                                    {
+                                        if (Glob.IsMatch(reference.ToString(), "*.dll"))
                                         {
-                                            var fullFile = Path.GetFullPath(Path.Combine(dir, file));
-                                            combinedReferences.Add(fullFile);
+                                            var dir = Path.GetDirectoryName(reference.ToString());
+                                            List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
+                                            foreach (var file in matchingFiles)
+                                            {
+                                                var fullFile = Path.GetFullPath(Path.Combine(dir, file));
+                                                combinedReferences.Add(fullFile);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Glob.IsMatch(reference.ToString(), "*.dll"))
+                                        {
+                                            List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
+                                            foreach (var file in matchingFiles)
+                                            {
+                                                var fullFile = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), file));
+                                                combinedReferences.Add(fullFile);
+                                            }
                                         }
                                     }
                                 }
-                                else
-                                {
-                                    if (Glob.IsMatch(reference.ToString(), "*.dll"))
-                                    {
-                                        List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
-                                        foreach (var file in matchingFiles)
-                                        {
-                                            var fullFile = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), file));
-                                            combinedReferences.Add(fullFile);
-                                        }
-                                    }
-                                }
+                                PipelineTypes.Load(combinedReferences.Distinct()
+                                    .Where(x => !string.IsNullOrEmpty(x.ToString()))
+                                    .ToArray());
                             }
-                            PipelineTypes.Load(combinedReferences.Distinct()
-                                .Where(x => !string.IsNullOrEmpty(x.ToString()))
-                                .ToArray());
-
                             ImGui.TreePop();
                         }
                         ImGui.PopStyleColor();
