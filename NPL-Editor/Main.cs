@@ -70,9 +70,10 @@ namespace NPLEditor
 
         protected override void LoadContent()
         {
+            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
 #if DEBUG
             string workingDir = Directory.GetCurrentDirectory();
-            string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
+            string projDir = Directory.GetParent(workingDir).Parent.Parent.Parent.FullName;
             _nplJsonFilePath = Path.Combine(projDir, "Content", "Content.npl");
 #else
             string[] args = Environment.GetCommandLineArgs();

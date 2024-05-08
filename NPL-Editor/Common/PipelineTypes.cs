@@ -272,7 +272,8 @@ namespace NPLEditor.Common
             var assemblyErrors = 0;
 
             var workingDir = Directory.GetCurrentDirectory();
-            foreach (var file in Directory.GetFiles(workingDir, "*.dll"))
+            var monogameLibsDir = Directory.GetParent(workingDir).FullName;
+            foreach (var file in Directory.GetFiles(monogameLibsDir, "*.dll"))
             {
                 try
                 {
@@ -294,16 +295,20 @@ namespace NPLEditor.Common
                 catch { assemblyErrors++; }
             }
 
+            List<string> assemblyNames = new List<string>();
             foreach (var path in assemblyPaths)
             {
+                var newAssemblyName = Path.GetFileName(path);
+                if (assemblyNames.Contains(newAssemblyName)) continue;
+                else assemblyNames.Add(newAssemblyName);
+
                 assemblyCount++;
 
                 try
                 {
-                    Log.Information("Load Assembly '{0}'", Path.GetFileName(path));
+                    Log.Information("Load Assembly '{0}'", Path.GetFileName(newAssemblyName));
 
-                    var relativePath = Path.Combine(workingDir, path);
-                    var assembly = Assembly.LoadFrom(relativePath);
+                    var assembly = Assembly.LoadFrom(path);
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
 
