@@ -387,11 +387,17 @@ namespace NPLEditor
 
         private void WriteContentNPL()
         {
+            try
+            {
             string jsonString = JsonSerializer.Serialize(_jsonObject, new JsonSerializerOptions()
             {
                 WriteIndented = true
             });
             File.WriteAllText(_nplJsonFilePath, jsonString);
+
+                Log.Debug("--- Content file successfully saved ---");
+            }
+            catch { Log.Error("It was not possible to save the content file."); }
         }
 
         protected override void OnExiting(object sender, EventArgs args)
