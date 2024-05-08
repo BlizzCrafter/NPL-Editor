@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:MonoGo.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -18,4 +19,3 @@
 
 #begin Font-Awesome-5-Free-Solid-900.otf
 /copy:Font-Awesome-5-Free-Solid-900.otf
-

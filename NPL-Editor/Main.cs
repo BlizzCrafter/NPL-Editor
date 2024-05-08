@@ -6,6 +6,7 @@ using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;
 using Serilog;
+using GlobExpressions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -132,20 +133,56 @@ namespace NPLEditor
                         {
                             ImGui.PopStyleColor();
 
-                            ImGui.BeginDisabled();
                             var root = _jsonObject["root"];
                             var rootValue = root.ToString();
                             ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.ReadOnly);
-                            ImGui.EndDisabled();
 
                             var references = _jsonObject["references"].AsArray();
-                            ArrayEditor("Reference", references, out _, out _, out bool itemChanged);
+                            ArrayEditor("Reference", references, out _, out bool itemRemoved, out bool itemChanged);
                             {
-                                if (itemChanged) PipelineTypes.Reset();
+                                if (itemChanged || itemRemoved)
+                                {
+                                    PipelineTypes.Reset();
+                                    WriteContentNPL();
+                                }
                             }
-                            PipelineTypes.Load(references
+
+                            var combinedReferences = new List<string>();
+                            foreach (var reference in references)
+                            {
+                                if (File.Exists(reference.ToString()))
+                                {
+                                    combinedReferences.Add(Path.GetFullPath(reference.ToString()));
+                                }
+                                else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
+                                {
+                                    if (Glob.IsMatch(reference.ToString(), "*.dll"))
+                                    {
+                                        var dir = Path.GetDirectoryName(reference.ToString());
+                                        List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
+                                        foreach (var file in matchingFiles)
+                                        {
+                                            var fullFile = Path.GetFullPath(Path.Combine(dir, file));
+                                            combinedReferences.Add(fullFile);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (Glob.IsMatch(reference.ToString(), "*.dll"))
+                                    {
+                                        List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
+                                        foreach (var file in matchingFiles)
+                                        {
+                                            var fullFile = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), file));
+                                            combinedReferences.Add(fullFile);
+                                        }
+                                    }
+                                }
+                            }
+                            PipelineTypes.Load(combinedReferences.Distinct()
                                 .Where(x => !string.IsNullOrEmpty(x.ToString()))
-                                .Select(x => x.ToString()).ToArray());
+                                .ToArray());
 
                             ImGui.TreePop();
                         }
@@ -390,11 +427,11 @@ namespace NPLEditor
         {
             try
             {
-            string jsonString = JsonSerializer.Serialize(_jsonObject, new JsonSerializerOptions()
-            {
-                WriteIndented = true
-            });
-            File.WriteAllText(_nplJsonFilePath, jsonString);
+                string jsonString = JsonSerializer.Serialize(_jsonObject, new JsonSerializerOptions()
+                {
+                    WriteIndented = true
+                });
+                File.WriteAllText(_nplJsonFilePath, jsonString);
 
                 Log.Debug("--- Content file successfully saved ---");
             }

@@ -1,7 +1,7 @@
 {
-  "root": "../../MonoGo.Samples.Content/Content/",
+  "root": "",
   "references": [
-    "../../../MonoGo.Pipeline.dll"
+    "MonoGo.Pipeline.dll"
   ],
   "content": {
     "contentList": {
@@ -9,143 +9,7 @@
       "recursive": "False",
       "action": "build",
       "importer": "ResourceInfoImporter",
-      "processor": "PassThroughProcessor",
-      "watch": [
-        "../../MonoGo.Samples.Content/Content/*"
-      ]
-    },
-    "textures": {
-      "path": "Graphics/*.png",
-      "recursive": "True",
-      "action": "build",
-      "importer": "TextureImporter",
-      "processor": "TextureProcessor",
-      "processorParam": {
-        "ColorKeyColor": "255,0,255,255",
-        "ColorKeyEnabled": "True",
-        "GenerateMipmaps": "False",
-        "PremultiplyAlpha": "True",
-        "ResizeToPowerOfTwo": "False",
-        "MakeSquare": "False",
-        "TextureFormat": "Compressed"
-      }
-    },
-    "music": {
-      "path": "Audio/Music/*.ogg",
-      "recursive": "True",
-      "action": "copy",
-      "importer": "OggImporter",
-      "processor": "SongProcessor",
-      "processorParam": {
-        "Quality": "Best"
-      }
-    },
-    "sounds": {
-      "path": "Audio/Sounds/*.wav",
-      "recursive": "True",
-      "action": "copy",
-      "importer": "WavImporter",
-      "processor": "SoundEffectProcessor",
-      "processorParam": {
-        "Quality": "Best"
-      }
-    },
-    "styles": {
-      "path": "Graphics/GUI/Styles/*.xml",
-      "recursive": "false",
-      "action": "copy",
-      "importer": "XmlImporter",
-      "processor": "PassThroughProcessor",
-      "watch": [
-        "GUI/Styles/*.xml"
-      ]
-    },
-    "defaultSpriteGroup": {
-      "path": "Graphics/*.spritegroup",
-      "recursive": "True",
-      "action": "build",
-      "importer": "SpriteGroupImporter",
-      "processor": "SpriteGroupProcessor",
-      "watch": [
-        "Default/*.png",
-        "Default/*.json",
-        "GUI/Textures/*.png"
-      ]
-    },
-    "effects": {
-      "path": "Effects/*.fx",
-      "recursive": "True",
-      "action": "build",
-      "importer": "EffectImporter",
-      "processor": "EffectProcessor",
-      "processorParam": {
-        "DebugMode": "Auto",
-        "Defines": ""
-      }
-    },
-    "tiledMaps": {
-      "path": "Maps/*.tmx",
-      "recursive": "True",
-      "action": "build",
-      "importer": "TiledMapImporter",
-      "processor": "PassThroughProcessor",
-      "watch": [
-        "Tilesets/*.tsx",
-        "Tilesets/*.png",
-        "Templates/*.tsx",
-        "Templates/*.tx",
-        "Templates/*.png"
-      ]
-    },
-    "tiledMapTextures": {
-      "path": "Maps/*.png",
-      "recursive": "True",
-      "action": "build",
-      "importer": "TextureImporter",
-      "processor": "TextureProcessor",
-      "processorParam": {
-        "ColorKeyColor": "255,0,255,255",
-        "ColorKeyEnabled": "True",
-        "GenerateMipmaps": "False",
-        "PremultiplyAlpha": "True",
-        "ResizeToPowerOfTwo": "False",
-        "MakeSquare": "False",
-        "TextureFormat": "Color"
-      }
-    },
-    "fonts": {
-      "path": "Fonts/*.spritefont",
-      "recursive": "True",
-      "action": "build",
-      "importer": "FontDescriptionImporter",
-      "processor": "FontDescriptionProcessor",
-      "processorParam": {
-        "PremultiplyAlpha": "True",
-        "TextureFormat": "Compressed"
-      }
-    },
-    "fontTextures": {
-      "path": "Fonts/*.fbx",
-      "recursive": "True",
-      "action": "build",
-      "importer": "FbxImporter",
-      "processor": "ModelProcessor",
-      "processorParam": {
-        "ColorKeyColor": "0,0,0,0",
-        "ColorKeyEnabled": "True",
-        "DefaultEffect": "BasicEffect",
-        "GenerateMipmaps": "True",
-        "GenerateTangentFrames": "False",
-        "PremultiplyTextureAlpha": "True",
-        "PremultiplyVertexColors": "True",
-        "ResizeTexturesToPowerOfTwo": "False",
-        "RotationX": 1,
-        "RotationY": "0",
-        "RotationZ": "0",
-        "Scale": "1",
-        "SwapWindingOrder": "False",
-        "TextureFormat": "Compressed"
-      }
+      "processor": "PassThroughProcessor"
     }
   }
 }
