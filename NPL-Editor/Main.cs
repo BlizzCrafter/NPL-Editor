@@ -149,35 +149,28 @@ namespace NPLEditor
                             if (PipelineTypes.IsDirty)
                             {
                                 var combinedReferences = new List<string>();
-                                foreach (var reference in references)
+                                foreach (var item in references)
                                 {
+                                    var reference = Environment.ExpandEnvironmentVariables(item.ToString());
                                     if (File.Exists(reference.ToString()))
                                     {
                                         combinedReferences.Add(Path.GetFullPath(reference.ToString()));
                                     }
                                     else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
                                     {
-                                        if (Glob.IsMatch(reference.ToString(), "*.dll"))
+                                        var dir = Path.GetDirectoryName(reference.ToString());
+                                        var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
+                                        foreach (var file in matchingFiles)
                                         {
-                                            var dir = Path.GetDirectoryName(reference.ToString());
-                                            List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
-                                            foreach (var file in matchingFiles)
-                                            {
-                                                var fullFile = Path.GetFullPath(Path.Combine(dir, file));
-                                                combinedReferences.Add(fullFile);
-                                            }
+                                            combinedReferences.Add(Path.GetFullPath(file));
                                         }
                                     }
                                     else
                                     {
-                                        if (Glob.IsMatch(reference.ToString(), "*.dll"))
+                                        var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
+                                        foreach (var file in matchingFiles)
                                         {
-                                            List<string> matchingFiles = Glob.Files(Directory.GetCurrentDirectory(), "*.dll").ToList();
-                                            foreach (var file in matchingFiles)
-                                            {
-                                                var fullFile = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), file));
-                                                combinedReferences.Add(fullFile);
-                                            }
+                                            combinedReferences.Add(Path.GetFullPath(file));
                                         }
                                     }
                                 }
