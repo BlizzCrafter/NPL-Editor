@@ -6,7 +6,6 @@ using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;
 using Serilog;
-using GlobExpressions;
 using System;
 using System.Collections.Generic;
 using System.Data;
