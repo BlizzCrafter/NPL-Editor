@@ -46,7 +46,7 @@ namespace NPLEditor
 
             // Currently not usable in DesktopGL because of this bug:
             // https://github.com/MonoGame/MonoGame/issues/7914
-            _graphics.PreferMultiSampling = false;
+            //_graphics.PreferMultiSampling = true;
 
             Window.AllowUserResizing = true;
             IsMouseVisible = true;
