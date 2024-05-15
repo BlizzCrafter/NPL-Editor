@@ -11,11 +11,8 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	<PackAsTool>true</PackAsTool>
 	<ToolCommandName>npl</ToolCommandName>
+	<IncludeBuildOutput>false</IncludeBuildOutput>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<Title>NPL-Editor</Title>
-	<Description>A graphical editor for ".npl" files used together with "Nopipeline.Task" to produce ".mgcb" files for MonoGame projects. </Description>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Icon.ico" />
@@ -33,16 +30,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.90.1.1" />
-    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
-    <PackageReference Include="MonoGame.Framework.Content.Pipeline" Version="3.8.1.303">
-		<IncludeAssets>compile;runtime</IncludeAssets>
-	</PackageReference>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
-    <PackageReference Include="Nopipeline.Task" Version="2.2.0" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="MonoGame.Framework.Content.Pipeline">
+      <HintPath>Content\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Update="Content\Font-Awesome-5-Brands-Regular-400.otf">
@@ -51,7 +48,7 @@
     <None Update="Content\Font-Awesome-5-Free-Solid-900.otf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Content\MonoGo.Pipeline.dll">
+    <None Update="MonoGame.Framework.Content.Pipeline.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
