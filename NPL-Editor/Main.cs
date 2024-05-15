@@ -39,7 +39,7 @@ namespace NPLEditor
         private bool _dummyBoolIsOpen = true;
 
         public Main()
-        {            
+        {
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = 800;
             _graphics.PreferredBackBufferHeight = 500;
