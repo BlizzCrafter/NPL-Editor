@@ -37,6 +37,7 @@ namespace NPLEditor
         private bool _settingsVisible = true;
         private bool _contentListVisible = true;
         private bool _dummyBoolIsOpen = true;
+        private bool _buildContentEnabled = true;
 
         public Main()
         {
@@ -685,6 +686,23 @@ namespace NPLEditor
                     }
                     ImGui.EndMenu();
                 }
+#if RELEASE
+                if (ImGui.BeginMenu("Build", _buildContentEnabled))
+                {
+                    _buildContentEnabled = false;
+
+                    var projDir = Directory.GetParent(Directory.GetCurrentDirectory());
+                    var process = new Process()
+                    {
+                        StartInfo = new ProcessStartInfo(
+                            "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={Path.Combine(AppSettings.LogsPath, "build.txt")};verbosity=minimal"),
+                        EnableRaisingEvents = true
+                    };
+                    process.Exited += (sender, e) => { _buildContentEnabled = true; };
+                    process.Start();
+                    ImGui.EndMenu();
+                }
+#endif
                 if (ImGui.BeginMenu("Help"))
                 {
                     if (ImGui.BeginMenu("Logs"))
