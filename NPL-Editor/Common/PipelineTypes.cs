@@ -289,12 +289,10 @@ namespace NPLEditor.Common
 
                     assemblyCount++;
 
-                    Log.Information("Load Assembly '{0}'", Path.GetFileName(file));
+                    Log.Information($"Load Assembly '{Path.GetFileName(file)}'");
 
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
-
-                    Log.Information("Done! ^.^");
                 }
                 catch { assemblyErrors++; }
             }
@@ -310,18 +308,16 @@ namespace NPLEditor.Common
 
                 try
                 {
-                    Log.Information("Load Assembly '{0}'", Path.GetFileName(newAssemblyName));
+                    Log.Information($"Load Assembly '{Path.GetFileName(newAssemblyName)}'");
 
                     var assembly = Assembly.LoadFrom(path);
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
-
-                    Log.Information("Done! ^.^");
                 }
                 catch (Exception e)
                 {
                     assemblyErrors++;
-                    Log.Error("Failed to load assembly '{0}': {1}", Path.GetFileName(path), e.Message);
+                    Log.Error($"Failed to load assembly '{Path.GetFileName(path)}': {e.Message}");
                     continue;
                 }
             }
@@ -413,7 +409,7 @@ namespace NPLEditor.Common
             
             IsDirty = false;
 
-            Log.Information("Loaded {0} of {1} References.", assemblyCount - assemblyErrors, assemblyCount);
+            Log.Information($"Loaded {assemblyCount - assemblyErrors} of {assemblyCount} References.");
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
@@ -433,9 +429,9 @@ namespace NPLEditor.Common
                         if (!_importers.Select(x => x.Name).ToList().Contains(importer.Name))
                         {
                             _importers.Add(importer);
-                            Log.Verbose("Importer Added: '{0}'", importer.Name);
+                            Log.Verbose($"Importer Added: '{importer.Name}'");
                         }
-                        else Log.Warning("Importer NOT Added: '{0} [Reason: Already Added]'", importer.Name);
+                        else Log.Warning($"Importer NOT Added: '{importer.Name} [Reason: Already Added]'");
                     }
                     else
                     {
@@ -447,9 +443,9 @@ namespace NPLEditor.Common
                         if (!_importers.Select(x => x.Name).ToList().Contains(importer.Name))
                         {
                             _importers.Add(importer);
-                            Log.Verbose("Importer Added: '{0}'", importer.Name);
+                            Log.Verbose($"Importer Added: '{importer.Name}'");
                         }
-                        else Log.Warning("Importer NOT Added: '{0} [Reason: Already Added]'", importer.Name);
+                        else Log.Warning($"Importer NOT Added: '{importer.Name} [Reason: Already Added]'");
                     }
                 }
                 else if (t.GetInterface(@"IContentProcessor") == typeof(IContentProcessor))
@@ -462,9 +458,9 @@ namespace NPLEditor.Common
                         if (!_processors.Select(x => x.Name).ToList().Contains(processor.Name))
                         {
                             _processors.Add(processor);
-                            Log.Verbose("Importer Added: '{0}'", processor.Name);
+                            Log.Verbose($"Processor Added: '{processor.Name}'");
                         }
-                        else Log.Warning("Processor NOT Added: '{0} [Reason: Already Added]'", processor.Name);
+                        else Log.Warning($"Processor NOT Added: '{processor.Name} [Reason: Already Added]'");
                     }
                 }
             }
