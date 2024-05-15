@@ -71,10 +71,11 @@ namespace NPLEditor
         protected override void LoadContent()
         {
             Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
+            Log.Debug($"WorkingDir: {Directory.GetCurrentDirectory()}");
             Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
 #if DEBUG
             string workingDir = Directory.GetCurrentDirectory();
-            string projDir = Directory.GetParent(workingDir).Parent.Parent.Parent.FullName;
+            string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
             _nplJsonFilePath = Path.Combine(projDir, "Content", "Content.npl");
 #else
             string[] args = Environment.GetCommandLineArgs();
@@ -217,8 +218,8 @@ namespace NPLEditor
 
                             if (importerName != null && processorName != null)
                             {
-                            ModifyDataDescriptor.ForceWrite = true;
-                        }
+                                ModifyDataDescriptor.ForceWrite = true;
+                            }
                         }
                         if (processorParam == null)
                         {
