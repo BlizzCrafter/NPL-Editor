@@ -275,8 +275,8 @@ namespace NPLEditor.Common
             var assemblyCount = 0;
             var assemblyErrors = 0;
 
-            var workingDir = Directory.GetCurrentDirectory();
-            var monogameLibsDir = Directory.GetParent(workingDir).FullName;
+            var monogameLibsDir = Directory.GetParent(AppSettings.LocalContentPath).FullName;
+            Log.Debug($"Load MonoGame Assemblies from '{monogameLibsDir}'");
             foreach (var file in Directory.GetFiles(monogameLibsDir, "*.dll"))
             {
                 try
