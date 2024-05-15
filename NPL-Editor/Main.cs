@@ -695,7 +695,7 @@ namespace NPLEditor
                     var process = new Process()
                     {
                         StartInfo = new ProcessStartInfo(
-                            "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={Path.Combine(AppSettings.LogsPath, "build.txt")};verbosity=minimal"),
+                            "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity=minimal"),
                         EnableRaisingEvents = true
                     };
                     process.Exited += (sender, e) => { _buildContentEnabled = true; };
