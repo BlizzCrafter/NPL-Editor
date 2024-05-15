@@ -214,7 +214,10 @@ namespace NPLEditor
                             data.Value["importer"] = importerName;
                             data.Value["processor"] = processorName;
 
+                            if (importerName != null && processorName != null)
+                            {
                             ModifyDataDescriptor.ForceWrite = true;
+                        }
                         }
                         if (processorParam == null)
                         {
