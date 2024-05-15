@@ -1,6 +1,15 @@
 ﻿using Serilog;
 using System.IO;
+using System.Runtime.InteropServices;
 
+// Ensure DPI-Awareness isn't lost for the dotnet tool.
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    [DllImport("user32.dll")]
+    static extern bool SetProcessDPIAware();
+
+    SetProcessDPIAware();
+}
 Directory.CreateDirectory(NPLEditor.AppSettings.LogsPath);
 
 if (File.Exists(NPLEditor.AppSettings.AllLogPath)) File.Delete(NPLEditor.AppSettings.AllLogPath);
