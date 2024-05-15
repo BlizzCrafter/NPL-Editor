@@ -10,7 +10,7 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	<PackAsTool>true</PackAsTool>
-	<ToolCommandName>npl</ToolCommandName>
+	<ToolCommandName>npl-editor</ToolCommandName>
 	<IncludeBuildOutput>false</IncludeBuildOutput>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
