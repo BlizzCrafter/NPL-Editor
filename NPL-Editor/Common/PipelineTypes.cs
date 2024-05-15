@@ -286,7 +286,7 @@ namespace NPLEditor.Common
 
                     if (!assembly.ToString().Contains("MonoGame"))
                         continue;
-                    
+
                     assemblyCount++;
 
                     Log.Information("Load Assembly '{0}'", Path.GetFileName(file));
