@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -148,11 +149,17 @@ namespace NPLEditor.GUI
             string fontsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
             try
             {
-                CreateFont(Path.Combine(fontsFolder, "micross.ttf"), 20f, 0, new ushort[] { 0x20, 0xFFFF, 0 });
+                CreateFont(Path.Combine(fontsFolder, "micross.ttf"), 20f, 0, new ushort[] { 0x20, 0xFFFF, 0 }); 
+                Log.Debug($"Font micross.ttf loaded.");
             }
-            catch { ImGui.GetIO().Fonts.AddFontDefault(); }
-            CreateFont(Path.Combine(Path.GetFullPath(game.Content.RootDirectory), "Font-Awesome-5-Free-Solid-900.otf"), 20f, 1, new ushort[] { 0xf000, 0xf83e, 0 });
-            CreateFont(Path.Combine(Path.GetFullPath(game.Content.RootDirectory), "Font-Awesome-5-Brands-Regular-400.otf"), 20f, 1, new ushort[] { 0xf081, 0xf840, 0 });
+            catch { ImGui.GetIO().Fonts.AddFontDefault(); Log.Debug($"Default Fonts loaded."); }
+            try
+            {
+                CreateFont(Path.Combine(AppSettings.LocalContentPath, "Font-Awesome-5-Free-Solid-900.otf"), 20f, 1, new ushort[] { 0xf000, 0xf83e, 0 });
+                CreateFont(Path.Combine(AppSettings.LocalContentPath, "Font-Awesome-5-Brands-Regular-400.otf"), 20f, 1, new ushort[] { 0xf081, 0xf840, 0 });
+                Log.Debug($"Font Awesome fonts loaded.");
+            }
+            catch { Log.Warning($"Couldn't load Font Awesome fonts."); }
             RebuildFontAtlas();
 
             var style = ImGui.GetStyle();
@@ -397,6 +404,7 @@ namespace NPLEditor.GUI
             {
                 ImGui.GetIO().Fonts.AddFontFromFileTTF(fontFile, fontSize, nativeConfig, rangeHandle.AddrOfPinnedObject());
             }
+            catch { Log.Warning($"Couldn't load font: {fontFile}."); }
             finally
             {
                 if (rangeHandle.IsAllocated)

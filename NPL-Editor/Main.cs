@@ -71,6 +71,7 @@ namespace NPLEditor
         protected override void LoadContent()
         {
             Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
+            Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
 #if DEBUG
             string workingDir = Directory.GetCurrentDirectory();
             string projDir = Directory.GetParent(workingDir).Parent.Parent.Parent.FullName;
