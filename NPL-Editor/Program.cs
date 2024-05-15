@@ -10,10 +10,14 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 
     SetProcessDPIAware();
 }
+
+// Create the logs directory.
 Directory.CreateDirectory(NPLEditor.AppSettings.LogsPath);
 
+// The general log file should always regenerate.
 if (File.Exists(NPLEditor.AppSettings.AllLogPath)) File.Delete(NPLEditor.AppSettings.AllLogPath);
 
+// Create the serilog logger.
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .WriteTo.File(NPLEditor.AppSettings.AllLogPath,
@@ -29,7 +33,9 @@ Log.Logger = new LoggerConfiguration()
     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug)
     .CreateLogger();
 
+// Log that main initialize begins.
 Log.Information("--- INITIALIZE ---");
 
+// Main initialize.
 using var game = new NPLEditor.Main();
 game.Run();
