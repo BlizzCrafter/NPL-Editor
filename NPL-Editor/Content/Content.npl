@@ -1,15 +1,22 @@
 {
   "root": "",
-  "references": [
-    "MonoGo.Pipeline.dll"
-  ],
+  "references": [],
   "content": {
-    "contentList": {
-      "path": "$Content.npl",
-      "recursive": "False",
+    "textures": {
+      "path": "Graphics/*.png",
+      "recursive": "True",
       "action": "build",
-      "importer": "ResourceInfoImporter",
-      "processor": "PassThroughProcessor"
+      "importer": "TextureImporter",
+      "processor": "TextureProcessor",
+      "processorParam": {
+        "ColorKeyColor": "255,0,255,255",
+        "ColorKeyEnabled": "True",
+        "GenerateMipmaps": "False",
+        "PremultiplyAlpha": "True",
+        "ResizeToPowerOfTwo": "False",
+        "MakeSquare": "False",
+        "TextureFormat": "Color"
+      }
     }
   }
 }
