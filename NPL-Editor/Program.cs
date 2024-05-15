@@ -16,6 +16,8 @@ Log.Logger = new LoggerConfiguration()
         rollOnFileSizeLimit: true)
     .WriteTo.Debug(
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug)
+    .WriteTo.Console(
+    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug)
     .CreateLogger();
 
 Log.Information("--- INITIALIZE ---");
