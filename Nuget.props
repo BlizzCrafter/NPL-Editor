@@ -8,7 +8,11 @@
 		<PackageProjectUrl>https://github.com/BlizzCrafter/NPL-Editor</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/BlizzCrafter/NPL-Editor</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageOutputPath>../</PackageOutputPath>
 	</PropertyGroup>
+	
+	<ItemGroup>
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 </Project>
