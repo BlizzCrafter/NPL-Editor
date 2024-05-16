@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" ?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+    <Metadata>
+        <Identity Id="NPLEditor.Templates.VSExtension.b2fd787a-0ec7-4579-bb6f-9fa3334677cf" Version="1.0" Language="en-US" Publisher="BlizzCrafter" />
+        <DisplayName>NPL Editor Extension</DisplayName>
+        <Description xml:space="preserve">A graphical editor for '.npl' files used together with 'Nopipeline.Task' to produce '.mgcb' files for MonoGame projects.</Description>
+        <MoreInfo>https://github.com/BlizzCrafter/NPL-Editor</MoreInfo>
+        <License>LICENSE.txt</License>
+        <GettingStartedGuide>https://github.com/BlizzCrafter/NPL-Editor</GettingStartedGuide>
+        <Tags>.NET,C#,Game development,Templates,Games,Gamedev,Project,Mono,MonoGame,Nopipeline,NPL</Tags>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency d:Source="Manual" DisplayName="NPL Editor" Id="NPLEditor" Version="1.0.0" d:InstallSource="Download" Location="https://github.com/BlizzCrafter/NPL-Editor" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
+</PackageManifest>
