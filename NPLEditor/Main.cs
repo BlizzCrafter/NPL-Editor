@@ -33,9 +33,8 @@ namespace NPLEditor
 
         private JsonNode _jsonObject;
         private string _nplJsonFilePath;
-        private bool _treeNodesCollapsed = false;
+        private bool _treeNodesOpen = true;
         private bool _settingsVisible = true;
-        private bool _contentListVisible = true;
         private bool _dummyBoolIsOpen = true;
         private bool _buildContentEnabled = true;
         private LoggerVerbosity _buildContentVerbosity = LoggerVerbosity.Minimal;
@@ -194,10 +193,7 @@ namespace NPLEditor
                     {
                         var data = jsonContent.ToArray()[i];
 
-                        var isContentList = data.Key.Equals("contentList");                        
-                        if (isContentList && !_contentListVisible) continue;
-
-                        if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true, isContentList))
+                        if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true))
                         {
                             AddContentDescriptor.Name = data.Key;
                             AddContentDescriptor.Category = data.Key;
@@ -255,7 +251,6 @@ namespace NPLEditor
                                 }
                                 else
                                 {
-                                    if (isContentList) ImGui.BeginDisabled();
                                     if (itemKey == "processorParam")
                                     {
                                         ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
@@ -349,7 +344,6 @@ namespace NPLEditor
                                             ModifyDataDescriptor.Set(data.Key, itemKey, value);
                                         }
                                     }
-                                    if (isContentList) ImGui.EndDisabled();
                                 }
                             }
                             ImGui.TreePop();
@@ -659,11 +653,12 @@ namespace NPLEditor
             {
                 if (ImGui.BeginMenu("File"))
                 {
-                    if (ImGui.MenuItem("Add Content"))
+                    if (ImGui.MenuItem($"{FontAwesome.Plus} Add Content"))
                     {
                         ModalDescriptor.Set(MessageType.AddContent, "Set the name and the extension of your new content.");
                     }
-                    if (ImGui.MenuItem("Save"))
+                    ImGui.Separator();
+                    if (ImGui.MenuItem($"{FontAwesome.Save} Save"))
                     {
                         WriteContentNPL();
                     }
@@ -672,25 +667,21 @@ namespace NPLEditor
                 if (ImGui.BeginMenu("Options"))
                 {
                     ImGui.SeparatorText("View");
-                    if (ImGui.MenuItem(_treeNodesCollapsed ? "Unfold Trees" : "Fold Trees"))
+                    if (ImGui.MenuItem($"{(_treeNodesOpen ? $"{FontAwesome.Eye} Trees Open" : $"{FontAwesome.EyeSlash} Trees Closed")}"))
                     {
-                        _treeNodesCollapsed = !_treeNodesCollapsed;
+                        _treeNodesOpen = !_treeNodesOpen;
                         changeTreeVisibility = true;
                     }
-                    if (ImGui.MenuItem(_settingsVisible ? "Hide Settings" : "Show Settings"))
+                    if (ImGui.MenuItem($"{(_settingsVisible ? $"{FontAwesome.Eye} Settings Visible" : $"{FontAwesome.EyeSlash} Settings Hidden")}"))
                     {
                         _settingsVisible = !_settingsVisible;
-                    }
-                    if (ImGui.MenuItem(_contentListVisible ? "Hide Content List" : "Show Content List"))
-                    {
-                        _contentListVisible = !_contentListVisible;
                     }
                     ImGui.EndMenu();
                 }
 #if RELEASE
                 if (ImGui.BeginMenu("Content"))
                 {
-                    if (ImGui.BeginMenu("Build Verbosity"))
+                    if (ImGui.BeginMenu($"{FontAwesome.FileAlt} Build Verbosity"))
                     {
                         var verbosities = Enum.GetNames(typeof(LoggerVerbosity));
                         foreach (var verbosity in verbosities)
@@ -703,7 +694,8 @@ namespace NPLEditor
                         }
                         ImGui.EndMenu();
                     }
-                    if (ImGui.MenuItem("Build Now", _buildContentEnabled))
+                    ImGui.Separator();
+                    if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", _buildContentEnabled))
                     {
                         _buildContentEnabled = false;
 
@@ -722,7 +714,7 @@ namespace NPLEditor
 #endif
                 if (ImGui.BeginMenu("Help"))
                 {
-                    if (ImGui.BeginMenu("Logs"))
+                    if (ImGui.BeginMenu($"{FontAwesome.FileArchive} Logs"))
                     {
                         if (ImGui.MenuItem("All"))
                         {
@@ -750,7 +742,7 @@ namespace NPLEditor
                         }
                         ImGui.EndMenu();
                     }
-                    if (ImGui.MenuItem("About"))
+                    if (ImGui.MenuItem($"{FontAwesome.AddressBook} About"))
                     {
 
                     }
@@ -776,7 +768,7 @@ namespace NPLEditor
                 foreach (var stringID in ids)
                 {
                     var id = ImGui.GetID(stringID);
-                    ImGui.GetStateStorage().SetInt(id, _treeNodesCollapsed ? 0 : 1);
+                    ImGui.GetStateStorage().SetInt(id, _treeNodesOpen ? 1 : 0);
                 }
             }
         }
