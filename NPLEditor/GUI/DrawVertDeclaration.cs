@@ -1,5 +1,5 @@
-﻿using ImGuiNET;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
+using ImGuiNET;
 
 namespace NPLEditor.GUI
 {

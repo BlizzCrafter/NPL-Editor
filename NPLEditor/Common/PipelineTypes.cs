@@ -1,14 +1,14 @@
-﻿using Microsoft.Xna.Framework.Content.Pipeline;
-using Serilog;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Diagnostics;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using Microsoft.Xna.Framework.Content.Pipeline;
+using Serilog;
 
 namespace NPLEditor.Common
 {

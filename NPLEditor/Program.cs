@@ -1,6 +1,6 @@
-﻿using Serilog;
-using System.IO;
+﻿using System.IO;
 using System.Runtime.InteropServices;
+using Serilog;
 
 // Ensure DPI-Awareness isn't lost for the dotnet tool.
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

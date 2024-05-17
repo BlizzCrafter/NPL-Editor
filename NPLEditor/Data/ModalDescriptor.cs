@@ -1,5 +1,5 @@
-﻿using NPLEditor.Enums;
-using System.IO;
+﻿using System.IO;
+using NPLEditor.Enums;
 
 namespace NPLEditor.Data
 {

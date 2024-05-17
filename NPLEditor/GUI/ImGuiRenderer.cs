@@ -1,12 +1,12 @@
-﻿using ImGuiNET;
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ImGuiNET;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
 using Num = System.Numerics;
 
 namespace NPLEditor.GUI

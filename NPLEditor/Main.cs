@@ -1,19 +1,19 @@
-﻿using ImGuiNET;
+﻿using System;
+using System.IO;
+using System.Data;
+using System.Linq;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using NPLEditor.Common;
 using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;
+using ImGuiNET;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Color = Microsoft.Xna.Framework.Color;
 using Num = System.Numerics;
 
