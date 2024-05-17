@@ -126,7 +126,7 @@ namespace NPLEditor
 
                     if (_settingsVisible)
                     {
-                        EditButton(EditButtonPosition.Before, FontAwesome.Edit, 0, true, true);
+                        EditButton(EditButtonPosition.Before, FontAwesome.Edit, -1, true, true);
                         
                         ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
                         ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
