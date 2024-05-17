@@ -311,7 +311,7 @@ namespace NPLEditor
                                     else if (itemKey == "path")
                                     {
                                         var path = nplItem.Path;
-                                        if (ImGui.InputText(" ", ref path, 9999))
+                                        if (ImGui.InputText(" ", ref path, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                         {
                                             nplItem.Path = path;
                                             itemValue = path;
@@ -377,6 +377,12 @@ namespace NPLEditor
                             _jsonObject["content"][ModifyDataDescriptor.DataKey].AsObject().Remove("processorParam");
                         }
                         else _jsonObject["content"][ModifyDataDescriptor.DataKey]["processorParam"] = modifiedProcessorParam;
+                    }
+                    else if (ModifyDataDescriptor.ItemKey == "path" && string.IsNullOrEmpty(ModifyDataDescriptor.Value.ToString()))
+                    {
+                        _jsonObject["content"][ModifyDataDescriptor.DataKey].AsObject().Remove("importer");
+                        _jsonObject["content"][ModifyDataDescriptor.DataKey].AsObject().Remove("processor");
+                        _jsonObject["content"][ModifyDataDescriptor.DataKey].AsObject().Remove("processorParam");
                     }
 
                     _jsonObject["content"][ModifyDataDescriptor.DataKey][ModifyDataDescriptor.ItemKey] = ModifyDataDescriptor.Value;
