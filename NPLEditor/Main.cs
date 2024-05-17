@@ -799,25 +799,25 @@ namespace NPLEditor
 
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
-                bool error = false;
                 if (ModalDescriptor.MessageType == MessageType.AddContent || ModalDescriptor.MessageType == MessageType.EditContent)
                 {
                     if (ImGui.InputTextWithHint("name", "textures / sound / music / etc.", ref ContentDescriptor.Name, 9999))
                     {
+                        ContentDescriptor.Error("");
+
                         Extensions.NumberlessRef(ref ContentDescriptor.Name);
-                    }
 
-                    if (ModalDescriptor.MessageType == MessageType.AddContent)
-                    {
                         var existingItem = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().Find(x => x.Equals(ContentDescriptor.Name));
-                        if (existingItem != null)
-                        {
-                            error = true;
-                            ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive], "Already Exists");
-                        }
-
-                        ImGui.InputTextWithHint("path", "Graphics/*.png / Music/*.ogg etc.", ref ContentDescriptor.Path, 9999);
+                        if (existingItem != null) ContentDescriptor.Error("Already exists!");
                     }
+                    if (string.IsNullOrEmpty(ContentDescriptor.Name)) ContentDescriptor.Error("Name must be set!");
+
+                    if (ContentDescriptor.HasError)
+                    {
+                        ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive], ContentDescriptor.ErrorMessage);
+                    }
+
+                    ImGui.InputTextWithHint("path", "Graphics/*.png / Music/*.ogg etc.", ref ContentDescriptor.Path, 9999);
                 }
 
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
@@ -844,8 +844,8 @@ namespace NPLEditor
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - (buttonWidth * buttonCountRightAligned) - ImGui.GetStyle().ItemSpacing.X * buttonCountRightAligned);
 
-                if (error) ImGui.BeginDisabled();
-                if (ImGui.Button("OK", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
+                if (ContentDescriptor.HasError) ImGui.BeginDisabled();
+                if (ImGui.Button("OK", new Num.Vector2(buttonWidth, 0)) || (ImGui.IsKeyPressed(ImGuiKey.Enter) && !ContentDescriptor.HasError))
                 {
                     if (ModalDescriptor.MessageType == MessageType.AddContent)
                     {
@@ -881,7 +881,7 @@ namespace NPLEditor
                     ClosePopupModal();
                     return true;
                 }
-                if (error) ImGui.EndDisabled();
+                if (ContentDescriptor.HasError) ImGui.EndDisabled();
 
                 if (hasCancel)
                 {

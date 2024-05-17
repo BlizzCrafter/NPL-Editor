@@ -7,6 +7,13 @@ namespace NPLEditor.Data
         public static string Name = "";
         public static string Path = "";
         public static string Category = "";
+        public static string ErrorMessage { get; private set; }
+        public static bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
+        public static void Error(string message)
+        {
+            ErrorMessage = message;
+        }
 
         public static void MakeNumberless()
         {
@@ -18,6 +25,7 @@ namespace NPLEditor.Data
             Name = "";
             Path = "";
             Category = "";
+            ErrorMessage = "";
         }
     }
 }
