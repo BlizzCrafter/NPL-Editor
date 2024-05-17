@@ -5,7 +5,7 @@ namespace NPLEditor.Data
     public static class ContentDescriptor
     {
         public static string Name = "";
-        public static string Extension = "";
+        public static string Path = "";
         public static string Category = "";
 
         public static void MakeNumberless()
@@ -16,7 +16,7 @@ namespace NPLEditor.Data
         public static void Reset()
         {
             Name = "";
-            Extension = "";
+            Path = "";
             Category = "";
         }
     }
