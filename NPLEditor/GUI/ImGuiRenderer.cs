@@ -178,7 +178,7 @@ namespace NPLEditor.GUI
             style.ScrollbarRounding = 0;
             style.FramePadding = new Num.Vector2(4, 8);
             style.WindowPadding = new Num.Vector2(0, 0);
-            style.ItemSpacing = new Num.Vector2(8, 1);
+            style.ItemSpacing = new Num.Vector2(4, 1);
             style.ItemInnerSpacing = new Num.Vector2(1, 4);
             style.ButtonTextAlign = new Num.Vector2(0.5f, 0.5f);
 
