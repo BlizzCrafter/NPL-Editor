@@ -38,6 +38,7 @@ namespace NPLEditor
         private bool _contentListVisible = true;
         private bool _dummyBoolIsOpen = true;
         private bool _buildContentEnabled = true;
+        private LoggerVerbosity _buildContentVerbosity = LoggerVerbosity.Minimal;
 
         public Main()
         {
@@ -687,19 +688,35 @@ namespace NPLEditor
                     ImGui.EndMenu();
                 }
 #if RELEASE
-                if (ImGui.BeginMenu("Build", _buildContentEnabled))
+                if (ImGui.BeginMenu("Content"))
                 {
-                    _buildContentEnabled = false;
-
-                    var projDir = Directory.GetParent(Directory.GetCurrentDirectory());
-                    var process = new Process()
+                    if (ImGui.BeginMenu("Build Verbosity"))
                     {
-                        StartInfo = new ProcessStartInfo(
-                            "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity=minimal"),
-                        EnableRaisingEvents = true
-                    };
-                    process.Exited += (sender, e) => { _buildContentEnabled = true; };
-                    process.Start();
+                        var verbosities = Enum.GetNames(typeof(LoggerVerbosity));
+                        foreach (var verbosity in verbosities)
+                        {
+                            bool selected = verbosity == _buildContentVerbosity.ToString();
+                            if (ImGui.MenuItem(verbosity, "", selected))
+                            {
+                                _buildContentVerbosity = Enum.Parse<LoggerVerbosity>(verbosity);
+                            }
+                        }
+                        ImGui.EndMenu();
+                    }
+                    if (ImGui.MenuItem("Build Now", _buildContentEnabled))
+                    {
+                        _buildContentEnabled = false;
+
+                        var projDir = Directory.GetParent(Directory.GetCurrentDirectory());
+                        var process = new Process()
+                        {
+                            StartInfo = new ProcessStartInfo(
+                                "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity={_buildContentVerbosity.ToString().ToLower()}"),
+                            EnableRaisingEvents = true
+                        };
+                        process.Exited += (sender, e) => { _buildContentEnabled = true; };
+                        process.Start();
+                    }
                     ImGui.EndMenu();
                 }
 #endif
