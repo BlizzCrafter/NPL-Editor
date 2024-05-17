@@ -16,6 +16,8 @@ using ImGuiNET;
 using Serilog;
 using Color = Microsoft.Xna.Framework.Color;
 using Num = System.Numerics;
+using System.Text;
+using System.Globalization;
 
 namespace NPLEditor
 {
@@ -26,6 +28,8 @@ namespace NPLEditor
             Before,
             After
         }
+
+        public static bool ScrollLogToBottom { get; set; }
 
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer _imGuiRenderer;
@@ -67,7 +71,9 @@ namespace NPLEditor
 
             base.Initialize();
 
+            Log.Information("");
             Log.Information($"{FontAwesome.FlagCheckered} APP-INITIALIZED");
+            Log.Information("");
         }
 
         protected override void LoadContent()
@@ -359,18 +365,28 @@ namespace NPLEditor
                     }
                     else if (_LogOpen)
                     {
-                        if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(100, 0)))
+                        ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
+
+                        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);                        
+                        var logText = NPLEditorSink.Output.ToString(); 
+                        ImGui.TextUnformatted(logText);
+                        ImGui.PopStyleColor();
+
+                        ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
+
+                        if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
                         {
                             _LogOpen = false;
                         }
-                        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);
-                        
-                        var logText = NPLEditorSink.Output.ToString();
-                        ImGui.InputTextMultiline("##LogText", ref logText, 999999, ImGui.GetContentRegionAvail(), ImGuiInputTextFlags.ReadOnly);
 
-                        //Debug.WriteLine($"Current: {ImGui.GetScrollY()}, Max: {ImGui.GetScrollMaxY()}");
-                        //if (ImGui.GetScrollMaxY() > ImGui.GetScrollY()) ImGui.SetScrollHereY(1.0f);
-                        ImGui.PopStyleColor();
+                        //BUG: SetScrollHere currently doesn't work on InputTextMultiline.
+                        //ImGui.InputTextMultiline("##LogText", ref logText, 999999, ImGui.GetContentRegionAvail(), ImGuiInputTextFlags.ReadOnly);
+
+                        if (ScrollLogToBottom && ImGui.GetScrollMaxY() > ImGui.GetScrollY())
+                        {
+                            ScrollLogToBottom = false;
+                            ImGui.SetScrollHereY(1.0f);
+                        }
                     }
                     ImGui.End();
                 }
@@ -701,7 +717,8 @@ namespace NPLEditor
                     }
                     if (ImGui.MenuItem($"{FontAwesome.Eye} Show Log"))
                     {
-                        _LogOpen = true;
+                        ScrollLogToBottom = true;
+                        _LogOpen = !_LogOpen;
                     }
                     ImGui.EndMenu();
                 }
@@ -727,7 +744,9 @@ namespace NPLEditor
                         _buildContentEnabled = false;
                         _LogOpen = true;
 
-                        Log.Debug($"{FontAwesome.Igloo} CONTENT BUILDER");
+                        Log.Information("");
+                        Log.Information($"{FontAwesome.Igloo} BUILD CONTENT");
+                        Log.Information("");
 
                         Encoding encoding;
                         try
@@ -744,32 +763,53 @@ namespace NPLEditor
                         }
 
                         var projDir = Directory.GetParent(Directory.GetCurrentDirectory());
-                        var process = new Process()
+
+                        try
                         {
-                            StartInfo = new ProcessStartInfo(
-                                "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity={_buildContentVerbosity.ToString().ToLower()}")
+                            var process = new Process()
                             {
-                                RedirectStandardOutput = true,
-                                StandardOutputEncoding = encoding
-                            },
-                            EnableRaisingEvents = true,
-                        };
-                        process.OutputDataReceived += (sender, e) =>
+                                StartInfo = new ProcessStartInfo(
+                                    "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity={_buildContentVerbosity.ToString().ToLower()}")
+                                {
+                                    RedirectStandardOutput = true,
+                                    StandardOutputEncoding = encoding
+                                },
+                                EnableRaisingEvents = true,
+                            };
+                            process.OutputDataReceived += (sender, e) =>
+                            {
+                                if (!string.IsNullOrEmpty(e.Data))
+                                {
+                                    Log.Debug(e.Data);
+                                }
+                            };
+                            process.Exited += (sender, e) =>
+                            {
+                                _buildContentEnabled = true;
+                                Log.Information("");
+                                Log.Debug($"{FontAwesome.Igloo} CONTENT BUILDER FINISHED");
+                                Log.Information("");
+                            };
+                            process.Start();
+                            process.BeginOutputReadLine();
+                            process.WaitForExit();
+                        }
+                        catch (Exception e) 
                         {
-                            if (!string.IsNullOrEmpty(e.Data))
+                            if (!string.IsNullOrEmpty(e.Message))
                             {
-                                Log.Debug(e.Data);
+                                Log.Information("");
+                                Log.Error($"{FontAwesome.HeartBroken} BUILD FAILED: {e.Message}");
+                                Log.Information("");
                             }
-                        };
-                        process.Exited += (sender, e) => 
-                        { 
-                            _buildContentEnabled = true;
-                            Log.Debug($"{FontAwesome.Igloo} CONTENT BUILDER FINISHED");
-                        };
-                        process.Start();
-                        process.BeginOutputReadLine();
-                        process.WaitForExit();
-                        process.Close();
+                            else
+                            {
+                                Log.Information("");
+                                Log.Error($"{FontAwesome.HeartBroken} BUILD FAILED: {Environment.NewLine}");
+                                Log.Error(e.ToString());
+                                Log.Information("");
+                            }
+                        }
                     }
                     ImGui.EndMenu();
                 }

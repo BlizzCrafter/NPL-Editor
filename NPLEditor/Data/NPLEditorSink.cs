@@ -30,6 +30,8 @@ namespace NPLEditor.Data
         {
             var message = logEvent.RenderMessage(_formatProvider);
             Output.AppendLine(DateTimeOffset.Now.ToString("HH:mm:ss") + " " + message);
+
+            Main.ScrollLogToBottom = true;
         }
     }
 }

@@ -22,10 +22,10 @@ if (File.Exists(NPLEditor.AppSettings.AllLogPath)) File.Delete(NPLEditor.AppSett
 // Create the serilog logger.
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
-    .WriteTo.File(NPLEditor.AppSettings.AllLogPath,
+    .WriteTo.File(AppSettings.AllLogPath,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose,
         rollOnFileSizeLimit: true)
-    .WriteTo.File(NPLEditor.AppSettings.ImportantLogPath,
+    .WriteTo.File(AppSettings.ImportantLogPath,
         rollingInterval: RollingInterval.Day,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
         rollOnFileSizeLimit: true)
@@ -38,8 +38,10 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 // Log that main initialize begins.
+Log.Information("");
 Log.Information($"{FontAwesome.Flag} INITIALIZE");
+Log.Information("");
 
 // Main initialize.
-using var game = new NPLEditor.Main();
+using var game = new Main();
 game.Run();
