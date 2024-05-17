@@ -1,4 +1,4 @@
-﻿using NPLEditor.Templates.VSExtension;
+﻿using NPLEditor.VSExtension;
 using System.Reflection;
 using System.Runtime.InteropServices;
 

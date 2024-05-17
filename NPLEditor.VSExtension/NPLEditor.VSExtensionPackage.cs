@@ -8,13 +8,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
 
-namespace NPLEditor.Templates.VSExtension
+namespace NPLEditor.VSExtension
 {
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
-    [Guid(PackageGuids.NPLEditorTemplatesVSExtensionString)]
+    [Guid(PackageGuids.NPLEditorVSExtensionString)]
     [ProvideEditorExtension(typeof(EditorFactory), ".npl", int.MaxValue, DefaultName = "NPL Editor")]
-    public sealed class NPLEditorTemplatesVSExtensionPackage : ToolkitPackage
+    public sealed class NPLEditorVSExtensionPackage : ToolkitPackage
     {
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {

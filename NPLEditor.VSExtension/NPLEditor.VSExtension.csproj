@@ -13,8 +13,8 @@
     <ProjectGuid>{6D1E1A94-784E-4455-9796-0C02566DB09A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NPLEditor.Templates.VSExtension</RootNamespace>
-    <AssemblyName>NPLEditor.Templates.VSExtension</AssemblyName>
+    <RootNamespace>NPLEditor.VSExtension</RootNamespace>
+    <AssemblyName>NPLEditor.VSExtension</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
@@ -46,7 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="NPLEditor.Templates.VSExtensionPackage.cs" />
+    <Compile Include="NPLEditor.VSExtensionPackage.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -71,10 +71,6 @@
       <Generator>VsixManifestGenerator</Generator>
       <LastGenOutput>source.extension.cs</LastGenOutput>
     </None>
-    <Content Include="LICENSE.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

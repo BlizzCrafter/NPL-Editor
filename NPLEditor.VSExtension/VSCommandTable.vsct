@@ -6,11 +6,11 @@
   <Include href="KnownImageIds.vsct"/>
   <Include href="VSGlobals.vsct"/>
 
-  <Commands package="NPLEditorTemplatesVSExtension">
+  <Commands package="NPLEditorVSExtension">
   </Commands>
 
   <Symbols>
-    <GuidSymbol name="NPLEditorTemplatesVSExtension" value="{7cfececb-3adc-4952-b954-32eed9df6a28}"></GuidSymbol>
+    <GuidSymbol name="NPLEditorVSExtension" value="{7cfececb-3adc-4952-b954-32eed9df6a28}"></GuidSymbol>
 	<GuidSymbol name="NPLEditorFactory" value="{9bbbe19a-d951-4f48-8769-0e15f58c834c}"></GuidSymbol>
   </Symbols>
 </CommandTable>
