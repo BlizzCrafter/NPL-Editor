@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
+using NPLEditor;
+using NPLEditor.Data;
 using Serilog;
 
 // Ensure DPI-Awareness isn't lost for the dotnet tool.
@@ -31,10 +33,12 @@ Log.Logger = new LoggerConfiguration()
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug)
     .WriteTo.Console(
     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug)
+    .WriteTo.NPLEditorSink(
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose)
     .CreateLogger();
 
 // Log that main initialize begins.
-Log.Information("--- INITIALIZE ---");
+Log.Information($"{FontAwesome.Flag} INITIALIZE");
 
 // Main initialize.
 using var game = new NPLEditor.Main();

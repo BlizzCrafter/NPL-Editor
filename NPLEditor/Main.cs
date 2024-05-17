@@ -34,6 +34,7 @@ namespace NPLEditor
         private JsonNode _jsonObject;
         private string _nplJsonFilePath;
         private bool _treeNodesOpen = true;
+        private bool _LogOpen = false;
         private bool _settingsVisible = true;
         private bool _dummyBoolIsOpen = true;
         private bool _buildContentEnabled = true;
@@ -66,7 +67,7 @@ namespace NPLEditor
 
             base.Initialize();
 
-            Log.Information("App Initialized.");
+            Log.Information($"{FontAwesome.FlagCheckered} APP-INITIALIZED");
         }
 
         protected override void LoadContent()
@@ -108,7 +109,7 @@ namespace NPLEditor
                 | ImGuiWindowFlags.NoBackground;
 
             var windowFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration
-                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysVerticalScrollbar | ImGuiWindowFlags.MenuBar;
+                | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.AlwaysVerticalScrollbar;
 
             ImGuiViewportPtr viewport = ImGui.GetMainViewport();
 
@@ -120,241 +121,259 @@ namespace NPLEditor
                 ImGui.SetNextWindowPos(viewport.Pos);
                 ImGui.SetNextWindowSize(viewport.Size);
                 ImGui.SetNextWindowViewport(viewport.ID);
-                if (ImGui.Begin("JsonTree", ref _dummyBoolIsOpen, windowFlags))
+                if (ImGui.Begin("Content", ref _dummyBoolIsOpen, windowFlags))
                 {
                     MenuBar();
 
-                    if (_settingsVisible)
+                    if (!_LogOpen)
                     {
-                        EditButton(EditButtonPosition.Before, FontAwesome.Edit, -1, true, true);
-                        
-                        ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
-                        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
-                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
-                        if (ImGui.TreeNodeEx("settings", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
+                        if (_settingsVisible)
                         {
-                            ImGui.PopStyleColor();
+                            EditButton(EditButtonPosition.Before, FontAwesome.Edit, -1, true, true);
 
-                            var root = _jsonObject["root"];
-                            var rootValue = root.ToString();
-                            ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.ReadOnly);
-
-                            var references = _jsonObject["references"].AsArray();
-                            ArrayEditor("Reference", references, out _, out bool itemRemoved, out bool itemChanged);
+                            ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
+                            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
+                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
+                            if (ImGui.TreeNodeEx("settings", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                             {
-                                if (itemChanged || itemRemoved)
+                                ImGui.PopStyleColor();
+
+                                var root = _jsonObject["root"];
+                                var rootValue = root.ToString();
+                                ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.ReadOnly);
+
+                                var references = _jsonObject["references"].AsArray();
+                                ArrayEditor("Reference", references, out _, out bool itemRemoved, out bool itemChanged);
                                 {
-                                    PipelineTypes.Reset();
-                                    WriteContentNPL();
+                                    if (itemChanged || itemRemoved)
+                                    {
+                                        PipelineTypes.Reset();
+                                        WriteContentNPL();
+                                    }
+                                }
+
+                                if (PipelineTypes.IsDirty)
+                                {
+                                    var combinedReferences = new List<string>();
+                                    foreach (var item in references)
+                                    {
+                                        var reference = Environment.ExpandEnvironmentVariables(item.ToString());
+                                        if (File.Exists(reference.ToString()))
+                                        {
+                                            combinedReferences.Add(Path.GetFullPath(reference.ToString()));
+                                        }
+                                        else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
+                                        {
+                                            var dir = Path.GetDirectoryName(reference.ToString());
+                                            var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
+                                            foreach (var file in matchingFiles)
+                                            {
+                                                combinedReferences.Add(Path.GetFullPath(file));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
+                                            foreach (var file in matchingFiles)
+                                            {
+                                                combinedReferences.Add(Path.GetFullPath(file));
+                                            }
+                                        }
+                                    }
+                                    PipelineTypes.Load(combinedReferences.Distinct()
+                                        .Where(x => !string.IsNullOrEmpty(x.ToString()))
+                                        .ToArray());
+                                }
+                                ImGui.TreePop();
+                            }
+                            ImGui.PopStyleColor();
+                            ImGui.PopItemWidth();
+                        }
+
+                        JsonObject modifiedProcessorParam = null;
+                        var jsonContent = _jsonObject["content"].AsObject().AsEnumerable();
+                        for (int i = 0; i < jsonContent.Count(); i++)
+                        {
+                            var data = jsonContent.ToArray()[i];
+
+                            if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true))
+                            {
+                                ContentDescriptor.Name = data.Key;
+                                ContentDescriptor.Category = data.Key;
+                                ModalDescriptor.Set(MessageType.EditContent, "Set the name for this content.");
+                            }
+
+                            var importerName = data.Value["importer"]?.ToString();
+                            var processorName = data.Value["processor"]?.ToString();
+                            var processorParam = data.Value["processorParam"]?.ToString();
+                            if (importerName == null || processorName == null)
+                            {
+                                PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
+                                    out var outImporter, out var outProcessor);
+
+                                importerName = outImporter?.TypeName;
+                                processorName = outProcessor?.TypeName;
+
+                                data.Value["importer"] = importerName;
+                                data.Value["processor"] = processorName;
+
+                                if (importerName != null && processorName != null)
+                                {
+                                    ModifyDataDescriptor.ForceWrite = true;
+                                }
+                            }
+                            if (processorParam == null)
+                            {
+                                if (WriteJsonProcessorParameters(processorName, data))
+                                {
+                                    ModifyDataDescriptor.ForceWrite = true;
                                 }
                             }
 
-                            if (PipelineTypes.IsDirty)
+                            var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
+
+                            var categoryObject = _jsonObject["content"][data.Key];
+
+                            ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
+                            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
+                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
+                            if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                             {
-                                var combinedReferences = new List<string>();
-                                foreach (var item in references)
+                                ImGui.PopStyleColor();
+
+                                foreach (var categoryItem in categoryObject.AsObject())
                                 {
-                                    var reference = Environment.ExpandEnvironmentVariables(item.ToString());
-                                    if (File.Exists(reference.ToString()))
+                                    var itemKey = categoryItem.Key; //e.g. path
+                                    var itemValue = categoryItem.Value; //e.g. "C:\\"
+
+                                    nplItem.SetParameter(itemKey, itemValue);
+
+                                    if (itemKey == "watch")
                                     {
-                                        combinedReferences.Add(Path.GetFullPath(reference.ToString()));
-                                    }
-                                    else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
-                                    {
-                                        var dir = Path.GetDirectoryName(reference.ToString());
-                                        var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
-                                        foreach (var file in matchingFiles)
-                                        {
-                                            combinedReferences.Add(Path.GetFullPath(file));
-                                        }
+                                        ArrayEditor("Watcher", categoryItem.Value.AsArray(), out _, out _, out _);
                                     }
                                     else
                                     {
-                                        var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
-                                        foreach (var file in matchingFiles)
+                                        if (itemKey == "processorParam")
                                         {
-                                            combinedReferences.Add(Path.GetFullPath(file));
-                                        }
-                                    }
-                                }
-                                PipelineTypes.Load(combinedReferences.Distinct()
-                                    .Where(x => !string.IsNullOrEmpty(x.ToString()))
-                                    .ToArray());
-                            }
-                            ImGui.TreePop();
-                        }
-                        ImGui.PopStyleColor();
-                        ImGui.PopItemWidth();
-                    }
-
-                    JsonObject modifiedProcessorParam = null;
-                    var jsonContent = _jsonObject["content"].AsObject().AsEnumerable();
-                    for (int i = 0; i < jsonContent.Count(); i++)
-                    {
-                        var data = jsonContent.ToArray()[i];
-
-                        if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true))
-                        {
-                            ContentDescriptor.Name = data.Key;
-                            ContentDescriptor.Category = data.Key;
-                            ModalDescriptor.Set(MessageType.EditContent, "Set the name for this content.");
-                        }
-
-                        var importerName = data.Value["importer"]?.ToString();
-                        var processorName = data.Value["processor"]?.ToString();
-                        var processorParam = data.Value["processorParam"]?.ToString();
-                        if (importerName == null || processorName == null)
-                        {
-                            PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
-                                out var outImporter, out var outProcessor);
-
-                            importerName = outImporter?.TypeName;
-                            processorName = outProcessor?.TypeName;
-
-                            data.Value["importer"] = importerName;
-                            data.Value["processor"] = processorName;
-
-                            if (importerName != null && processorName != null)
-                            {
-                                ModifyDataDescriptor.ForceWrite = true;
-                            }
-                        }
-                        if (processorParam == null)
-                        {
-                            if (WriteJsonProcessorParameters(processorName, data))
-                            {
-                                ModifyDataDescriptor.ForceWrite = true;
-                            }
-                        }
-
-                        var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
-
-                        var categoryObject = _jsonObject["content"][data.Key];
-
-                        ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
-                        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
-                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
-                        if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
-                        {
-                            ImGui.PopStyleColor();
-
-                            foreach (var categoryItem in categoryObject.AsObject())
-                            {
-                                var itemKey = categoryItem.Key; //e.g. path
-                                var itemValue = categoryItem.Value; //e.g. "C:\\"
-
-                                nplItem.SetParameter(itemKey, itemValue);
-
-                                if (itemKey == "watch")
-                                {
-                                    ArrayEditor("Watcher", categoryItem.Value.AsArray(), out _, out _, out _);
-                                }
-                                else
-                                {
-                                    if (itemKey == "processorParam")
-                                    {
-                                        ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
-                                        if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
-                                        {
-                                            if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
+                                            ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
+                                            if (ImGui.TreeNodeEx(itemKey, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
                                             {
-                                                var itemCount = 0;
-                                                foreach (var parameter in itemValue.AsObject())
+                                                if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
                                                 {
-                                                    var parameterKey = parameter.Key; //e.g. ColorKeyColor
-                                                    var parameterValue = parameter.Value; //e.g. 255,0,255,255
+                                                    var itemCount = 0;
+                                                    foreach (var parameter in itemValue.AsObject())
+                                                    {
+                                                        var parameterKey = parameter.Key; //e.g. ColorKeyColor
+                                                        var parameterValue = parameter.Value; //e.g. 255,0,255,255
 
-                                                    itemCount++;
-                                                    var columnPos = itemCount % 2;
+                                                        itemCount++;
+                                                        var columnPos = itemCount % 2;
 
-                                                    if (columnPos == 1)
-                                                    {
-                                                        ImGui.TableNextRow();
-                                                        ImGui.TableSetupColumn("Column 1");
-                                                        ImGui.TableSetupColumn("Column 2");
-                                                        ImGui.TableSetColumnIndex(0);
-                                                    }
-                                                    else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
+                                                        if (columnPos == 1)
+                                                        {
+                                                            ImGui.TableNextRow();
+                                                            ImGui.TableSetupColumn("Column 1");
+                                                            ImGui.TableSetupColumn("Column 2");
+                                                            ImGui.TableSetColumnIndex(0);
+                                                        }
+                                                        else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
 
-                                                    if (nplItem.Property(parameterKey).Type == typeof(bool))
-                                                    {
-                                                        Checkbox(nplItem, data.Key, itemKey, parameterKey);
+                                                        if (nplItem.Property(parameterKey).Type == typeof(bool))
+                                                        {
+                                                            Checkbox(nplItem, data.Key, itemKey, parameterKey);
+                                                        }
+                                                        else if (nplItem.Property(parameterKey).Type == typeof(int))
+                                                        {
+                                                            InputInt(nplItem, data.Key, itemKey, parameterKey);
+                                                        }
+                                                        else if (nplItem.Property(parameterKey).Type == typeof(double))
+                                                        {
+                                                            InputDouble(nplItem, data.Key, itemKey, parameterKey);
+                                                        }
+                                                        else if (nplItem.Property(parameterKey).Type == typeof(float))
+                                                        {
+                                                            InputFloat(nplItem, data.Key, itemKey, parameterKey);
+                                                        }
+                                                        else if (nplItem.Property(parameterKey).Type == typeof(Color))
+                                                        {
+                                                            ColorEdit(nplItem, data.Key, itemKey, parameterKey);
+                                                        }
+                                                        else if (nplItem.Property(parameterKey).Type.IsEnum)
+                                                        {
+                                                            ComboEnum(nplItem, data.Key, itemKey, parameterKey);
+                                                        }
+                                                        else TextInput(nplItem, data.Key, itemKey, parameterKey);
                                                     }
-                                                    else if (nplItem.Property(parameterKey).Type == typeof(int))
-                                                    {
-                                                        InputInt(nplItem, data.Key, itemKey, parameterKey);
-                                                    }
-                                                    else if (nplItem.Property(parameterKey).Type == typeof(double))
-                                                    {
-                                                        InputDouble(nplItem, data.Key, itemKey, parameterKey);
-                                                    }
-                                                    else if (nplItem.Property(parameterKey).Type == typeof(float))
-                                                    {
-                                                        InputFloat(nplItem, data.Key, itemKey, parameterKey);
-                                                    }
-                                                    else if (nplItem.Property(parameterKey).Type == typeof(Color))
-                                                    {
-                                                        ColorEdit(nplItem, data.Key, itemKey, parameterKey);
-                                                    }
-                                                    else if (nplItem.Property(parameterKey).Type.IsEnum)
-                                                    {
-                                                        ComboEnum(nplItem, data.Key, itemKey, parameterKey);
-                                                    }
-                                                    else TextInput(nplItem, data.Key, itemKey, parameterKey);
                                                 }
+                                                ImGui.EndTable();
+                                                ImGui.TreePop();
                                             }
-                                            ImGui.EndTable();
-                                            ImGui.TreePop();
+                                            ImGui.PopItemWidth();
                                         }
-                                        ImGui.PopItemWidth();
-                                    }
-                                    else if (itemKey == "path")
-                                    {
-                                        var path = nplItem.Path;
-                                        if (ImGui.InputText(" ", ref path, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                                        else if (itemKey == "path")
                                         {
-                                            nplItem.Path = path;
-                                            itemValue = path;
-                                            ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
-                                        }
-                                    }
-                                    else if (itemKey == "action")
-                                    {
-                                        var actionIndex = nplItem.GetActionIndex();
-                                        var actionNames = Enum.GetNames(typeof(BuildAction));
-                                        if (ImGui.Combo(itemKey, ref actionIndex, actionNames, actionNames.Length))
-                                        {
-                                            itemValue = actionNames[actionIndex].ToLowerInvariant();
-                                            nplItem.Action = (BuildAction)Enum.Parse(typeof(BuildAction), itemValue.ToString(), true);
-                                            ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
-                                        }
-                                    }
-                                    else if (itemKey == "recursive")
-                                    {
-                                        ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
-                                    }
-                                    else if (itemKey == "importer" || itemKey == "processor")
-                                    {
-                                        if (ComboTypeDesciptors(nplItem, itemKey, out string value))
-                                        {
-                                            if (itemKey == "processor")
+                                            var path = nplItem.Path;
+                                            if (ImGui.InputText(" ", ref path, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                             {
-                                                GetJsonProcessorParameters(value, out modifiedProcessorParam);
+                                                nplItem.Path = path;
+                                                itemValue = path;
+                                                ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
                                             }
-                                            ModifyDataDescriptor.Set(data.Key, itemKey, value);
+                                        }
+                                        else if (itemKey == "action")
+                                        {
+                                            var actionIndex = nplItem.GetActionIndex();
+                                            var actionNames = Enum.GetNames(typeof(BuildAction));
+                                            if (ImGui.Combo(itemKey, ref actionIndex, actionNames, actionNames.Length))
+                                            {
+                                                itemValue = actionNames[actionIndex].ToLowerInvariant();
+                                                nplItem.Action = (BuildAction)Enum.Parse(typeof(BuildAction), itemValue.ToString(), true);
+                                                ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
+                                            }
+                                        }
+                                        else if (itemKey == "recursive")
+                                        {
+                                            ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
+                                        }
+                                        else if (itemKey == "importer" || itemKey == "processor")
+                                        {
+                                            if (ComboTypeDesciptors(nplItem, itemKey, out string value))
+                                            {
+                                                if (itemKey == "processor")
+                                                {
+                                                    GetJsonProcessorParameters(value, out modifiedProcessorParam);
+                                                }
+                                                ModifyDataDescriptor.Set(data.Key, itemKey, value);
+                                            }
                                         }
                                     }
                                 }
+                                ImGui.TreePop();
                             }
-                            ImGui.TreePop();
+                            ImGui.PopStyleColor();
+                            ImGui.PopItemWidth();
                         }
-                        ImGui.PopStyleColor();
-                        ImGui.PopItemWidth();
+                        ModifyData(modifiedProcessorParam);
+                        ImGui.End();
                     }
-                    ModifyData(modifiedProcessorParam);
+                    else if (_LogOpen)
+                    {
+                        if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(100, 0)))
+                        {
+                            _LogOpen = false;
+                        }
+                        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);
+                        
+                        var logText = NPLEditorSink.Output.ToString();
+                        ImGui.InputTextMultiline("##LogText", ref logText, 999999, ImGui.GetContentRegionAvail(), ImGuiInputTextFlags.ReadOnly);
+
+                        //Debug.WriteLine($"Current: {ImGui.GetScrollY()}, Max: {ImGui.GetScrollMaxY()}");
+                        //if (ImGui.GetScrollMaxY() > ImGui.GetScrollY()) ImGui.SetScrollHereY(1.0f);
+                        ImGui.PopStyleColor();
+                    }
                     ImGui.End();
                 }
-                ImGui.End();
             }
         }
 
@@ -434,7 +453,7 @@ namespace NPLEditor
                 });
                 File.WriteAllText(_nplJsonFilePath, jsonString);
 
-                Log.Debug("--- Content file successfully saved ---");
+                Log.Debug("Content file successfully saved.");
             }
             catch { Log.Error("It was not possible to save the content file."); }
         }
@@ -538,7 +557,7 @@ namespace NPLEditor
         {
             if (itemKey == "importer")
             {
-                var selectedIndex = nplItem.GetImporterIndex();                
+                var selectedIndex = nplItem.GetImporterIndex();
                 var names = PipelineTypes.Importers.Select(x => x.DisplayName).ToArray();
 
                 if (ImGui.Combo(itemKey, ref selectedIndex, names, names.Length))
@@ -680,6 +699,10 @@ namespace NPLEditor
                     {
                         _settingsVisible = !_settingsVisible;
                     }
+                    if (ImGui.MenuItem($"{FontAwesome.Eye} Show Log"))
+                    {
+                        _LogOpen = true;
+                    }
                     ImGui.EndMenu();
                 }
 #if RELEASE
@@ -702,16 +725,51 @@ namespace NPLEditor
                     if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", _buildContentEnabled))
                     {
                         _buildContentEnabled = false;
+                        _LogOpen = true;
+
+                        Log.Debug($"{FontAwesome.Igloo} CONTENT BUILDER");
+
+                        Encoding encoding;
+                        try
+                        {
+                            encoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
+                        }
+                        catch (NotSupportedException)
+                        {
+                            encoding = Encoding.UTF8;
+                        }
+                        catch (ArgumentException)
+                        {
+                            encoding = Encoding.UTF8;
+                        }
 
                         var projDir = Directory.GetParent(Directory.GetCurrentDirectory());
                         var process = new Process()
                         {
                             StartInfo = new ProcessStartInfo(
-                                "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity={_buildContentVerbosity.ToString().ToLower()}"),
-                            EnableRaisingEvents = true
+                                "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity={_buildContentVerbosity.ToString().ToLower()}")
+                            {
+                                RedirectStandardOutput = true,
+                                StandardOutputEncoding = encoding
+                            },
+                            EnableRaisingEvents = true,
                         };
-                        process.Exited += (sender, e) => { _buildContentEnabled = true; };
+                        process.OutputDataReceived += (sender, e) =>
+                        {
+                            if (!string.IsNullOrEmpty(e.Data))
+                            {
+                                Log.Debug(e.Data);
+                            }
+                        };
+                        process.Exited += (sender, e) => 
+                        { 
+                            _buildContentEnabled = true;
+                            Log.Debug($"{FontAwesome.Igloo} CONTENT BUILDER FINISHED");
+                        };
                         process.Start();
+                        process.BeginOutputReadLine();
+                        process.WaitForExit();
+                        process.Close();
                     }
                     ImGui.EndMenu();
                 }
@@ -835,7 +893,7 @@ namespace NPLEditor
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
                 bool hasDelete = (ModalDescriptor.MessageType & MessageType.Delete) != 0;
-                bool hasCancel = (ModalDescriptor.MessageType & MessageType.Cancel) != 0;                
+                bool hasCancel = (ModalDescriptor.MessageType & MessageType.Cancel) != 0;
                 if (hasCancel) buttonCountRightAligned++;
 
                 if (hasDelete)

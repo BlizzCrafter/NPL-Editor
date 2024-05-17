@@ -267,7 +267,7 @@ namespace NPLEditor.Common
 
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
         {
-            Log.Information("Loading References ...");
+            Log.Information($"{FontAwesome.BoxOpen} LOADING REFERENCES");
 
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
@@ -409,7 +409,7 @@ namespace NPLEditor.Common
             
             IsDirty = false;
 
-            Log.Information($"Loaded {assemblyCount - assemblyErrors} of {assemblyCount} References.");
+            Log.Information($"{FontAwesome.Box} LOADED {assemblyCount - assemblyErrors} OF {assemblyCount} REFERENCES.");
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
