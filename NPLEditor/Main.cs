@@ -585,9 +585,7 @@ namespace NPLEditor
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
                     return true;
                 }
-                ImGui.PopStyleColor();
-                ImGui.PopStyleColor();
-                ImGui.PopStyleColor();
+                ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
             }
             else
             {
@@ -783,7 +781,7 @@ namespace NPLEditor
             ImGui.SetNextWindowPos(viewport.GetCenter(), ImGuiCond.Always, new Num.Vector2(0.5f));
             if (ImGui.BeginPopupModal(ModalDescriptor.Title, ref _dummyBoolIsOpen, modalWindowFlags))
             {
-                var buttonCount = 1;
+                var buttonCountRightAligned = 1;
                 var buttonWidth = 60f;
 
                 ImGui.SeparatorText(title);
@@ -798,48 +796,67 @@ namespace NPLEditor
                 bool error = false;
                 if (ModalDescriptor.MessageType == MessageType.AddContent || ModalDescriptor.MessageType == MessageType.EditContent)
                 {
-                    buttonCount++;
-
-                    if (ImGui.InputTextWithHint("name", "textures / sound / music / etc.", ref AddContentDescriptor.Name, 9999))
+                    if (ImGui.InputTextWithHint("name", "textures / sound / music / etc.", ref ContentDescriptor.Name, 9999))
                     {
-                        Extensions.NumberlessRef(ref AddContentDescriptor.Name);
+                        Extensions.NumberlessRef(ref ContentDescriptor.Name);
                     }
 
                     if (ModalDescriptor.MessageType == MessageType.AddContent)
                     {
-                        var existingItem = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().Find(x => x.Equals(AddContentDescriptor.Name));
+                        var existingItem = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().Find(x => x.Equals(ContentDescriptor.Name));
                         if (existingItem != null)
                         {
                             error = true;
                             ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive], "Already Exists");
                         }
 
-                        ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref AddContentDescriptor.Extension, 9999);
+                        ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref ContentDescriptor.Extension, 9999);
                     }
                 }
 
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
+                bool hasDelete = (ModalDescriptor.MessageType & MessageType.Delete) != 0;
+                bool hasCancel = (ModalDescriptor.MessageType & MessageType.Cancel) != 0;                
+                if (hasCancel) buttonCountRightAligned++;
+
+                if (hasDelete)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive]);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetStyle().Colors[(int)ImGuiCol.TabHovered]);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.Tab]);
+                    ImGui.SetCursorPosX(ImGui.GetStyle().ItemSpacing.X);
+                    if (ImGui.Button($"{FontAwesome.TrashAlt}", new Num.Vector2(buttonWidth, 0)))
+                    {
+                        _jsonObject["content"].AsObject().Remove(ContentDescriptor.Category);
+                        WriteContentNPL();
+                        ClosePopupModal();
+                        return true;
+                    }
+                    ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
+                }
+
+                ImGui.SameLine(ImGui.GetContentRegionMax().X - (buttonWidth * buttonCountRightAligned) - ImGui.GetStyle().ItemSpacing.X * buttonCountRightAligned);
+
                 if (error) ImGui.BeginDisabled();
-                ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - (buttonWidth * buttonCount) - ImGui.GetStyle().ItemSpacing.X * buttonCount);
                 if (ImGui.Button("OK", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
                 {
                     if (ModalDescriptor.MessageType == MessageType.AddContent)
                     {
                         JsonObject content = new()
                         {
-                            ["path"] = AddContentDescriptor.Extension,
+                            ["path"] = ContentDescriptor.Extension,
                             ["recursive"] = "false",
                             ["action"] = "build"
                         };
 
-                        _jsonObject["content"].AsObject().Add(AddContentDescriptor.Name, content);
+                        _jsonObject["content"].AsObject().Add(ContentDescriptor.Name, content);
                         WriteContentNPL();
                     }
                     else if (ModalDescriptor.MessageType == MessageType.EditContent)
                     {
-                        var node = _jsonObject["content"][AddContentDescriptor.Category];
-                        var nodeIndex = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().IndexOf(AddContentDescriptor.Category);
+                        var node = _jsonObject["content"][ContentDescriptor.Category];
+                        var nodeIndex = _jsonObject["content"].AsObject().Select(x => x.Key).ToList().IndexOf(ContentDescriptor.Category);
                         var content = _jsonObject["content"].AsObject().ToList();
 
                         foreach (var item in content)
@@ -850,33 +867,35 @@ namespace NPLEditor
                         for (int i = 0; i < content.Count; i++)
                         {
                             if (i != nodeIndex) _jsonObject["content"].AsObject().Add(content[i]);
-                            else _jsonObject["content"].AsObject().Add(AddContentDescriptor.Name, node);
+                            else _jsonObject["content"].AsObject().Add(ContentDescriptor.Name, node);
                         }
 
                         WriteContentNPL();
                     }
-                    AddContentDescriptor.Reset();
-                    ModalDescriptor.Reset();
-                    ImGui.CloseCurrentPopup();
+                    ClosePopupModal();
                     return true;
                 }
                 if (error) ImGui.EndDisabled();
 
-                bool hasCancel = (ModalDescriptor.MessageType & MessageType.Cancel) != 0;
                 if (hasCancel)
                 {
                     ImGui.SameLine();
                     if (ImGui.Button("Cancel", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
                     {
-                        AddContentDescriptor.Reset();
-                        ModalDescriptor.Reset();
-                        ImGui.CloseCurrentPopup();
+                        ClosePopupModal();
                         return false;
                     }
                 }
                 ImGui.EndPopup();
             }
             return false;
+        }
+
+        private void ClosePopupModal()
+        {
+            ContentDescriptor.Reset();
+            ModalDescriptor.Reset();
+            ImGui.CloseCurrentPopup();
         }
 
         #endregion ImGui Widgets
