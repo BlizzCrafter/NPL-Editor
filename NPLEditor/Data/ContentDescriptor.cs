@@ -2,7 +2,7 @@
 
 namespace NPLEditor.Data
 {
-    public static class AddContentDescriptor
+    public static class ContentDescriptor
     {
         public static string Name = "";
         public static string Extension = "";

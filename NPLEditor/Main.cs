@@ -195,8 +195,8 @@ namespace NPLEditor
 
                         if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true))
                         {
-                            AddContentDescriptor.Name = data.Key;
-                            AddContentDescriptor.Category = data.Key;
+                            ContentDescriptor.Name = data.Key;
+                            ContentDescriptor.Category = data.Key;
                             ModalDescriptor.Set(MessageType.EditContent, "Set the name for this content.");
                         }
 
