@@ -886,7 +886,7 @@ namespace NPLEditor
                 if (hasCancel)
                 {
                     ImGui.SameLine();
-                    if (ImGui.Button("Cancel", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Enter))
+                    if (ImGui.Button("Cancel", new Num.Vector2(buttonWidth, 0)) || ImGui.IsKeyPressed(ImGuiKey.Escape))
                     {
                         ClosePopupModal();
                         return false;
