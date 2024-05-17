@@ -653,7 +653,7 @@ namespace NPLEditor
                 {
                     if (ImGui.MenuItem($"{FontAwesome.Plus} Add Content"))
                     {
-                        ModalDescriptor.Set(MessageType.AddContent, "Set the name and the extension of your new content.");
+                        ModalDescriptor.Set(MessageType.AddContent, "Set the name and the path of your new content.");
                     }
                     ImGui.Separator();
                     if (ImGui.MenuItem($"{FontAwesome.Save} Save"))
@@ -810,7 +810,7 @@ namespace NPLEditor
                             ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive], "Already Exists");
                         }
 
-                        ImGui.InputTextWithHint("extension", ".png / .jpg / .ogg / etc.", ref ContentDescriptor.Extension, 9999);
+                        ImGui.InputTextWithHint("path", "Graphics/*.png / Music/*.ogg etc.", ref ContentDescriptor.Path, 9999);
                     }
                 }
 
@@ -845,7 +845,7 @@ namespace NPLEditor
                     {
                         JsonObject content = new()
                         {
-                            ["path"] = ContentDescriptor.Extension,
+                            ["path"] = ContentDescriptor.Path,
                             ["recursive"] = "false",
                             ["action"] = "build"
                         };
