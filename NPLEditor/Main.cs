@@ -742,7 +742,19 @@ namespace NPLEditor
                                 };
                                 Process.Start(process);
                             }
-                            else ModalDescriptor.SetFileNotFound(AppSettings.ImportantLogPath, "Note: this log file will only be created on errors or important events.");
+                            else ModalDescriptor.SetFileNotFound(AppSettings.ImportantLogPath, "Note: this log file gets created on errors or important events.");
+                        }
+                        if (ImGui.MenuItem("Build"))
+                        {
+                            if (File.Exists(AppSettings.BuildContentLogPath))
+                            {
+                                ProcessStartInfo process = new(AppSettings.BuildContentLogPath)
+                                {
+                                    UseShellExecute = true
+                                };
+                                Process.Start(process);
+                            }
+                            else ModalDescriptor.SetFileNotFound(AppSettings.BuildContentLogPath, "Note: this log gets created when building content.");
                         }
                         ImGui.EndMenu();
                     }
