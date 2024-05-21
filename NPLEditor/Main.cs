@@ -232,6 +232,11 @@ namespace NPLEditor
                                     ModifyDataDescriptor.ForceWrite = true;
                                 }
                             }
+                            var hasWatcher = _jsonObject["content"][data.Key]["watch"] != null;
+                            if (!hasWatcher)
+                            {
+                                _jsonObject["content"][data.Key].AsObject().Add("watch", new JsonArray());
+                            }
 
                             var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
 
