@@ -198,6 +198,9 @@ namespace NPLEditor
                             {
                                 ContentDescriptor.Name = data.Key;
                                 ContentDescriptor.Category = data.Key;
+                                var path = _jsonObject["content"][data.Key]["path"];
+                                if (path != null) ContentDescriptor.Path = path.ToString();
+
                                 ModalDescriptor.Set(MessageType.EditContent, "Set the name for this content.");
                             }
 
