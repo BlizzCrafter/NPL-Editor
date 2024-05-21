@@ -692,14 +692,20 @@ namespace NPLEditor
             {
                 if (ImGui.BeginMenu("File"))
                 {
+                    ImGui.SeparatorText("New");
                     if (ImGui.MenuItem($"{FontAwesome.Plus} Add Content"))
                     {
                         ModalDescriptor.Set(MessageType.AddContent, "Set the name and the path of your new content.");
                     }
-                    ImGui.Separator();
+                    ImGui.SeparatorText("App");
                     if (ImGui.MenuItem($"{FontAwesome.Save} Save"))
                     {
                         WriteContentNPL();
+                    }
+                    if (ImGui.MenuItem($"{FontAwesome.WindowClose} Exit"))
+                    {
+                        WriteContentNPL();
+                        Exit();
                     }
                     ImGui.EndMenu();
                 }
