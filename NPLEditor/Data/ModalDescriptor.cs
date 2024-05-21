@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Reflection;
 using NPLEditor.Enums;
 
 namespace NPLEditor.Data
@@ -15,6 +17,13 @@ namespace NPLEditor.Data
             string shortMessage = $"'{Path.GetFileName(filePath)}' not found.";
             string longMessage = message;
             Set(MessageType.FileNotFound, $"{shortMessage}\n\n{longMessage}");
+        }
+
+        public static void SetAbout()
+        {
+            string shortMessage = $"NPL Editor v.{Assembly.GetExecutingAssembly().GetName().Version}\nCopyright {FontAwesome.Copyright} {DateTime.Now.Year} BlizzCrafter\nThe MIT License (MIT)";
+            string longMessage = "A graphical editor for '.npl' files used together with 'Nopipeline.Task' to produce '.mgcb' files for MonoGame projects.\n\nVisit the GitHub page for further help & extended license information.";
+            Set(MessageType.About, $"{shortMessage}\n\n{longMessage}");
         }
 
         public static void Set(MessageType messageType, string message)
@@ -34,6 +43,11 @@ namespace NPLEditor.Data
                 case MessageType.EditContent:
                     {
                         Title = $"{FontAwesome.Edit} edit content";
+                        break;
+                    }
+                case MessageType.About:
+                    {
+                        Title = $"{FontAwesome.ListAlt} about";
                         break;
                     }
                 default:

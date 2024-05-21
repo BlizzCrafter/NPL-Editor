@@ -787,7 +787,7 @@ namespace NPLEditor
                     }
                     if (ImGui.MenuItem($"{FontAwesome.AddressBook} About"))
                     {
-
+                        ModalDescriptor.SetAbout();
                     }
                     ImGui.EndMenu();
                 }
@@ -832,7 +832,7 @@ namespace NPLEditor
                 ImGui.SeparatorText(title);
 
                 ImGui.SetCursorPos(new Num.Vector2(ImGui.GetStyle().ItemSpacing.X / 2f, ImGui.GetFrameHeight()));
-                ImGui.PushTextWrapPos(viewport.Size.X / 2f - 120f);
+                ImGui.PushTextWrapPos(viewport.Size.X / 2f);
                 ImGui.TextWrapped(message);
                 ImGui.PopTextWrapPos();
 
@@ -857,6 +857,23 @@ namespace NPLEditor
                     }
 
                     ImGui.InputTextWithHint("path", "Graphics/*.png / Music/*.ogg etc.", ref ContentDescriptor.Path, 9999);
+                }
+                else if (ModalDescriptor.MessageType == MessageType.About)
+                {
+                    ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
+
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.PlotHistogram]);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetStyle().Colors[(int)ImGuiCol.PlotHistogramHovered]);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.PlotHistogram]);
+                    if (ImGui.Button($"{FontAwesomeBrands.Github} NPL Editor", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                    {
+                        ProcessStartInfo process = new("https://github.com/BlizzCrafter/NPL-Editor")
+                        {
+                            UseShellExecute = true
+                        };
+                        Process.Start(process);
+                    }
+                    ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
                 }
 
                 ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();

@@ -9,6 +9,7 @@ namespace NPLEditor.Enums
         AddContent = 1,
         EditContent = 2,
         FileNotFound = 4,
+        About = 8,
 
         Cancel = AddContent | EditContent,
         Delete = EditContent
