@@ -38,9 +38,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 // Log that main initialize begins.
-Log.Information("");
-Log.Information($"{FontAwesome.Flag} INITIALIZE");
-Log.Information("");
+NPLLog.LogInfoHeadline(FontAwesome.Flag, "INITIALIZE");
 
 // Main initialize.
 using var game = new Main();

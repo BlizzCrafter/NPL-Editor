@@ -23,18 +23,10 @@ namespace NPLEditor
 {
     public class Main : Game
     {
-        public enum EditButtonPosition
-        {
-            Before,
-            After
-        }
-
         public static bool ScrollLogToBottom { get; set; }
 
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer _imGuiRenderer;
-        private Num.Vector3 _clearColor = new(114f / 255f, 144f / 255f, 154f / 255f);
-
         private JsonNode _jsonObject;
         private string _nplJsonFilePath;
         private bool _treeNodesOpen = true;
@@ -42,7 +34,6 @@ namespace NPLEditor
         private bool _settingsVisible = true;
         private bool _dummyBoolIsOpen = true;
         private bool _buildContentEnabled = true;
-        private LoggerVerbosity _buildContentVerbosity = LoggerVerbosity.Minimal;
 
         public Main()
         {
@@ -71,9 +62,7 @@ namespace NPLEditor
 
             base.Initialize();
 
-            Log.Information("");
-            Log.Information($"{FontAwesome.FlagCheckered} APP-INITIALIZED");
-            Log.Information("");
+            NPLLog.LogInfoHeadline(FontAwesome.FlagCheckered, "APP-INITIALIZED");
         }
 
         protected override void LoadContent()
@@ -90,15 +79,18 @@ namespace NPLEditor
             _nplJsonFilePath = args[1];
 #endif
 
-            var jsonString = File.ReadAllText(_nplJsonFilePath);
-            _jsonObject = JsonNode.Parse(jsonString);
-
+            try
+            {
+                var jsonString = File.ReadAllText(_nplJsonFilePath);
+                _jsonObject = JsonNode.Parse(jsonString);
+            }
+            catch (Exception e) { NPLLog.LogException(e, "JSON", true); }
             base.LoadContent();
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(new Color(_clearColor.X, _clearColor.Y, _clearColor.Z));
+            GraphicsDevice.Clear(Color.Black);
 
             _imGuiRenderer.BeforeLayout(gameTime);
             ImGuiLayout();
@@ -725,28 +717,13 @@ namespace NPLEditor
 #if RELEASE
                 if (ImGui.BeginMenu("Content"))
                 {
-                    if (ImGui.BeginMenu($"{FontAwesome.FileAlt} Build Verbosity"))
-                    {
-                        var verbosities = Enum.GetNames(typeof(LoggerVerbosity));
-                        foreach (var verbosity in verbosities)
-                        {
-                            bool selected = verbosity == _buildContentVerbosity.ToString();
-                            if (ImGui.MenuItem(verbosity, "", selected))
-                            {
-                                _buildContentVerbosity = Enum.Parse<LoggerVerbosity>(verbosity);
-                            }
-                        }
-                        ImGui.EndMenu();
-                    }
                     ImGui.Separator();
                     if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", _buildContentEnabled))
                     {
                         _buildContentEnabled = false;
                         _LogOpen = true;
 
-                        Log.Information("");
-                        Log.Information($"{FontAwesome.Igloo} BUILD CONTENT");
-                        Log.Information("");
+                        NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CONTENT");
 
                         Encoding encoding;
                         try
@@ -769,7 +746,7 @@ namespace NPLEditor
                             var process = new Process()
                             {
                                 StartInfo = new ProcessStartInfo(
-                                    "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity={_buildContentVerbosity.ToString().ToLower()}")
+                                    "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity=m")
                                 {
                                     RedirectStandardOutput = true,
                                     StandardOutputEncoding = encoding
@@ -786,30 +763,13 @@ namespace NPLEditor
                             process.Exited += (sender, e) =>
                             {
                                 _buildContentEnabled = true;
-                                Log.Information("");
-                                Log.Debug($"{FontAwesome.Igloo} CONTENT BUILDER FINISHED");
-                                Log.Information("");
+                                NPLLog.LogInfoHeadline(FontAwesome.Igloo, "CONTENT BUILDER FINISHED");
                             };
                             process.Start();
                             process.BeginOutputReadLine();
                             process.WaitForExit();
                         }
-                        catch (Exception e) 
-                        {
-                            if (!string.IsNullOrEmpty(e.Message))
-                            {
-                                Log.Information("");
-                                Log.Error($"{FontAwesome.HeartBroken} BUILD FAILED: {e.Message}");
-                                Log.Information("");
-                            }
-                            else
-                            {
-                                Log.Information("");
-                                Log.Error($"{FontAwesome.HeartBroken} BUILD FAILED: {Environment.NewLine}");
-                                Log.Error(e.ToString());
-                                Log.Information("");
-                            }
-                        }
+                        catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
                     }
                     ImGui.EndMenu();
                 }

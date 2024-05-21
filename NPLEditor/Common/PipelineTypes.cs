@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Serilog;
+using NPLEditor.Data;
 
 namespace NPLEditor.Common
 {
@@ -267,9 +268,7 @@ namespace NPLEditor.Common
 
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
         {
-            Log.Information("");
-            Log.Information($"{FontAwesome.BoxOpen} LOADING REFERENCES");
-            Log.Information("");
+            NPLLog.LogInfoHeadline(FontAwesome.BoxOpen, "LOADING REFERENCES");
 
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
@@ -411,9 +410,7 @@ namespace NPLEditor.Common
             
             IsDirty = false;
 
-            Log.Information("");
-            Log.Information($"{FontAwesome.Box} LOADED {assemblyCount - assemblyErrors} OF {assemblyCount} REFERENCES.");
-            Log.Information("");
+            NPLLog.LogInfoHeadline(FontAwesome.Box, $"LOADED {assemblyCount - assemblyErrors} OF {assemblyCount} REFERENCES.");
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
