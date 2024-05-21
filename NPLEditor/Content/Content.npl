@@ -16,7 +16,8 @@
         "ResizeToPowerOfTwo": "False",
         "MakeSquare": "False",
         "TextureFormat": "Color"
-      }
+      },
+      "watch": []
     }
   }
 }
