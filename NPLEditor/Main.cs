@@ -606,7 +606,7 @@ namespace NPLEditor
             return false;
         }
 
-        private bool EditButton(EditButtonPosition position, string text, int id, bool small, bool disabled = false)
+        private bool EditButton(EditButtonPosition position, string icon, int id, bool small, bool disabled = false)
         {
             if (disabled) ImGui.BeginDisabled();
             if (position == EditButtonPosition.After) ImGui.SameLine();
@@ -616,7 +616,7 @@ namespace NPLEditor
                 ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBgHovered]);
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBgActive]);
-                if (ImGui.SmallButton(text))
+                if (ImGui.SmallButton(icon))
                 {
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
                     return true;
@@ -625,7 +625,7 @@ namespace NPLEditor
             }
             else
             {
-                if (ImGui.Button(text))
+                if (ImGui.Button(icon))
                 {
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
                     return true;
