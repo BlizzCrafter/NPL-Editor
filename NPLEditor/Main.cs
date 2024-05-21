@@ -715,7 +715,7 @@ namespace NPLEditor
                     {
                         _settingsVisible = !_settingsVisible;
                     }
-                    if (ImGui.MenuItem($"{FontAwesome.Eye} Show Log"))
+                    if (ImGui.MenuItem($"{(_LogOpen ? $"{FontAwesome.EyeSlash} Close Log" : $"{FontAwesome.Eye} Show Log")}"))
                     {
                         ScrollLogToBottom = true;
                         _LogOpen = !_LogOpen;
