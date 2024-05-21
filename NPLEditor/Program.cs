@@ -14,10 +14,10 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 }
 
 // Create the logs directory.
-Directory.CreateDirectory(NPLEditor.AppSettings.LogsPath);
+Directory.CreateDirectory(AppSettings.LogsPath);
 
 // The general log file should always regenerate.
-if (File.Exists(NPLEditor.AppSettings.AllLogPath)) File.Delete(NPLEditor.AppSettings.AllLogPath);
+if (File.Exists(AppSettings.AllLogPath)) File.Delete(AppSettings.AllLogPath);
 
 // Create the serilog logger.
 Log.Logger = new LoggerConfiguration()
