@@ -140,7 +140,11 @@ namespace NPLEditor
 
                                 var root = _jsonObject["root"];
                                 var rootValue = root.ToString();
-                                ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.ReadOnly);
+                                if (ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                                {
+                                    _jsonObject["root"] = rootValue;
+                                    WriteContentNPL();
+                                }
 
                                 var references = _jsonObject["references"].AsArray();
                                 ArrayEditor("Reference", references, out _, out bool itemRemoved, out bool itemChanged);
