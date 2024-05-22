@@ -11,7 +11,7 @@ namespace NPLEditor.VSExtension
         public const string Name = "NPL Editor Extension";
         public const string Description = @"A graphical editor for '.npl' files used together with 'Nopipeline.Task' to produce '.mgcb' files for MonoGame projects.";
         public const string Language = "en-US";
-        public const string Version = "1.0";
+        public const string Version = "1.1";
         public const string Author = "BlizzCrafter";
         public const string Tags = ".NET,C#,Game development,Templates,Games,Gamedev,Project,Mono,MonoGame,MonoGo,Monofoxe,Nopipeline,NPL";
     }
