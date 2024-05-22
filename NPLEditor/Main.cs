@@ -86,7 +86,7 @@ namespace NPLEditor
                 var jsonString = File.ReadAllText(_nplJsonFilePath);
                 _jsonObject = JsonNode.Parse(jsonString);
             }
-            catch (Exception e) { NPLLog.LogException(e, "JSON", true); }
+            catch (Exception e) { NPLLog.LogException(e, "JSON ERROR", true); }
             base.LoadContent();
         }
 
