@@ -14,7 +14,6 @@
         </InstallationTarget>
     </Installation>
     <Dependencies>
-        <Dependency d:Source="Manual" DisplayName="NPL Editor" Id="NPLEditor" Version="1.0.0" d:InstallSource="Download" Location="https://github.com/BlizzCrafter/NPL-Editor" />
     </Dependencies>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
