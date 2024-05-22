@@ -16,9 +16,6 @@ using ImGuiNET;
 using Serilog;
 using Color = Microsoft.Xna.Framework.Color;
 using Num = System.Numerics;
-using System.Text;
-using System.Globalization;
-using System.Threading.Tasks;
 
 namespace NPLEditor
 {
@@ -29,8 +26,6 @@ namespace NPLEditor
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer _imGuiRenderer;
         private JsonNode _jsonObject;
-        private bool _buildContentRunning = false;
-        private bool _clearLogViewOnBuild = true;
         private bool _treeNodesOpen = true;
         private bool _LogOpen = false;
         private bool _settingsVisible = true;
@@ -376,12 +371,9 @@ namespace NPLEditor
 
                         ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
-                        if (!_buildContentRunning)
+                        if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
                         {
-                            if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
-                            {
-                                _LogOpen = false;
-                            }
+                            _LogOpen = false;
                         }
 
                         //BUG: SetScrollHere currently doesn't work on InputTextMultiline.
@@ -742,27 +734,7 @@ namespace NPLEditor
                     }
                     ImGui.EndMenu();
                 }
-#if RELEASE
-                if (ImGui.BeginMenu("Content"))
-                {
-                    ImGui.SeparatorText("Execution");
-                    if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", !_buildContentRunning))
-                    {
-                        _buildContentRunning = true;
-                        _LogOpen = true;
 
-                        if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
-
-                        BuildContent();
-                    }
-                    ImGui.SeparatorText("Options");
-                    if (ImGui.MenuItem("Clear Log View on Build", "", _clearLogViewOnBuild))
-                    {
-                        _clearLogViewOnBuild = !_clearLogViewOnBuild;
-                    }
-                    ImGui.EndMenu();
-                }
-#endif
                 if (ImGui.BeginMenu("Help"))
                 {
                     if (ImGui.BeginMenu($"{FontAwesome.FileArchive} Logs"))
@@ -790,18 +762,6 @@ namespace NPLEditor
                                 Process.Start(process);
                             }
                             else ModalDescriptor.SetFileNotFound(AppSettings.ImportantLogPath, "Note: this log file gets created on errors or important events.");
-                        }
-                        if (ImGui.MenuItem("Build"))
-                        {
-                            if (File.Exists(AppSettings.BuildContentLogPath))
-                            {
-                                ProcessStartInfo process = new(AppSettings.BuildContentLogPath)
-                                {
-                                    UseShellExecute = true
-                                };
-                                Process.Start(process);
-                            }
-                            else ModalDescriptor.SetFileNotFound(AppSettings.BuildContentLogPath, "Note: this log gets created when building content.");
                         }
                         ImGui.EndMenu();
                     }
@@ -981,59 +941,5 @@ namespace NPLEditor
         }
 
         #endregion ImGui Widgets
-
-        #region Default
-
-        public async Task BuildContent()
-        {
-            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CONTENT");
-
-            Encoding encoding;
-            try
-            {
-                encoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
-            }
-            catch (NotSupportedException)
-            {
-                encoding = Encoding.UTF8;
-            }
-            catch (ArgumentException)
-            {
-                encoding = Encoding.UTF8;
-            }
-
-            var projDir = Directory.GetParent(Directory.GetCurrentDirectory());
-            try
-            {
-                var process = new Process()
-                {
-                    StartInfo = new ProcessStartInfo(
-                        "dotnet", $"msbuild {projDir} /t:RunContentBuilder /fl /flp:logfile={AppSettings.BuildContentLogPath};verbosity=m")
-                    {
-                        RedirectStandardOutput = true,
-                        StandardOutputEncoding = encoding
-                    },
-                    EnableRaisingEvents = true,
-                };
-                process.OutputDataReceived += (sender, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                    {
-                        Log.Debug(e.Data);
-                    }
-                };
-                process.Exited += (sender, e) =>
-                {
-                    _buildContentRunning = false;
-                    NPLLog.LogInfoHeadline(FontAwesome.Igloo, "CONTENT BUILDER FINISHED");
-                };
-                process.Start();
-                process.BeginOutputReadLine();
-                await process.WaitForExitAsync();
-            }
-            catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
-        }
-
-        #endregion Default
     }
 }
