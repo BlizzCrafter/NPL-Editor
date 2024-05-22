@@ -484,7 +484,7 @@ namespace NPLEditor
 
                 Log.Debug("Content file successfully saved.");
             }
-            catch { Log.Error("It was not possible to save the content file."); }
+            catch (Exception e) { NPLLog.LogException(e, "SAVE ERROR"); }
         }
 
         protected override void OnExiting(object sender, EventArgs args)
