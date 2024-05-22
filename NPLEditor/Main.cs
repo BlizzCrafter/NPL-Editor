@@ -887,7 +887,7 @@ namespace NPLEditor
                     ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.PlotHistogram]);
                     if (ImGui.Button($"{FontAwesomeBrands.Github} NPL Editor", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
                     {
-                        ProcessStartInfo process = new("https://github.com/BlizzCrafter/NPL-Editor")
+                        ProcessStartInfo process = new(AppSettings.GitHubRepoURL)
                         {
                             UseShellExecute = true
                         };
