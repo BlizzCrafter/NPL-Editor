@@ -29,4 +29,8 @@ Yes! It should be possible now to double click the **Content.npl** file inside y
  
 # Impressions
 
+![NPLEditor](https://github.com/BlizzCrafter/NPL-Editor/blob/dev/docs/npl_tool_00.png?raw=true)
+![NPLEditor](https://github.com/BlizzCrafter/NPL-Editor/blob/dev/docs/npl_tool_01.png?raw=true)
+![NPLEditor](https://github.com/BlizzCrafter/NPL-Editor/blob/dev/docs/npl_tool_02.png?raw=true)
+
 # Now Have Fun with NPL Editor!
