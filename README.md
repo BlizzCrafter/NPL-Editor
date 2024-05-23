@@ -13,18 +13,27 @@ Inspired by the [MGCB Editor](https://docs.monogame.net/articles/content_pipelin
 4. Install the [NPLEditor.VSExtension](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) via Visual Studio.
 5. Profit ???
 
-Yes! It should be possible now to double click the **Content.npl** file inside your **Content** folder to open the **NPL Editor** and start adding content to it.
+Yes! It should be possible now to double click the **Content.npl** file inside your **Content** folder to open the **NPL Editor**. 
+
+Everything you change inside this editor will modify the corresponding **Content.npl** file now 🥳.
 
 # Benefits
 
-- No JSON-Formatting Erros Anymore
-  - Just manage your content and **NPL Editor** takes care about the correct formatting of your **.npl** files.
-- Automatic Pipeline Imports
-  - Just add your content pipeline references and **NPL Editor** extracts importers and processors from it.
-- No "Name-Guessing" Anymore
-  - Just with importers and processors, you don't need to guess the correct names of parameters or anything else anymore; just select what you need inside the **NPL Editor**.
-- Logging
-  - Realtime logging events directly inside the **NPL Editor**.
+✨ No JSON-Formatting Erros Anymore 
+
+Just manage your content and **NPL Editor** takes care about the correct formatting of your **.npl** files.
+
+✨ Automatic Pipeline Imports 
+
+Just add your content pipeline references and **NPL Editor** extracts importers and processors from it.
+
+✨ No "Name-Guessing" Anymore 
+
+Just with importers and processors, you don't need to guess the correct names of parameters or anything else anymore; just select what you need inside the **NPL Editor**.
+
+✨ Logging 
+
+Realtime logging events directly inside the **NPL Editor**.
  
 # Impressions
 
