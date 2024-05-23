@@ -9,7 +9,7 @@ Inspired by the [MGCB Editor](https://docs.monogame.net/articles/content_pipelin
 
 1. Open or create a [MonoGame](https://monogame.net/) project via Visual Studio.
 2. Install the [Nopipeline.Task](https://www.nuget.org/packages/Nopipeline.Task).
-3. Install the [NPLEditor](https://www.nuget.org/packages/NPLEditor/) as a local dotnet tool.
+3. Install the [NPLEditor](https://www.nuget.org/packages/NPLEditor/) as a **GLOBAL** dotnet tool.
 4. Install the [NPLEditor.VSExtension](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) via Visual Studio.
 5. Profit ???
 
