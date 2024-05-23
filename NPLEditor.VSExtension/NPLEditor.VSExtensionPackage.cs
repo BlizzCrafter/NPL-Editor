@@ -7,6 +7,7 @@ using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
+using System.IO;
 
 namespace NPLEditor.VSExtension
 {
@@ -35,10 +36,13 @@ namespace NPLEditor.VSExtension
             pgrfCDW = 0;
             pbstrEditorCaption = null;
 
+            Debug.WriteLine("Launching NPL-Editor as a global dotnet tool...");
+
             var process = new Process()
             {
-                StartInfo = new ProcessStartInfo("dotnet", $"npl-editor {pszMkDocument}")
+                StartInfo = new ProcessStartInfo("npl-editor", $"{pszMkDocument}")
                 {
+                    WorkingDirectory = Directory.GetParent(Path.GetDirectoryName(pszMkDocument)).FullName,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
