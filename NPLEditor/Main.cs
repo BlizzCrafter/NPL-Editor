@@ -635,11 +635,15 @@ namespace NPLEditor
             }
             else
             {
+                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive]);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetStyle().Colors[(int)ImGuiCol.TabHovered]);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.Tab]);
                 if (ImGui.Button(icon))
                 {
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
                     return true;
                 }
+                ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
             }
             ImGui.PopID();
             if (position == EditButtonPosition.Before) ImGui.SameLine();
