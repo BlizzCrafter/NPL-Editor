@@ -49,6 +49,11 @@ namespace NPLEditor.GUI
             var context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
 
+            unsafe
+            {
+                ImGui.GetIO().NativePtr->IniFilename = null;
+            }
+
             _game = game ?? throw new ArgumentNullException(nameof(game));
             _graphicsDevice = game.GraphicsDevice;
 
