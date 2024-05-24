@@ -629,6 +629,7 @@ namespace NPLEditor
                 if (ImGui.SmallButton(icon))
                 {
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
+                    ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
                     return true;
                 }
                 ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
@@ -641,6 +642,7 @@ namespace NPLEditor
                 if (ImGui.Button(icon))
                 {
                     if (position == EditButtonPosition.Before) ImGui.SameLine();
+                    ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
                     return true;
                 }
                 ImGui.PopStyleColor(); ImGui.PopStyleColor(); ImGui.PopStyleColor();
