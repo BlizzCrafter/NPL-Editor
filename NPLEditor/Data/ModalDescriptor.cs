@@ -21,7 +21,8 @@ namespace NPLEditor.Data
 
         public static void SetAbout()
         {
-            string shortMessage = $"NPL Editor v.{Assembly.GetExecutingAssembly().GetName().Version}\nCopyright {FontAwesome.Copyright} {DateTime.Now.Year} BlizzCrafter\nThe MIT License (MIT)";
+            var appVersion = $"v.{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor}.{Assembly.GetExecutingAssembly().GetName().Version.MinorRevision}";
+            string shortMessage = $"NPL Editor {appVersion}\nCopyright {FontAwesome.Copyright} {DateTime.Now.Year} BlizzCrafter\nThe MIT License (MIT)";
             string longMessage = "A graphical editor for '.npl' files used together with 'Nopipeline.Task' to produce '.mgcb' files for MonoGame projects.\n\nVisit the GitHub page for further help & extended license information.";
             Set(MessageType.About, $"{shortMessage}\n\n{longMessage}");
         }
