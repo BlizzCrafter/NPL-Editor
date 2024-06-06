@@ -50,7 +50,7 @@ namespace NPLEditor
 
         protected override void Initialize()
         {
-            Window.Title = "NPL Editor";
+            Window.Title = AppSettings.Title;
 
             _graphics.GraphicsDevice.PresentationParameters.BackBufferWidth = _graphics.PreferredBackBufferWidth;
             _graphics.GraphicsDevice.PresentationParameters.BackBufferHeight = _graphics.PreferredBackBufferHeight;
