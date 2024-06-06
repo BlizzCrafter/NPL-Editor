@@ -338,7 +338,12 @@ namespace NPLEditor
                                     }
                                     else if (itemKey == "recursive")
                                     {
-                                        ImGui.SameLine(); ImGui.Checkbox(itemKey, ref nplItem.Recursive);
+                                        ImGui.SameLine();
+                                        if (ImGui.Checkbox(itemKey, ref nplItem.Recursive))
+                                        {
+                                            itemValue = nplItem.Recursive;
+                                            ModifyDataDescriptor.Set(data.Key, itemKey, itemValue);
+                                        }
                                     }
                                     else if (itemKey == "importer" || itemKey == "processor")
                                     {
