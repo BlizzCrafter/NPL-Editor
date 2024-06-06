@@ -27,7 +27,7 @@ namespace NPLEditor
         private ImGuiRenderer _imGuiRenderer;
         private JsonNode _jsonObject;
         private bool _treeNodesOpen = true;
-        private bool _LogOpen = false;
+        private bool _logOpen = false;
         private bool _settingsVisible = true;
         private bool _dummyBoolIsOpen = true;
         private string _nplJsonFilePath;
@@ -120,7 +120,7 @@ namespace NPLEditor
                 {
                     MenuBar();
 
-                    if (!_LogOpen)
+                    if (!_logOpen)
                     {
                         if (_settingsVisible)
                         {
@@ -360,20 +360,19 @@ namespace NPLEditor
                         ModifyData(modifiedProcessorParam);
                         ImGui.End();
                     }
-                    else if (_LogOpen)
+                    else if (_logOpen)
                     {
                         ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
-                        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);                        
-                        var logText = NPLEditorSink.Output.ToString();
-                        ImGui.TextUnformatted(logText);
+                        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);
+                        ImGui.TextUnformatted(NPLEditorSink.Output.ToString());
                         ImGui.PopStyleColor();
 
                         ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
                         if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
                         {
-                            _LogOpen = false;
+                            _logOpen = false;
                         }
 
                         //BUG: SetScrollHere currently doesn't work on InputTextMultiline.
@@ -733,10 +732,10 @@ namespace NPLEditor
                     {
                         _settingsVisible = !_settingsVisible;
                     }
-                    if (ImGui.MenuItem($"{(_LogOpen ? $"{FontAwesome.EyeSlash} Close Log" : $"{FontAwesome.Eye} Show Log")}"))
+                    if (ImGui.MenuItem($"{(_logOpen ? $"{FontAwesome.EyeSlash} Close Log" : $"{FontAwesome.Eye} Show Log")}"))
                     {
                         ScrollLogToBottom = true;
-                        _LogOpen = !_LogOpen;
+                        _logOpen = !_logOpen;
                     }
                     ImGui.EndMenu();
                 }
