@@ -2,16 +2,11 @@
 using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
+using NPLEditor.Enums;
 using static NPLEditor.Common.ProcessorTypeDescription;
 
 namespace NPLEditor.Common
 {
-    public enum BuildAction
-    {
-        Build,
-        Copy,
-    }
-
     public class ContentItem
     {
         public string Path
