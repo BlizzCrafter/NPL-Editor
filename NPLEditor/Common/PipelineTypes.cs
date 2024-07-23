@@ -213,8 +213,8 @@ namespace NPLEditor.Common
             out ImporterTypeDescription outImporter,
             out ProcessorTypeDescription outProcessor)
         {
-            outImporter = null;
-            outProcessor = null;
+            outImporter = Importers.FirstOrDefault();
+            outProcessor = Processors.FirstOrDefault();
 
             foreach (var importer in Importers)
             {
@@ -229,15 +229,15 @@ namespace NPLEditor.Common
 
         public static int GetImporterIndex(string value)
         {
-            var info = _importers.Find(x => x.Type.Name.Equals(value));
-            var index = _importers.ToList().IndexOf(info);
+            var info = Importers.ToList().Find(x => x.TypeName.Equals(value));
+            var index = Importers.ToList().IndexOf(info);
             return index;
         }
 
         public static int GetProcessorIndex(string value)
         {
-            var info = _processors.Find(x => x.Name.Equals(value) || x.Type.Name.Equals(value));
-            var index = _processors.ToList().IndexOf(info);
+            var info = Processors.ToList().Find(x => x.DisplayName.Equals(value) || x.TypeName.Equals(value));
+            var index = Processors.ToList().IndexOf(info);
             return index;
         }
 
@@ -323,7 +323,8 @@ namespace NPLEditor.Common
                 }
             }
 
-            var importerDescriptions = new ImporterTypeDescription[_importers.Count];
+            //Creating TypeDescriptons
+            var importerDescriptions = new ImporterTypeDescription[_importers.Count + 1];
             var cur = 0;
             foreach (var item in _importers)
             {
@@ -344,14 +345,25 @@ namespace NPLEditor.Common
                     FileExtensions = item.Attribute.FileExtensions,
                     OutputType = outputType,
                 };
-                importerDescriptions[cur] = desc;
-                cur++;
+                importerDescriptions[cur++] = desc;
             }
-
+            var defaultImporter = new ImporterTypeDescription()
+            {
+                TypeName = "NONE",
+                DisplayName = "NONE",
+                DefaultProcessor = "NONE",
+                FileExtensions = Array.Empty<string>(),
+                OutputType = null,
+            };
+            importerDescriptions[cur] = defaultImporter;
+            {   //Sorting
+                var temp = importerDescriptions[0];
+                importerDescriptions[0] = importerDescriptions.Last();
+                importerDescriptions[^1] = temp;
+            }
             Importers = importerDescriptions;
 
-
-            var processorDescriptions = new ProcessorTypeDescription[_processors.Count];
+            var processorDescriptions = new ProcessorTypeDescription[_processors.Count + 1];
 
             const BindingFlags bindings = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             
@@ -403,8 +415,20 @@ namespace NPLEditor.Common
                 if (string.IsNullOrEmpty(desc.DisplayName))
                     desc.DisplayName = desc.TypeName;
 
-                processorDescriptions[cur] = desc;
-                cur++;
+                processorDescriptions[cur++] = desc;
+            }
+            var defaultProcessor = new ProcessorTypeDescription()
+            {
+                TypeName = "NONE",
+                DisplayName = "NONE",
+                Properties = new ProcessorTypeDescription.ProcessorPropertyCollection(Array.Empty< ProcessorTypeDescription.Property>()),
+                InputType = typeof(string),
+            };
+            processorDescriptions[cur] = defaultProcessor;
+            {   //Sorting
+                var temp = processorDescriptions[0];
+                processorDescriptions[0] = processorDescriptions.Last();
+                processorDescriptions[^1] = temp;
             }
             Processors = processorDescriptions;
             

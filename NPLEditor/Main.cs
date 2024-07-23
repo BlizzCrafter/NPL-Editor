@@ -212,8 +212,8 @@ namespace NPLEditor
                                 PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
                                     out var outImporter, out var outProcessor);
 
-                                importerName = outImporter?.TypeName;
-                                processorName = outProcessor?.TypeName;
+                                importerName = outImporter.TypeName;
+                                processorName = outProcessor.TypeName;
 
                                 data.Value["importer"] = importerName;
                                 data.Value["processor"] = processorName;
