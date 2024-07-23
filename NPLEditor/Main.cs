@@ -129,7 +129,7 @@ namespace NPLEditor
 
                             ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
                             ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
-                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
+                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 + ImGui.GetStyle().IndentSpacing);
                             if (ImGui.TreeNodeEx("settings", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                             {
                                 ImGui.PopStyleColor();
@@ -258,7 +258,7 @@ namespace NPLEditor
 
                             ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing * editButtonCount + ImGui.GetStyle().ItemSpacing.X);
                             ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
-                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
+                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 + ImGui.GetStyle().IndentSpacing * editButtonCount);
                             if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
                             {
                                 ImGui.PopStyleColor();
