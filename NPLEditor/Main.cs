@@ -29,6 +29,7 @@ namespace NPLEditor
         private bool _treeNodesOpen = true;
         private bool _logOpen = false;
         private bool _settingsVisible = true;
+        private bool _orderingOptionsVisible = false;
         private bool _dummyBoolIsOpen = true;
         private string _nplJsonFilePath;
 
@@ -190,10 +191,25 @@ namespace NPLEditor
 
                         JsonObject modifiedProcessorParam = null;
                         var jsonContent = _jsonObject["content"].AsObject().AsEnumerable();
-                        for (int i = 0; i < jsonContent.Count(); i++)
+                        for (int i = 0, id = 0; i < jsonContent.Count(); i++, id--)
                         {
                             var data = jsonContent.ToArray()[i];
+                            var editButtonCount = _orderingOptionsVisible ? 1 : 0;
 
+                            if (_orderingOptionsVisible)
+                            {
+                                editButtonCount++;
+                                if (EditButton(EditButtonPosition.Before, FontAwesome.ArrowDown, id, true, i == jsonContent.Count() - 1))
+                                {
+                                    MoveTreeItem(i, true);
+                                }
+                                editButtonCount++;
+                                if (EditButton(EditButtonPosition.Before, FontAwesome.ArrowUp, id - 1, true, i == 0))
+                                {
+                                    MoveTreeItem(i, false);
+                                }
+                            }
+                            editButtonCount++;
                             if (EditButton(EditButtonPosition.Before, FontAwesome.Edit, i, true))
                             {
                                 ContentDescriptor.Name = data.Key;
@@ -240,7 +256,7 @@ namespace NPLEditor
 
                             var categoryObject = _jsonObject["content"][data.Key];
 
-                            ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing + ImGui.GetStyle().ItemSpacing.X);
+                            ImGui.SetCursorPosX(ImGui.GetStyle().IndentSpacing * editButtonCount + ImGui.GetStyle().ItemSpacing.X);
                             ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight]);
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 150 - ImGui.GetStyle().IndentSpacing);
                             if (ImGui.TreeNodeEx(data.Key, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAllColumns))
@@ -487,6 +503,34 @@ namespace NPLEditor
         {
             WriteContentNPL();
             base.OnExiting(sender, args);
+        }
+
+        private void MoveTreeItem(int i, bool down)
+        {
+            var content = _jsonObject["content"].AsObject().ToList();
+
+            foreach (var item in content)
+            {
+                _jsonObject["content"].AsObject().Remove(item.Key);
+            }
+                        
+            for (int x = 0; x < content.Count; x++)
+            {
+                if (down)
+                {
+                    if (x == i + 1) _jsonObject["content"].AsObject().Add(content[i]);
+                    else if (x == i) _jsonObject["content"].AsObject().Add(content[i + 1]);
+                    else _jsonObject["content"].AsObject().Add(content[x]);
+                }
+                else
+                {
+                    if (x == i - 1) _jsonObject["content"].AsObject().Add(content[i]);
+                    else if (x == i) _jsonObject["content"].AsObject().Add(content[i - 1]);
+                    else _jsonObject["content"].AsObject().Add(content[x]);
+                }
+            }
+
+            WriteContentNPL();
         }
 
         #region ImGui Widgets
@@ -741,6 +785,10 @@ namespace NPLEditor
                     {
                         ScrollLogToBottom = true;
                         _logOpen = !_logOpen;
+                    }
+                    if (ImGui.MenuItem($"{(_orderingOptionsVisible ? $"{FontAwesome.Eye} Hide Order Arrows" : $"{FontAwesome.EyeSlash} Show Order Arrows")}"))
+                    {
+                        _orderingOptionsVisible = !_orderingOptionsVisible!;
                     }
                     ImGui.EndMenu();
                 }
