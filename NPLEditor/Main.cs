@@ -499,7 +499,7 @@ namespace NPLEditor
             catch (Exception e) { NPLLog.LogException(e, "SAVE ERROR"); }
         }
 
-        protected override void OnExiting(object sender, EventArgs args)
+        protected override void OnExiting(object sender, ExitingEventArgs args)
         {
             WriteContentNPL();
             base.OnExiting(sender, args);
