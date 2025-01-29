@@ -75,6 +75,7 @@ namespace NPLEditor
 #else
             string[] args = Environment.GetCommandLineArgs();
             _nplJsonFilePath = args[1];
+            Log.Verbose($"Launch Arguments: {_nplJsonFilePath}");
 #endif
 
             try
@@ -82,7 +83,7 @@ namespace NPLEditor
                 var jsonString = File.ReadAllText(_nplJsonFilePath);
                 _jsonObject = JsonNode.Parse(jsonString);
             }
-            catch (Exception e) { NPLLog.LogException(e, "JSON ERROR", true); }
+            catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
             base.LoadContent();
         }
 
