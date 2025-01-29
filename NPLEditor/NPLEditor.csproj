@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework.Content.Pipeline">
-      <HintPath>Content\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+      <HintPath>MonoGame.Framework.Content.Pipeline.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -49,7 +49,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="MonoGame.Framework.Content.Pipeline.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
