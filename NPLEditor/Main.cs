@@ -65,18 +65,21 @@ namespace NPLEditor
 
         protected override void LoadContent()
         {
-            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
-            Log.Debug($"WorkingDir: {Directory.GetCurrentDirectory()}");
-            Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
 #if DEBUG
-            string workingDir = Directory.GetCurrentDirectory();
-            string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
-            _nplJsonFilePath = Path.Combine(projDir, "Content", "Content.npl");
+            string projectDir = Directory.GetParent(AppSettings.LocalContentPath).Parent.Parent.FullName;
+            string contentDir = Path.Combine(projectDir, "Content");
+            _nplJsonFilePath = Path.Combine(contentDir, "Content.npl");
+
+            Directory.SetCurrentDirectory(contentDir);
 #else
+            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
+
             string[] args = Environment.GetCommandLineArgs();
             _nplJsonFilePath = args[1];
             Log.Verbose($"Launch Arguments: {_nplJsonFilePath}");
 #endif
+            Log.Debug($"WorkingDir: {Directory.GetCurrentDirectory()}");
+            Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
 
             try
             {
