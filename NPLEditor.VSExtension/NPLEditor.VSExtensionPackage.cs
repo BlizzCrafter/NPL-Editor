@@ -40,7 +40,7 @@ namespace NPLEditor.VSExtension
 
             var process = new Process()
             {
-                StartInfo = new ProcessStartInfo("npl-editor", $"{pszMkDocument}")
+                StartInfo = new ProcessStartInfo("npl-editor", $"\"{pszMkDocument}\"")
                 {
                     WorkingDirectory = Directory.GetParent(Path.GetDirectoryName(pszMkDocument)).FullName,
                     UseShellExecute = false,
