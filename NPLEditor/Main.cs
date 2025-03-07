@@ -1,20 +1,25 @@
-﻿using System;
-using System.IO;
-using System.Data;
-using System.Linq;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Collections.Generic;
+﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.RuntimeBuilder;
 using NPLEditor.Common;
 using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;
-using ImGuiNET;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using static System.Net.Mime.MediaTypeNames;
 using Color = Microsoft.Xna.Framework.Color;
+using ContentItem = NPLEditor.Common.ContentItem;
 using Num = System.Numerics;
 
 namespace NPLEditor
@@ -26,6 +31,12 @@ namespace NPLEditor
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer _imGuiRenderer;
         private JsonNode _jsonObject;
+        private RuntimeBuilder _RuntimeBuilder { get; set; }
+        private TargetPlatform _targetPlatform;
+        private GraphicsProfile _graphicsProfile;
+        private string _outputDir = "bin";
+        private string _intermediateDir = "obj";
+        private bool _compress = false;
         private bool _treeNodesOpen = true;
         private bool _logOpen = false;
         private bool _settingsVisible = true;
@@ -76,10 +87,27 @@ namespace NPLEditor
 
             string[] args = Environment.GetCommandLineArgs();
             _nplJsonFilePath = args[1];
-            Log.Verbose($"Launch Arguments: {_nplJsonFilePath}");
+            Log.Verbose($"Launch Arguments: {args}");
 #endif
+
+            var intermediateBuildDir = Path.Combine(Directory.GetCurrentDirectory(), _intermediateDir);
+            var outputBuildDir = Path.Combine(Directory.GetCurrentDirectory(), _outputDir);
+
             Log.Debug($"WorkingDir: {Directory.GetCurrentDirectory()}");
+            Log.Debug($"IntermediateDir: {intermediateBuildDir}");
+            Log.Debug($"OutputDir: {outputBuildDir}");
             Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
+
+            _RuntimeBuilder = new RuntimeBuilder(
+                Directory.GetCurrentDirectory(),
+                intermediateBuildDir,
+                outputBuildDir,
+                TargetPlatform.DesktopGL,
+                GraphicsProfile.Reach,
+                true)
+            {
+                Logger = new StringBuilderLogger()
+            };
 
             try
             {
@@ -146,12 +174,86 @@ namespace NPLEditor
                                     WriteContentNPL();
                                 }
 
+                                var intermediateDir = _jsonObject["intermediateDir"]?.ToString();
+                                if (intermediateDir == null)
+                                {
+                                    _jsonObject["intermediateDir"] = _intermediateDir;
+                                    intermediateDir = _jsonObject["intermediateDir"].ToString();
+                                    _RuntimeBuilder.SetIntermediateDir(_intermediateDir);
+                                }
+                                if (ImGui.InputText("intermediateDir", ref intermediateDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                                {
+                                    _jsonObject["intermediateDir"] = _intermediateDir = intermediateDir;
+                                    _RuntimeBuilder.SetIntermediateDir(_intermediateDir);
+                                    WriteContentNPL();
+                                }
+
+                                var outputDir = _jsonObject["outputDir"]?.ToString();
+                                if (outputDir == null)
+                                {
+                                    _jsonObject["outputDir"] = _outputDir;
+                                    outputDir = _jsonObject["outputDir"].ToString();
+                                    _RuntimeBuilder.SetOutputDir(_outputDir);
+                                }
+                                if (ImGui.InputText("outputDir", ref outputDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                                {
+                                    _jsonObject["outputDir"] = _outputDir = outputDir;
+                                    _RuntimeBuilder.SetOutputDir(_outputDir);
+                                    WriteContentNPL();
+                                }
+
+                                var platform = _jsonObject["platform"]?.ToString();
+                                if (platform == null)
+                                {
+                                    _jsonObject["platform"] = _targetPlatform.ToString();
+                                    platform = _jsonObject["platform"].ToString();
+                                    _RuntimeBuilder.SetPlatform(_targetPlatform);
+                                }
+                                if (ComboEnum(ref platform, "platform", Enum.GetNames(typeof(TargetPlatform))))
+                                {
+                                    _jsonObject["platform"] = platform;
+                                    _targetPlatform = Enum.Parse<TargetPlatform>(platform);
+                                    _RuntimeBuilder.SetPlatform(_targetPlatform);
+                                    WriteContentNPL();
+                                }
+
+                                var graphicsProfile = _jsonObject["graphicsProfile"]?.ToString();
+                                if (graphicsProfile == null)
+                                {
+                                    _jsonObject["graphicsProfile"] = _graphicsProfile.ToString();
+                                    graphicsProfile = _jsonObject["graphicsProfile"].ToString();
+                                    _RuntimeBuilder.SetGraphicsProfile(_graphicsProfile);
+                                }
+                                if (ComboEnum(ref graphicsProfile, "graphicsProfile", Enum.GetNames(typeof(GraphicsProfile))))
+                                {
+                                    _jsonObject["graphicsProfile"] = graphicsProfile;
+                                    _graphicsProfile = Enum.Parse<GraphicsProfile>(graphicsProfile);
+                                    _RuntimeBuilder.SetGraphicsProfile(_graphicsProfile);
+                                    WriteContentNPL();
+                                }
+
+                                var compress = _jsonObject["compress"]?.ToString();
+                                if (compress == null)
+                                {
+                                    _jsonObject["compress"] = _compress.ToString();
+                                    compress = _jsonObject["compress"].ToString();
+                                    _RuntimeBuilder.SetCompressContent(_compress);
+                                }
+                                else _compress = bool.Parse(compress);
+
+                                if (ImGui.Checkbox("compress", ref _compress))
+                                {
+                                    _jsonObject["compress"] = compress = _compress.ToString();
+                                    _RuntimeBuilder.SetCompressContent(_compress);
+                                }
+
                                 var references = _jsonObject["references"].AsArray();
                                 ArrayEditor("Reference", references, out _, out bool itemRemoved, out bool itemChanged);
                                 {
                                     if (itemChanged || itemRemoved)
                                     {
                                         PipelineTypes.Reset();
+                                        _RuntimeBuilder.ClearAllReferences();
                                     }
                                 }
 
@@ -183,9 +285,11 @@ namespace NPLEditor
                                             }
                                         }
                                     }
-                                    PipelineTypes.Load(combinedReferences.Distinct()
+                                    var combinedReferencesArray = combinedReferences.Distinct()
                                         .Where(x => !string.IsNullOrEmpty(x.ToString()))
-                                        .ToArray());
+                                        .ToArray();
+                                    PipelineTypes.Load(combinedReferencesArray);
+                                    _RuntimeBuilder.AddReferences(combinedReferencesArray);
                                 }
                                 ImGui.TreePop();
                             }
@@ -325,7 +429,7 @@ namespace NPLEditor
                                                     }
                                                     else if (nplItem.Property(parameterKey).Type.IsEnum)
                                                     {
-                                                        ComboEnum(nplItem, data.Key, itemKey, parameterKey);
+                                                        ComboContentItem(nplItem, data.Key, itemKey, parameterKey);
                                                     }
                                                     else TextInput(nplItem, data.Key, itemKey, parameterKey);
                                                 }
@@ -603,6 +707,17 @@ namespace NPLEditor
             return false;
         }
 
+        private bool ComboEnum(ref string property, string parameterKey, string[] names)
+        {
+            var selectedIndex = names.ToList().IndexOf(property.ToString());
+            if (ImGui.Combo(parameterKey, ref selectedIndex, names, names.Length))
+            {
+                property = names[selectedIndex].ToString();
+                return true;
+            }
+            return false;
+        }
+
         private bool Combo(ContentItem nplItem, string parameterKey, string[] names)
         {
             var property = nplItem.Property(parameterKey);
@@ -615,7 +730,7 @@ namespace NPLEditor
             return false;
         }
 
-        private bool ComboEnum(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        private bool ComboContentItem(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
         {
             var names = Enum.GetNames(nplItem.Property(parameterKey).Type);
             if (Combo(nplItem, parameterKey, names))

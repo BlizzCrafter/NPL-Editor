@@ -12,7 +12,6 @@
 	<PackAsTool>true</PackAsTool>
 	<ToolCommandName>npl-editor</ToolCommandName>
 	<IncludeBuildOutput>false</IncludeBuildOutput>
-	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;4014</NoWarn>
@@ -35,6 +34,9 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MonoGame.RuntimeBuilder\MonoGame.RuntimeBuilder\MonoGame.RuntimeBuilder.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework.Content.Pipeline">
