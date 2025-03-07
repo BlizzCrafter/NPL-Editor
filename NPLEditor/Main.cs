@@ -914,6 +914,26 @@ namespace NPLEditor
                     ImGui.EndMenu();
                 }
 
+                if (ImGui.BeginMenu("Content"))
+                {
+                    ImGui.SeparatorText("Builder");
+                    if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", !_buildContentRunning))
+                    {
+                        _buildContentRunning = true;
+                        _logOpen = true;
+
+                        if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
+
+                        //BuildContent();
+                    }
+                    ImGui.SeparatorText("Options");
+                    if (ImGui.MenuItem("Clear Log View on Build", "", _clearLogViewOnBuild))
+                    {
+                        _clearLogViewOnBuild = !_clearLogViewOnBuild;
+                    }
+                    ImGui.EndMenu();
+                }
+
                 if (ImGui.BeginMenu("Help"))
                 {
                     if (ImGui.BeginMenu($"{FontAwesome.FileArchive} Logs"))
