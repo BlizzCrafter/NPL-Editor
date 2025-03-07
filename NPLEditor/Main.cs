@@ -14,10 +14,9 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using static System.Net.Mime.MediaTypeNames;
+using System.Threading.Tasks;
 using Color = Microsoft.Xna.Framework.Color;
 using ContentItem = NPLEditor.Common.ContentItem;
 using Num = System.Numerics;
@@ -924,7 +923,7 @@ namespace NPLEditor
 
                         if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
 
-                        //BuildContent();
+                        BuildContent();
                     }
                     ImGui.SeparatorText("Options");
                     if (ImGui.MenuItem("Clear Log View on Build", "", _clearLogViewOnBuild))
@@ -1140,5 +1139,17 @@ namespace NPLEditor
         }
 
         #endregion ImGui Widgets
+
+        public async Task BuildContent()
+        {
+            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CONTENT");
+
+            try
+            {
+                await _RuntimeBuilder.BuildContent();
+                NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
+            }
+            catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
+        }
     }
 }
