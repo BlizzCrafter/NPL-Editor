@@ -500,9 +500,19 @@ namespace NPLEditor
 
                         ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
-                        if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                        if (!_buildContentRunning)
                         {
-                            _logOpen = false;
+                            if (ImGui.Button($"{FontAwesome.StepBackward} Back", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                            {
+                                _logOpen = false;
+                            }
+                        }
+                        else
+                        {
+                            if (ImGui.Button($"{FontAwesome.Stop} CANCEL", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                            {
+                                //ToDo: Implement build content cancelation.
+                            }
                         }
 
                         //BUG: SetScrollHere currently doesn't work on InputTextMultiline.
