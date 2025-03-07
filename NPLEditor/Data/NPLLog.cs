@@ -12,6 +12,13 @@ namespace NPLEditor.Data
             Log.Information("");
         }
 
+        public static void LogWarningHeadline(string icon, string message)
+        {
+            Log.Warning("");
+            Log.Warning($"{icon} {message}");
+            Log.Warning("");
+        }
+
         public static void LogErrorHeadline(string icon, string message)
         {
             Log.Error("");

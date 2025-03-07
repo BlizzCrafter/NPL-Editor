@@ -90,8 +90,8 @@ namespace NPLEditor
             Log.Verbose($"Launch Arguments: {args}");
 #endif
 
-            var intermediateBuildDir = Path.Combine(Directory.GetCurrentDirectory(), _intermediateDir);
-            var outputBuildDir = Path.Combine(Directory.GetCurrentDirectory(), _outputDir);
+            var intermediateBuildDir = Path.GetFullPath(_intermediateDir);
+            var outputBuildDir = Path.GetFullPath(_outputDir);
 
             Log.Debug($"WorkingDir: {Directory.GetCurrentDirectory()}");
             Log.Debug($"IntermediateDir: {intermediateBuildDir}");
@@ -106,7 +106,7 @@ namespace NPLEditor
                 GraphicsProfile.Reach,
                 true)
             {
-                Logger = new StringBuilderLogger()
+                Logger = new NPLBuildLogger()
             };
 
             try
