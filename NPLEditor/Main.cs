@@ -37,6 +37,8 @@ namespace NPLEditor
         private string _outputDir = "bin";
         private string _intermediateDir = "obj";
         private bool _compress = false;
+        private bool _buildContentRunning = false;
+        private bool _clearLogViewOnBuild = true;
         private bool _treeNodesOpen = true;
         private bool _logOpen = false;
         private bool _settingsVisible = true;
