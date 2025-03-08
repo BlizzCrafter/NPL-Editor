@@ -3,22 +3,17 @@ using System.IO;
 
 namespace NPLEditor.Data
 {
-    public static class NPLConfigReader
+    public static class ContentReader
     {
         public static string contentRoot = "";
 
         public static string[] GetAllContentFiles()
         {
-            Console.WriteLine("Reading Content Items.");
-            Console.WriteLine();
-
             contentRoot = contentRoot.Replace("\\", "/");
             if (contentRoot.StartsWith("./"))
             {
                 contentRoot = contentRoot.Substring(2, contentRoot.Length - 2);
             }
-            Console.WriteLine("Root: " + contentRoot);
-            Console.WriteLine();
 
             foreach (var item in Main.ContentList)
             {
@@ -46,8 +41,6 @@ namespace NPLEditor.Data
                     }
                 }
 
-                Console.WriteLine("Reading content for: " + path);
-
                 var fileName = Path.GetFileName(path);
                 var filePath = Path.GetDirectoryName(path);
                 var files = new string[] { };
@@ -65,16 +58,10 @@ namespace NPLEditor.Data
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"    Error reading files from {contentRoot}{filePath}: ");
-                    Console.WriteLine("    " + e.Message);
+                    NPLLog.LogException(e);
                 }
                 return files;
             }
-
-            Console.WriteLine();
-            Console.WriteLine("Finished reading Content Items!");
-            Console.WriteLine();
-
             return null;
         }
     }
