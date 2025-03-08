@@ -32,7 +32,7 @@ namespace NPLEditor
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer _imGuiRenderer;
         private JsonNode _jsonObject;
-        private RuntimeBuilder _RuntimeBuilder { get; set; }
+        private RuntimeBuilder _runtimeBuilder { get; set; }
         private TargetPlatform _targetPlatform;
         private GraphicsProfile _graphicsProfile;
         private string _outputDir = "bin";
@@ -104,7 +104,7 @@ namespace NPLEditor
             Log.Debug($"OutputDir: {outputBuildDir}");
             Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
 
-            _RuntimeBuilder = new RuntimeBuilder(
+            _runtimeBuilder = new RuntimeBuilder(
                 Directory.GetCurrentDirectory(),
                 intermediateBuildDir,
                 outputBuildDir,
@@ -186,12 +186,12 @@ namespace NPLEditor
                                 {
                                     _jsonObject["intermediateDir"] = _intermediateDir;
                                     intermediateDir = _jsonObject["intermediateDir"].ToString();
-                                    _RuntimeBuilder.SetIntermediateDir(_intermediateDir);
+                                    _runtimeBuilder.SetIntermediateDir(_intermediateDir);
                                 }
                                 if (ImGui.InputText("intermediateDir", ref intermediateDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                 {
                                     _jsonObject["intermediateDir"] = _intermediateDir = intermediateDir;
-                                    _RuntimeBuilder.SetIntermediateDir(_intermediateDir);
+                                    _runtimeBuilder.SetIntermediateDir(_intermediateDir);
                                     WriteContentNPL();
                                 }
 
@@ -200,12 +200,12 @@ namespace NPLEditor
                                 {
                                     _jsonObject["outputDir"] = _outputDir;
                                     outputDir = _jsonObject["outputDir"].ToString();
-                                    _RuntimeBuilder.SetOutputDir(_outputDir);
+                                    _runtimeBuilder.SetOutputDir(_outputDir);
                                 }
                                 if (ImGui.InputText("outputDir", ref outputDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                 {
                                     _jsonObject["outputDir"] = _outputDir = outputDir;
-                                    _RuntimeBuilder.SetOutputDir(_outputDir);
+                                    _runtimeBuilder.SetOutputDir(_outputDir);
                                     WriteContentNPL();
                                 }
 
@@ -214,13 +214,13 @@ namespace NPLEditor
                                 {
                                     _jsonObject["platform"] = _targetPlatform.ToString();
                                     platform = _jsonObject["platform"].ToString();
-                                    _RuntimeBuilder.SetPlatform(_targetPlatform);
+                                    _runtimeBuilder.SetPlatform(_targetPlatform);
                                 }
                                 if (ComboEnum(ref platform, "platform", Enum.GetNames(typeof(TargetPlatform))))
                                 {
                                     _jsonObject["platform"] = platform;
                                     _targetPlatform = Enum.Parse<TargetPlatform>(platform);
-                                    _RuntimeBuilder.SetPlatform(_targetPlatform);
+                                    _runtimeBuilder.SetPlatform(_targetPlatform);
                                     WriteContentNPL();
                                 }
 
@@ -229,13 +229,13 @@ namespace NPLEditor
                                 {
                                     _jsonObject["graphicsProfile"] = _graphicsProfile.ToString();
                                     graphicsProfile = _jsonObject["graphicsProfile"].ToString();
-                                    _RuntimeBuilder.SetGraphicsProfile(_graphicsProfile);
+                                    _runtimeBuilder.SetGraphicsProfile(_graphicsProfile);
                                 }
                                 if (ComboEnum(ref graphicsProfile, "graphicsProfile", Enum.GetNames(typeof(GraphicsProfile))))
                                 {
                                     _jsonObject["graphicsProfile"] = graphicsProfile;
                                     _graphicsProfile = Enum.Parse<GraphicsProfile>(graphicsProfile);
-                                    _RuntimeBuilder.SetGraphicsProfile(_graphicsProfile);
+                                    _runtimeBuilder.SetGraphicsProfile(_graphicsProfile);
                                     WriteContentNPL();
                                 }
 
@@ -244,14 +244,14 @@ namespace NPLEditor
                                 {
                                     _jsonObject["compress"] = _compress.ToString();
                                     compress = _jsonObject["compress"].ToString();
-                                    _RuntimeBuilder.SetCompressContent(_compress);
+                                    _runtimeBuilder.SetCompressContent(_compress);
                                 }
                                 else _compress = bool.Parse(compress);
 
                                 if (ImGui.Checkbox("compress", ref _compress))
                                 {
                                     _jsonObject["compress"] = compress = _compress.ToString();
-                                    _RuntimeBuilder.SetCompressContent(_compress);
+                                    _runtimeBuilder.SetCompressContent(_compress);
                                 }
 
                                 var references = _jsonObject["references"].AsArray();
@@ -260,7 +260,7 @@ namespace NPLEditor
                                     if (itemChanged || itemRemoved)
                                     {
                                         PipelineTypes.Reset();
-                                        _RuntimeBuilder.ClearAllReferences();
+                                        _runtimeBuilder.ClearAllReferences();
                                     }
                                 }
 
@@ -296,7 +296,7 @@ namespace NPLEditor
                                         .Where(x => !string.IsNullOrEmpty(x.ToString()))
                                         .ToArray();
                                     PipelineTypes.Load(combinedReferencesArray);
-                                    _RuntimeBuilder.AddReferences(combinedReferencesArray);
+                                    _runtimeBuilder.AddReferences(combinedReferencesArray);
                                 }
                                 ImGui.TreePop();
                             }
@@ -960,7 +960,7 @@ namespace NPLEditor
 
                         if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
 
-                        _RuntimeBuilder.CleanContent();
+                        _runtimeBuilder.CleanContent();
                         NPLLog.LogInfoHeadline(FontAwesome.Broom, "CONTENT CLEANED");
                     }
                     ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
@@ -968,12 +968,12 @@ namespace NPLEditor
                     if (ImGui.MenuItem("Incremental", "", _incrementalContent))
                     {
                         _incrementalContent = !_incrementalContent;
-                        _RuntimeBuilder.Incremental = _incrementalContent;
+                        _runtimeBuilder.Incremental = _incrementalContent;
                     }
                     if (ImGui.MenuItem("Launch Debugger", "", _launchDebuggerContent))
                     {
                         _launchDebuggerContent = !_launchDebuggerContent;
-                        _RuntimeBuilder.LaunchDebugger = _launchDebuggerContent;
+                        _runtimeBuilder.LaunchDebugger = _launchDebuggerContent;
                     }
                     if (ImGui.MenuItem("Clear Log View on Build", "", _clearLogViewOnBuild))
                     {
@@ -1193,11 +1193,11 @@ namespace NPLEditor
         public async Task BuildContent(bool rebuildNow = false)
         {
             NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CONTENT");
-            if (rebuildNow) _RuntimeBuilder.Rebuild = true;
+            if (rebuildNow) _runtimeBuilder.Rebuild = true;
 
             try
             {
-                if (_RuntimeBuilder.LaunchDebugger && !Debugger.IsAttached)
+                if (_runtimeBuilder.LaunchDebugger && !Debugger.IsAttached)
                 {
                     try
                     {
@@ -1222,7 +1222,7 @@ namespace NPLEditor
                 }
                 if (!_cancelBuildContent)
                 {
-                    await _RuntimeBuilder.BuildContent(ContentReader.GetAllContentFiles());
+                    await _runtimeBuilder.BuildContent(ContentReader.GetAllContentFiles());
                     NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
                 }
                 else NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CANCELD");
@@ -1232,7 +1232,7 @@ namespace NPLEditor
             _cancelBuildContent = false;
             _buildContentRunning = false;
 
-            if (rebuildNow) _RuntimeBuilder.Rebuild = false;
+            if (rebuildNow) _runtimeBuilder.Rebuild = false;
         }
     }
 }
