@@ -1228,14 +1228,11 @@ namespace NPLEditor
                 else NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CANCELD");
             }
             catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
-            FinishBuildContent();
-            if (rebuildNow) _RuntimeBuilder.Rebuild = false;
-        }
 
-        private void FinishBuildContent()
-        {
             _cancelBuildContent = false;
             _buildContentRunning = false;
+
+            if (rebuildNow) _RuntimeBuilder.Rebuild = false;
         }
     }
 }
