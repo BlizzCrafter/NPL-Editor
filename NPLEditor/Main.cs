@@ -40,9 +40,6 @@ namespace NPLEditor
         private bool _compress = false;
         private bool _buildContentRunning = false;
         private bool _clearLogViewOnBuild = true;
-        private bool _rebuildContent = false;
-        private bool _cleanContent = false;
-        private bool _quiteContent = false;
         private bool _launchDebuggerContent = false;
         private bool _incrementalContent = false;
         private bool _cancelBuildContent = false;
@@ -936,7 +933,7 @@ namespace NPLEditor
 
                 if (ImGui.BeginMenu("Content"))
                 {
-                    ImGui.SeparatorText("Builder");
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
                     if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", !_buildContentRunning))
                     {
                         _buildContentRunning = true;
@@ -944,29 +941,34 @@ namespace NPLEditor
 
                         if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
 
-                        var buildTask = Task.Factory.StartNew(() => BuildContent());
-                        buildTask.ContinueWith((e) => FinishBuildContent());
+                        Task.Factory.StartNew(() => BuildContent());
                     }
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
+                    if (ImGui.MenuItem($"{FontAwesome.Igloo} Rebuild Now", !_buildContentRunning))
+                    {
+                        _buildContentRunning = true;
+                        _logOpen = true;
+
+                        if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
+
+                        Task.Factory.StartNew(() => BuildContent(rebuildNow: true));
+                    }
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
+                    if (ImGui.MenuItem($"{FontAwesome.Broom} Clean Now"))
+                    {
+                        _logOpen = true;
+
+                        if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
+
+                        _RuntimeBuilder.CleanContent();
+                        NPLLog.LogInfoHeadline(FontAwesome.Broom, "CONTENT CLEANED");
+                    }
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                     ImGui.SeparatorText("Options");
-                    if (ImGui.MenuItem("Rebuild", "", _rebuildContent))
-                    {
-                        _rebuildContent = !_rebuildContent;
-                        _RuntimeBuilder.Rebuild = _rebuildContent;
-                    }
-                    if (ImGui.MenuItem("Clean", "", _cleanContent))
-                    {
-                        _cleanContent = !_cleanContent;
-                        _RuntimeBuilder.Clean = _cleanContent;
-                    }
                     if (ImGui.MenuItem("Incremental", "", _incrementalContent))
                     {
                         _incrementalContent = !_incrementalContent;
                         _RuntimeBuilder.Incremental = _incrementalContent;
-                    }
-                    if (ImGui.MenuItem("Quite", "", _quiteContent))
-                    {
-                        _quiteContent = !_quiteContent;
-                        _RuntimeBuilder.Quiet = _quiteContent;
                     }
                     if (ImGui.MenuItem("Launch Debugger", "", _launchDebuggerContent))
                     {
@@ -1188,9 +1190,10 @@ namespace NPLEditor
 
         #endregion ImGui Widgets
 
-        public async Task BuildContent()
+        public async Task BuildContent(bool rebuildNow = false)
         {
             NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CONTENT");
+            if (rebuildNow) _RuntimeBuilder.Rebuild = true;
 
             try
             {
@@ -1225,6 +1228,8 @@ namespace NPLEditor
                 else NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CANCELD");
             }
             catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
+            FinishBuildContent();
+            if (rebuildNow) _RuntimeBuilder.Rebuild = false;
         }
 
         private void FinishBuildContent()
