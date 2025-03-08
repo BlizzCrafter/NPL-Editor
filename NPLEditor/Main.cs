@@ -25,6 +25,7 @@ namespace NPLEditor
 {
     public class Main : Game
     {
+        public static Dictionary<string, ContentItem> ContentList = new();
         public static bool ScrollLogToBottom { get; set; }
 
         private GraphicsDeviceManager _graphics;
@@ -168,10 +169,11 @@ namespace NPLEditor
                                 ImGui.PopStyleColor();
 
                                 var root = _jsonObject["root"];
-                                var rootValue = root.ToString();
+                                var rootValue = NPLConfigReader.contentRoot = root.ToString();
                                 if (ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                 {
                                     _jsonObject["root"] = rootValue;
+                                    NPLConfigReader.contentRoot = rootValue;
                                     WriteContentNPL();
                                 }
 
@@ -362,6 +364,7 @@ namespace NPLEditor
                             }
 
                             var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
+                            if (!ContentList.ContainsKey(data.Key)) ContentList.Add(data.Key, nplItem);
 
                             var categoryObject = _jsonObject["content"][data.Key];
 
@@ -1079,6 +1082,7 @@ namespace NPLEditor
                     if (ImGui.Button($"{FontAwesome.TrashAlt}", new Num.Vector2(buttonWidth, 0)))
                     {
                         _jsonObject["content"].AsObject().Remove(ContentDescriptor.Category);
+                        ContentList.Remove(ContentDescriptor.Category);
                         WriteContentNPL();
                         ClosePopupModal();
                         return true;
@@ -1156,10 +1160,12 @@ namespace NPLEditor
 
             try
             {
-                await _RuntimeBuilder.BuildContent();
+                await _RuntimeBuilder.BuildContent(NPLConfigReader.GetAllContentFiles());
                 NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
             }
             catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
+
+            _buildContentRunning = false;
         }
     }
 }

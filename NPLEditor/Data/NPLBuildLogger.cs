@@ -8,17 +8,17 @@ namespace NPLEditor.Data
     {
         public override void LogImportantMessage(string message, params object[] messageArgs)
         {
-            NPLLog.LogWarningHeadline(FontAwesome.ExclamationCircle, message);
+            NPLLog.LogWarningHeadline(FontAwesome.ExclamationCircle, string.Format(message, messageArgs));
         }
 
         public override void LogMessage(string message, params object[] messageArgs)
         {
-            Log.Debug(message);
+            Log.Debug(string.Format(message, messageArgs));
         }
 
         public override void LogWarning(string helpLink, ContentIdentity contentIdentity, string message, params object[] messageArgs)
         {
-            NPLLog.LogWarningHeadline(FontAwesome.ExclamationTriangle, message);
+            NPLLog.LogWarningHeadline(FontAwesome.ExclamationTriangle, string.Format(message, messageArgs));
         }
     }
 }
