@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 using Color = Microsoft.Xna.Framework.Color;
 using ContentItem = NPLEditor.Common.ContentItem;
@@ -39,6 +40,12 @@ namespace NPLEditor
         private bool _compress = false;
         private bool _buildContentRunning = false;
         private bool _clearLogViewOnBuild = true;
+        private bool _rebuildContent = false;
+        private bool _cleanContent = false;
+        private bool _quiteContent = false;
+        private bool _launchDebuggerContent = false;
+        private bool _incrementalContent = false;
+        private bool _cancelBuildContent = false;
         private bool _treeNodesOpen = true;
         private bool _logOpen = false;
         private bool _settingsVisible = true;
@@ -169,11 +176,11 @@ namespace NPLEditor
                                 ImGui.PopStyleColor();
 
                                 var root = _jsonObject["root"];
-                                var rootValue = NPLConfigReader.contentRoot = root.ToString();
+                                var rootValue = ContentReader.contentRoot = root.ToString();
                                 if (ImGui.InputText("root", ref rootValue, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                 {
                                     _jsonObject["root"] = rootValue;
-                                    NPLConfigReader.contentRoot = rootValue;
+                                    ContentReader.contentRoot = rootValue;
                                     WriteContentNPL();
                                 }
 
@@ -514,7 +521,8 @@ namespace NPLEditor
                         {
                             if (ImGui.Button($"{FontAwesome.Stop} CANCEL", new Num.Vector2(ImGui.GetContentRegionAvail().X, 0)))
                             {
-                                //ToDo: Implement build content cancelation.
+                                //ToDo: Implement already running build content cancelation.
+                                _cancelBuildContent = true;
                             }
                         }
 
@@ -936,9 +944,35 @@ namespace NPLEditor
 
                         if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
 
-                        BuildContent();
+                        var buildTask = Task.Factory.StartNew(() => BuildContent());
+                        buildTask.ContinueWith((e) => FinishBuildContent());
                     }
                     ImGui.SeparatorText("Options");
+                    if (ImGui.MenuItem("Rebuild", "", _rebuildContent))
+                    {
+                        _rebuildContent = !_rebuildContent;
+                        _RuntimeBuilder.Rebuild = _rebuildContent;
+                    }
+                    if (ImGui.MenuItem("Clean", "", _cleanContent))
+                    {
+                        _cleanContent = !_cleanContent;
+                        _RuntimeBuilder.Clean = _cleanContent;
+                    }
+                    if (ImGui.MenuItem("Incremental", "", _incrementalContent))
+                    {
+                        _incrementalContent = !_incrementalContent;
+                        _RuntimeBuilder.Incremental = _incrementalContent;
+                    }
+                    if (ImGui.MenuItem("Quite", "", _quiteContent))
+                    {
+                        _quiteContent = !_quiteContent;
+                        _RuntimeBuilder.Quiet = _quiteContent;
+                    }
+                    if (ImGui.MenuItem("Launch Debugger", "", _launchDebuggerContent))
+                    {
+                        _launchDebuggerContent = !_launchDebuggerContent;
+                        _RuntimeBuilder.LaunchDebugger = _launchDebuggerContent;
+                    }
                     if (ImGui.MenuItem("Clear Log View on Build", "", _clearLogViewOnBuild))
                     {
                         _clearLogViewOnBuild = !_clearLogViewOnBuild;
@@ -1160,11 +1194,42 @@ namespace NPLEditor
 
             try
             {
-                await _RuntimeBuilder.BuildContent(NPLConfigReader.GetAllContentFiles());
-                NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
+                if (_RuntimeBuilder.LaunchDebugger && !Debugger.IsAttached)
+                {
+                    try
+                    {
+                        Debugger.Launch();
+                        var currentProcess = Process.GetCurrentProcess();
+                        Log.Warning("Waiting for debugger to attach:");
+                        Log.Warning($"({currentProcess.MainModule.FileName} PID {currentProcess.Id}).");
+                        Log.Warning("Press the 'Cancel' button below to continue without debugger.");
+                        while (!Debugger.IsAttached)
+                        {
+                            if (_cancelBuildContent)
+                            {
+                                break;
+                            }
+                            Thread.Sleep(100);
+                        }
+                    }
+                    catch (NotImplementedException e)
+                    {
+                        NPLLog.LogException(e, "The debugger is not implemented under Mono and thus is not supported on your platform.");
+                    }
+                }
+                if (!_cancelBuildContent)
+                {
+                    await _RuntimeBuilder.BuildContent(ContentReader.GetAllContentFiles());
+                    NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
+                }
+                else NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CANCELD");
             }
             catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
+        }
 
+        private void FinishBuildContent()
+        {
+            _cancelBuildContent = false;
             _buildContentRunning = false;
         }
     }
