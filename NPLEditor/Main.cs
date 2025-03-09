@@ -619,7 +619,11 @@ namespace NPLEditor
                 {
                     WriteIndented = true
                 });
-                File.WriteAllText(_nplJsonFilePath, jsonString);
+                using (var fs = new FileStream(_nplJsonFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                using (var writer = new StreamWriter(fs))
+                {
+                    writer.Write(jsonString);
+                }
 
                 Log.Debug("Content file successfully saved.");
             }
