@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace NPLEditor.Data
@@ -7,8 +8,11 @@ namespace NPLEditor.Data
     {
         public static string contentRoot = "";
 
-        public static string[] GetAllContentFiles()
+        public static void GetAllContentFiles(out List<string> copyFiles, out List<string> buildFiles)
         {
+            copyFiles = new List<string>();
+            buildFiles = new List<string>();
+
             contentRoot = contentRoot.Replace("\\", "/");
             if (contentRoot.StartsWith("./"))
             {
@@ -23,27 +27,23 @@ namespace NPLEditor.Data
                     throw new Exception("'path' is not allowed to contain '../'! Use 'root' property to specify a different root instead.");
                 }
 
-                var appendRoot = false;
-                if (contentRoot != "")
+                if (path.StartsWith('$'))
                 {
-                    if (path.StartsWith('$'))
-                    {
-                        // $ means that the path will not have the root appended to it.
-                        path = path.TrimStart('$');
-                        appendRoot = false;
-                    }
-                    else
-                    {
-                        // Appending root now so that we would work with full paths.
-                        // We don't care if it's a link or not for now.
-                        path = Path.Combine(contentRoot, path);
-                        appendRoot = true;
-                    }
+                    // $ means that the path will not have the root appended to it.
+                    path = path.TrimStart('$');
+                }
+                else if (contentRoot != "")
+                {
+                    // Appending root now so that we would work with full paths.
+                    path = Path.Combine(contentRoot, path);
                 }
 
                 var fileName = Path.GetFileName(path);
                 var filePath = Path.GetDirectoryName(path);
-                var files = new string[] { };
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    filePath = Directory.GetCurrentDirectory();
+                }
 
                 try
                 {
@@ -54,15 +54,20 @@ namespace NPLEditor.Data
                     }
                     else searchOpt = SearchOption.TopDirectoryOnly;
 
-                    files = Directory.GetFiles(Path.Combine(contentRoot, filePath), fileName, searchOpt);
+                    if (item.Value.Action == Enums.BuildAction.Copy)
+                    {
+                        copyFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
+                    }
+                    else if(item.Value.Action == Enums.BuildAction.Build)
+                    {
+                        buildFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
+                    }
                 }
                 catch (Exception e)
                 {
                     NPLLog.LogException(e);
                 }
-                return files;
             }
-            return null;
         }
     }
 }

@@ -1222,7 +1222,13 @@ namespace NPLEditor
                 }
                 if (!_cancelBuildContent)
                 {
-                    await _runtimeBuilder.BuildContent(ContentReader.GetAllContentFiles());
+                    ContentReader.GetAllContentFiles(out var filesToCopy, out var filesToBuild);
+
+                    _runtimeBuilder.RegisterCopyContent(filesToCopy.ToArray());
+                    _runtimeBuilder.RegisterBuildContent(filesToBuild.ToArray());
+                    
+                    await _runtimeBuilder.BuildContent();
+
                     NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
                 }
                 else NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CANCELD");
