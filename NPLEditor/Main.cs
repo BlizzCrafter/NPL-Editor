@@ -368,7 +368,8 @@ namespace NPLEditor
                             }
 
                             var nplItem = new ContentItem(data.Key, importerName, processorName); //e.g. data.Key = contentList
-                            if (!ContentList.ContainsKey(data.Key)) ContentList.Add(data.Key, nplItem);
+                            if (ContentList.ContainsKey(data.Key)) ContentList.Remove(data.Key);
+                            ContentList.Add(data.Key, nplItem);
 
                             var categoryObject = _jsonObject["content"][data.Key];
 
