@@ -1,8 +1,8 @@
-﻿using System;
+﻿using NPLEditor.Enums;
+using System;
 using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
-using NPLEditor.Enums;
 using static NPLEditor.Common.ProcessorTypeDescription;
 
 namespace NPLEditor.Common
