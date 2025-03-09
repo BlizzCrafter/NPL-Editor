@@ -33,8 +33,10 @@ namespace NPLEditor
         private ImGuiRenderer _imGuiRenderer;
         private JsonNode _jsonObject;
         private RuntimeBuilder _runtimeBuilder { get; set; }
-        private TargetPlatform _targetPlatform;
-        private GraphicsProfile _graphicsProfile;
+        private TargetPlatform _targetPlatform = TargetPlatform.DesktopGL;
+        private GraphicsProfile _graphicsProfile = GraphicsProfile.Reach;
+        private string _outputPath => Path.Combine(Path.GetFullPath(_outputDir), _targetPlatform.ToString());
+        private string _intermediatePath => Path.Combine(Path.GetFullPath(_intermediateDir), _targetPlatform.ToString());
         private string _outputDir = "bin";
         private string _intermediateDir = "obj";
         private bool _compress = false;
@@ -95,29 +97,30 @@ namespace NPLEditor
             _nplJsonFilePath = args[1];
             Log.Verbose($"Launch Arguments: {args}");
 #endif
-
-            var intermediateBuildDir = Path.GetFullPath(_intermediateDir);
-            var outputBuildDir = Path.GetFullPath(_outputDir);
-
             Log.Debug($"WorkingDir: {Directory.GetCurrentDirectory()}");
-            Log.Debug($"IntermediateDir: {intermediateBuildDir}");
-            Log.Debug($"OutputDir: {outputBuildDir}");
+            Log.Debug($"IntermediateDir: {_intermediatePath}");
+            Log.Debug($"OutputDir: {_outputPath}");
             Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
 
             _runtimeBuilder = new RuntimeBuilder(
                 Directory.GetCurrentDirectory(),
-                intermediateBuildDir,
-                outputBuildDir,
-                TargetPlatform.DesktopGL,
-                GraphicsProfile.Reach,
-                true)
+                _intermediatePath,
+                _outputPath,
+                _targetPlatform,
+                _graphicsProfile,
+                _compress)
             {
                 Logger = new NPLBuildLogger()
             };
 
             try
             {
-                var jsonString = File.ReadAllText(_nplJsonFilePath);
+                string jsonString;
+                using (var fs = new FileStream(_nplJsonFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(fs))
+                {
+                    jsonString = reader.ReadToEnd();
+                }
                 _jsonObject = JsonNode.Parse(jsonString);
             }
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
@@ -181,31 +184,29 @@ namespace NPLEditor
                                     WriteContentNPL();
                                 }
 
-                                var intermediateDir = _jsonObject["intermediateDir"]?.ToString();
-                                if (intermediateDir == null)
+                                if (_jsonObject["intermediateDir"]?.ToString() == null)
                                 {
                                     _jsonObject["intermediateDir"] = _intermediateDir;
-                                    intermediateDir = _jsonObject["intermediateDir"].ToString();
-                                    _runtimeBuilder.SetIntermediateDir(_intermediateDir);
+                                    _runtimeBuilder.SetIntermediateDir(_intermediatePath);
                                 }
-                                if (ImGui.InputText("intermediateDir", ref intermediateDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                                if (ImGui.InputText("intermediateDir", ref _intermediateDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                 {
-                                    _jsonObject["intermediateDir"] = _intermediateDir = intermediateDir;
-                                    _runtimeBuilder.SetIntermediateDir(_intermediateDir);
+                                    _jsonObject["intermediateDir"] = _intermediateDir;
+                                    _runtimeBuilder.SetIntermediateDir(_intermediatePath);
+                                    Log.Debug($"IntermediateDir: {_intermediatePath}");
                                     WriteContentNPL();
                                 }
 
-                                var outputDir = _jsonObject["outputDir"]?.ToString();
-                                if (outputDir == null)
+                                if (_jsonObject["outputDir"]?.ToString() == null)
                                 {
                                     _jsonObject["outputDir"] = _outputDir;
-                                    outputDir = _jsonObject["outputDir"].ToString();
-                                    _runtimeBuilder.SetOutputDir(_outputDir);
+                                    _runtimeBuilder.SetOutputDir(_outputPath);
                                 }
-                                if (ImGui.InputText("outputDir", ref outputDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
+                                if (ImGui.InputText("outputDir", ref _outputDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                                 {
-                                    _jsonObject["outputDir"] = _outputDir = outputDir;
-                                    _runtimeBuilder.SetOutputDir(_outputDir);
+                                    _jsonObject["outputDir"] = _outputDir;
+                                    _runtimeBuilder.SetOutputDir(_outputPath);
+                                    Log.Debug($"OutputDir: {_outputPath}");
                                     WriteContentNPL();
                                 }
 
@@ -221,6 +222,8 @@ namespace NPLEditor
                                     _jsonObject["platform"] = platform;
                                     _targetPlatform = Enum.Parse<TargetPlatform>(platform);
                                     _runtimeBuilder.SetPlatform(_targetPlatform);
+                                    Log.Debug($"IntermediateDir: {_intermediatePath}");
+                                    Log.Debug($"OutputDir: {_outputPath}");
                                     WriteContentNPL();
                                 }
 
