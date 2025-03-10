@@ -1247,8 +1247,7 @@ namespace NPLEditor
 
             _cancelBuildContent = false;
             _buildContentRunning = false;
-
-            if (rebuildNow) _runtimeBuilder.Rebuild = false;
+            _runtimeBuilder.Rebuild = false;
         }
 
         protected void SimpleTooltip(
