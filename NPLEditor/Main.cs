@@ -196,6 +196,7 @@ namespace NPLEditor
                                     Log.Debug($"IntermediateDir: {_intermediatePath}");
                                     WriteContentNPL();
                                 }
+                                SimpleTooltip("Path", _intermediatePath, 800f);
 
                                 if (_jsonObject["outputDir"]?.ToString() == null)
                                 {
@@ -209,6 +210,7 @@ namespace NPLEditor
                                     Log.Debug($"OutputDir: {_outputPath}");
                                     WriteContentNPL();
                                 }
+                                SimpleTooltip("Path", _outputPath, 800f);
 
                                 var platform = _jsonObject["platform"]?.ToString();
                                 if (platform == null)
@@ -1247,6 +1249,24 @@ namespace NPLEditor
             _buildContentRunning = false;
 
             if (rebuildNow) _runtimeBuilder.Rebuild = false;
+        }
+
+        protected void SimpleTooltip(
+            string title,
+            string text,
+            float width = 450f)
+        {
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
+            {
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(width);
+
+                ImGui.TextColored(
+                    ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled], $"{title}: "); ImGui.SameLine(); ImGui.Text(text);
+
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
+            }
         }
     }
 }
