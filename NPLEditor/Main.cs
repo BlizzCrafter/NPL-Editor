@@ -941,7 +941,7 @@ namespace NPLEditor
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Content"))
+                if (ImGui.BeginMenu("Build"))
                 {
                     ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
                     if (ImGui.MenuItem($"{FontAwesome.Igloo} Build Now", !_buildContentRunning))
@@ -980,7 +980,7 @@ namespace NPLEditor
                         _incrementalContent = !_incrementalContent;
                         _runtimeBuilder.Incremental = _incrementalContent;
                     }
-                    if (ImGui.MenuItem("Launch Debugger", "", _launchDebuggerContent))
+                    if (ImGui.MenuItem("Debug Mode", "", _launchDebuggerContent))
                     {
                         _launchDebuggerContent = !_launchDebuggerContent;
                         _runtimeBuilder.LaunchDebugger = _launchDebuggerContent;
