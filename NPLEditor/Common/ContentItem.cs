@@ -1,5 +1,7 @@
-﻿using NPLEditor.Enums;
+﻿using NPLEditor.Data;
+using NPLEditor.Enums;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
@@ -19,18 +21,25 @@ namespace NPLEditor.Common
                 {
                     _path = Path.Substring(1);
                 }
+                if (ContentBuilder.Initialized) CheckImportersProcessors();
             }
         }
         private string _path;
-        public readonly string Category;
+        public string Category;
         public bool Recursive;
         public int SelectedImporterIndex;
         public int SelectedProcessorIndex;
-        public string[] Watch;
+        public List<string> Watch = [];
         public string[] Parameters;
         public BuildAction Action;
         public ImporterTypeDescription Importer;
         public ProcessorTypeDescription Processor;
+
+        public ContentItem(string category, string path)
+        {
+            Category = category;
+            Path = path;
+        }
 
         public ContentItem(string category, string importerKey, string processorKey)
         {
@@ -63,10 +72,9 @@ namespace NPLEditor.Common
                 case "watch":
                     {
                         var itemArray = (JsonArray)value;
-                        Watch ??= new string[itemArray.Count];
-                        for (int i = 0; i < itemArray.Count; i++)
+                        foreach (var item in itemArray)
                         {
-                            Watch[i] = itemArray[i].ToString();
+                            Watch.Add(item.ToString());
                         }
                     }
                     break;
@@ -90,6 +98,26 @@ namespace NPLEditor.Common
                         Parameters[^1] = GetParameterString(param, value);
                     }
                     break;
+            }
+        }
+
+        private void CheckImportersProcessors()
+        {
+            PipelineTypes.GetTypeDescriptions(System.IO.Path.GetExtension(Path),
+                out var outImporter, out var outProcessor);
+
+            if (outImporter != null && outProcessor != null)
+            {
+                Importer = outImporter;
+                Processor = outProcessor;
+
+                GetImporterIndex();
+                GetProcessorIndex();
+
+                ContentBuilder._jsonObject["content"][Category]["importer"] = Importer.TypeName;
+                ContentBuilder._jsonObject["content"][Category]["processor"] = Processor.TypeName;
+                Main.WriteJsonProcessorParameters(this);
+                Main.WriteContentNPL();
             }
         }
 

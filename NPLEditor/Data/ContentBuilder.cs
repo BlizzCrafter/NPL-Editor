@@ -15,8 +15,10 @@ using ContentItem = NPLEditor.Common.ContentItem;
 
 namespace NPLEditor.Data
 {
-    public static class ContentBuilder
+    public static partial class ContentBuilder
     {
+        public static bool Initialized { get; set; } = false;
+
         public static Dictionary<string, ContentItem> ContentList = new();
         public static RuntimeBuilder RuntimeBuilder { get; set; }
         public static string OutputPath => Path.Combine(Path.GetFullPath(OutputDir), TargetPlatform.ToString());
@@ -30,31 +32,54 @@ namespace NPLEditor.Data
         public static bool CancelBuildContent = false;
         public static bool BuildContentRunning = false;
 
-        public static void Init(JsonNode jsonObject)
+        private static List<string> _tempReferences = [];
+        internal static JsonNode _jsonObject;
+
+        public static void Init()
         {
-            ContentRoot = jsonObject["root"].ToString();
-            IntermediateDir = jsonObject["intermediateDir"].ToString();
-            OutputDir = jsonObject["outputDir"].ToString();
-            TargetPlatform = Enum.Parse<TargetPlatform>(jsonObject["platform"].ToString());
-            GraphicsProfile = Enum.Parse<GraphicsProfile>(jsonObject["graphicsProfile"].ToString());
-            Compress = bool.Parse(jsonObject["compress"].ToString());
-
-            RuntimeBuilder = new RuntimeBuilder(
-                Directory.GetCurrentDirectory(),
-                IntermediatePath,
-                OutputPath,
-                TargetPlatform,
-                GraphicsProfile,
-                Compress)
+            try
             {
-                Logger = new NPLBuildLogger()
-            };
+                string jsonString;
+                using (var fs = new FileStream(AppSettings.NPLJsonFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(fs))
+                {
+                    jsonString = reader.ReadToEnd();
+                }
+                _jsonObject = JsonNode.Parse(jsonString);
 
-            var references = GetAllReferences(jsonObject["references"].AsArray());
-            PipelineTypes.Load(references);
-            RuntimeBuilder.AddReferences(references);
+                ContentRoot = _jsonObject["root"]?.ToString() ?? "";
+                IntermediateDir = _jsonObject["intermediateDir"]?.ToString() ?? "obj";
+                OutputDir = _jsonObject["outputDir"]?.ToString() ?? "bin";
 
-            ParseAllContentFiles(jsonObject["content"]);
+                var platformParsed = Enum.TryParse<TargetPlatform>(_jsonObject["platform"]?.ToString(), true, out var targetPlatform);
+                TargetPlatform = platformParsed ? targetPlatform : TargetPlatform.DesktopGL;
+
+                var graphicsParsed = Enum.TryParse<GraphicsProfile>(_jsonObject["graphicsProfile"]?.ToString(), true, out var graphicsProfile);
+                GraphicsProfile = graphicsParsed ? graphicsProfile : GraphicsProfile.Reach;
+
+                var compressParsed = bool.TryParse(_jsonObject["compress"]?.ToString(), out var compressed);
+                Compress = compressParsed ? compressed : false;
+
+                RuntimeBuilder = new RuntimeBuilder(
+                    Directory.GetCurrentDirectory(),
+                    IntermediatePath,
+                    OutputPath,
+                    TargetPlatform,
+                    GraphicsProfile,
+                    Compress)
+                {
+                    Logger = new NPLBuildLogger()
+                };
+
+                var references = GetAllReferences(_jsonObject["references"].AsArray());
+                PipelineTypes.Load(references);
+                RuntimeBuilder.AddReferences(references);
+
+                ParseAllContentFiles(_jsonObject["content"]);
+            }
+            catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
+
+            Initialized = true;
         }
 
         public static async Task BuildContent(bool rebuildNow = false)

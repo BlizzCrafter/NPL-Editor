@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace NPLEditor
@@ -17,6 +18,53 @@ namespace NPLEditor
         public static readonly string ImportantLogPath = Path.Combine(LogsPath, "important-log.txt");
         public static readonly string BuildContentLogPath = Path.Combine(LogsPath, "build.txt");
 
+        public static string NPLJsonFilePath = LocalContentPath;
+
         public static readonly bool ImGuiINI = false;
+
+        internal static Dictionary<string, string> LaunchArguments;
+
+        public static void Init(string[] args)
+        {
+            // Set the working directory.
+#if DEBUG
+            string projectDir = Directory.GetParent(LocalContentPath).Parent.Parent.FullName;
+            string contentDir = Path.Combine(projectDir, "Content");
+            Directory.SetCurrentDirectory(contentDir);
+#else
+            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
+#endif
+            // Create the logs directory.
+            Directory.CreateDirectory(LogsPath);
+
+            // The general log file should always regenerate.
+            if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
+
+            // Parsing launch arguments.
+            LaunchArguments = ParseArguments(args);
+            if (LaunchArguments.ContainsKey("content"))
+            {
+                NPLJsonFilePath = LaunchArguments["content"];
+            }
+            else NPLJsonFilePath = Path.Combine(contentDir, "Content.npl");
+        }
+
+        private static Dictionary<string, string> ParseArguments(string[] args)
+        {
+            var arguments = new Dictionary<string, string>();
+            foreach (var arg in args)
+            {
+                var splitArg = arg.Split('=');
+                if (splitArg.Length == 2)
+                {
+                    arguments[splitArg[0]] = splitArg[1];
+                }
+                else
+                {
+                    arguments[splitArg[0]] = null;
+                }
+            }
+            return arguments;
+        }
     }
 }

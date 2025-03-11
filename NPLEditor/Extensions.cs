@@ -1,10 +1,18 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace NPLEditor
 {
     public static class Extensions
     {
+        public static void ChangeKey<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey fromKey, TKey toKey)
+        {
+            TValue value = dictionary[fromKey];
+            dictionary.Remove(fromKey);
+            dictionary[toKey] = value;
+        }
+
         public static Microsoft.Xna.Framework.Color ToXNA(this Vector4 color)
         {
             return new Microsoft.Xna.Framework.Color(
