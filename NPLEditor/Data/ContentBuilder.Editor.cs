@@ -25,13 +25,13 @@ namespace NPLEditor.Data
         {
             if (ImGui.InputText("root", ref ContentRoot, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                _jsonObject["root"] = ContentRoot;
+                JsonObject["root"] = ContentRoot;
                 Main.WriteContentNPL();
             }
 
             if (ImGui.InputText("intermediateDir", ref IntermediateDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                _jsonObject["intermediateDir"] = IntermediateDir;
+                JsonObject["intermediateDir"] = IntermediateDir;
                 RuntimeBuilder.SetIntermediateDir(IntermediatePath);
                 Log.Debug($"IntermediateDir: {IntermediatePath}");
                 Main.WriteContentNPL();
@@ -40,7 +40,7 @@ namespace NPLEditor.Data
 
             if (ImGui.InputText("outputDir", ref OutputDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                _jsonObject["outputDir"] = OutputDir;
+                JsonObject["outputDir"] = OutputDir;
                 RuntimeBuilder.SetOutputDir(OutputPath);
                 Log.Debug($"OutputDir: {OutputPath}");
                 Main.WriteContentNPL();
@@ -50,7 +50,7 @@ namespace NPLEditor.Data
             var platform = TargetPlatform.ToString();
             if (Widgets.ComboEnum(ref platform, "platform", Enum.GetNames(typeof(TargetPlatform))))
             {
-                _jsonObject["platform"] = platform;
+                JsonObject["platform"] = platform;
                 TargetPlatform = Enum.Parse<TargetPlatform>(platform);
                 RuntimeBuilder.SetPlatform(TargetPlatform);
                 Log.Debug($"IntermediateDir: {IntermediatePath}");
@@ -61,7 +61,7 @@ namespace NPLEditor.Data
             var graphicsProfile = GraphicsProfile.ToString();
             if (Widgets.ComboEnum(ref graphicsProfile, "graphicsProfile", Enum.GetNames(typeof(GraphicsProfile))))
             {
-                _jsonObject["graphicsProfile"] = graphicsProfile;
+                JsonObject["graphicsProfile"] = graphicsProfile;
                 GraphicsProfile = Enum.Parse<GraphicsProfile>(graphicsProfile);
                 RuntimeBuilder.SetGraphicsProfile(GraphicsProfile);
                 Main.WriteContentNPL();
@@ -69,7 +69,7 @@ namespace NPLEditor.Data
 
             if (ImGui.Checkbox("compress", ref Compress))
             {
-                _jsonObject["compress"] = Compress.ToString();
+                JsonObject["compress"] = Compress.ToString();
                 RuntimeBuilder.SetCompressContent(Compress);
             }
 
@@ -82,7 +82,7 @@ namespace NPLEditor.Data
                     {
                         jsonNode[i] = _tempReferences[i];
                     }
-                    _jsonObject["references"] = new JsonArray(jsonNode);
+                    JsonObject["references"] = new JsonArray(jsonNode);
                     Main.WriteContentNPL();
                     GetAllReferences();
                 }
@@ -134,13 +134,13 @@ namespace NPLEditor.Data
                     {
                         nplItem.Path = path;
 
-                        _jsonObject["content"][nplItem.Category]["path"] = nplItem.Path;
+                        JsonObject["content"][nplItem.Category]["path"] = nplItem.Path;
                         Main.WriteContentNPL();
                     }
                     ImGui.SameLine();
                     if (ImGui.Checkbox("recursive", ref nplItem.Recursive))
                     {
-                        _jsonObject["content"][nplItem.Category]["recursive"] = nplItem.Recursive;
+                        JsonObject["content"][nplItem.Category]["recursive"] = nplItem.Recursive;
                         Main.WriteContentNPL();
                     }
 
@@ -150,18 +150,18 @@ namespace NPLEditor.Data
                     {
                         var itemValue = actionNames[actionIndex].ToLowerInvariant();
                         nplItem.Action = (BuildAction)Enum.Parse(typeof(BuildAction), itemValue.ToString(), true);
-                        _jsonObject["content"][nplItem.Category]["action"] = itemValue;
+                        JsonObject["content"][nplItem.Category]["action"] = itemValue;
                         Main.WriteContentNPL();
                     }
 
                     if (Widgets.ComboImporterDesciptor(nplItem, out var importer))
                     {
-                        _jsonObject["content"][nplItem.Category]["importer"] = importer.TypeName;
+                        JsonObject["content"][nplItem.Category]["importer"] = importer.TypeName;
                         Main.WriteContentNPL();
                     }
                     if (Widgets.ComboProcessorDesciptor(nplItem, out var processor))
                     {
-                        _jsonObject["content"][nplItem.Category]["processor"] = processor.TypeName;
+                        JsonObject["content"][nplItem.Category]["processor"] = processor.TypeName;
                         Main.WriteJsonProcessorParameters(nplItem);
                         Main.WriteContentNPL();
                     }
@@ -227,7 +227,7 @@ namespace NPLEditor.Data
                             {
                                 jsonNode[x] = nplItem.Watch[x];
                             }
-                            _jsonObject["content"][nplItem.Category]["watch"] = new JsonArray(jsonNode);
+                            JsonObject["content"][nplItem.Category]["watch"] = new JsonArray(jsonNode);
                             Main.WriteContentNPL();
                         }
                     }

@@ -181,14 +181,14 @@ namespace NPLEditor
                     props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
                 }
             }
-            ContentBuilder._jsonObject["content"][nplItem.Category]["processorParam"] = props;
+            ContentBuilder.JsonObject["content"][nplItem.Category]["processorParam"] = props;
         }
 
         public static void WriteContentNPL()
         {
             try
             {
-                string jsonString = JsonSerializer.Serialize(ContentBuilder._jsonObject, new JsonSerializerOptions()
+                string jsonString = JsonSerializer.Serialize(ContentBuilder.JsonObject, new JsonSerializerOptions()
                 {
                     WriteIndented = true
                 });
@@ -211,32 +211,32 @@ namespace NPLEditor
 
         public static void MoveTreeItem(int i, bool down)
         {
-            var content = ContentBuilder._jsonObject["content"].AsObject().ToList();
+            var content = ContentBuilder.JsonObject["content"].AsObject().ToList();
 
             foreach (var item in content)
             {
-                ContentBuilder._jsonObject["content"].AsObject().Remove(item.Key);
+                ContentBuilder.JsonObject["content"].AsObject().Remove(item.Key);
             }
 
             for (int x = 0; x < content.Count; x++)
             {
                 if (down)
                 {
-                    if (x == i + 1) ContentBuilder._jsonObject["content"].AsObject().Add(content[i]);
-                    else if (x == i) ContentBuilder._jsonObject["content"].AsObject().Add(content[i + 1]);
-                    else ContentBuilder._jsonObject["content"].AsObject().Add(content[x]);
+                    if (x == i + 1) ContentBuilder.JsonObject["content"].AsObject().Add(content[i]);
+                    else if (x == i) ContentBuilder.JsonObject["content"].AsObject().Add(content[i + 1]);
+                    else ContentBuilder.JsonObject["content"].AsObject().Add(content[x]);
                 }
                 else
                 {
-                    if (x == i - 1) ContentBuilder._jsonObject["content"].AsObject().Add(content[i]);
-                    else if (x == i) ContentBuilder._jsonObject["content"].AsObject().Add(content[i - 1]);
-                    else ContentBuilder._jsonObject["content"].AsObject().Add(content[x]);
+                    if (x == i - 1) ContentBuilder.JsonObject["content"].AsObject().Add(content[i]);
+                    else if (x == i) ContentBuilder.JsonObject["content"].AsObject().Add(content[i - 1]);
+                    else ContentBuilder.JsonObject["content"].AsObject().Add(content[x]);
                 }
             }
 
             // Sort ContentList based on the new order in _jsonObject
             var sortedContentList = new Dictionary<string, ContentItem>();
-            foreach (var item in ContentBuilder._jsonObject["content"].AsObject())
+            foreach (var item in ContentBuilder.JsonObject["content"].AsObject())
             {
                 sortedContentList.Add(item.Key, ContentBuilder.ContentList[item.Key]);
             }
@@ -395,7 +395,7 @@ namespace NPLEditor
                 {
                     "settings"
                 };
-                ids.AddRange(ContentBuilder._jsonObject["content"].AsObject().Select(x => x.Key).ToArray());
+                ids.AddRange(ContentBuilder.JsonObject["content"].AsObject().Select(x => x.Key).ToArray());
 
                 foreach (var stringID in ids)
                 {
@@ -481,7 +481,7 @@ namespace NPLEditor
                     ImGui.SetCursorPosX(ImGui.GetStyle().ItemSpacing.X);
                     if (ImGui.Button($"{FontAwesome.TrashAlt}", new Num.Vector2(buttonWidth, 0)))
                     {
-                        ContentBuilder._jsonObject["content"].AsObject().Remove(ContentDescriptor.Category);
+                        ContentBuilder.JsonObject["content"].AsObject().Remove(ContentDescriptor.Category);
                         ContentBuilder.ContentList.Remove(ContentDescriptor.Category);
                         WriteContentNPL();
                         ClosePopupModal();
@@ -504,7 +504,7 @@ namespace NPLEditor
                             ["action"] = "build"
                         };
 
-                        ContentBuilder._jsonObject["content"].AsObject().Add(ContentDescriptor.Name, content);
+                        ContentBuilder.JsonObject["content"].AsObject().Add(ContentDescriptor.Name, content);
                         ContentBuilder.ContentList.Add(ContentDescriptor.Name, new ContentItem(ContentDescriptor.Name, ContentDescriptor.Path));
                         WriteContentNPL();
 
@@ -512,19 +512,19 @@ namespace NPLEditor
                     }
                     else if (ModalDescriptor.MessageType == MessageType.EditContent)
                     {
-                        var node = ContentBuilder._jsonObject["content"][ContentDescriptor.Category];
-                        var nodeIndex = ContentBuilder._jsonObject["content"].AsObject().Select(x => x.Key).ToList().IndexOf(ContentDescriptor.Category);
-                        var content = ContentBuilder._jsonObject["content"].AsObject().ToList();
+                        var node = ContentBuilder.JsonObject["content"][ContentDescriptor.Category];
+                        var nodeIndex = ContentBuilder.JsonObject["content"].AsObject().Select(x => x.Key).ToList().IndexOf(ContentDescriptor.Category);
+                        var content = ContentBuilder.JsonObject["content"].AsObject().ToList();
 
                         foreach (var item in content)
                         {
-                            ContentBuilder._jsonObject["content"].AsObject().Remove(item.Key);
+                            ContentBuilder.JsonObject["content"].AsObject().Remove(item.Key);
                         }
 
                         for (int i = 0; i < content.Count; i++)
                         {
-                            if (i != nodeIndex) ContentBuilder._jsonObject["content"].AsObject().Add(content[i]);
-                            else ContentBuilder._jsonObject["content"].AsObject().Add(ContentDescriptor.Name, node);
+                            if (i != nodeIndex) ContentBuilder.JsonObject["content"].AsObject().Add(content[i]);
+                            else ContentBuilder.JsonObject["content"].AsObject().Add(ContentDescriptor.Name, node);
                         }
 
                         ContentBuilder.ContentList[ContentDescriptor.Category].Category = ContentDescriptor.Name;

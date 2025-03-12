@@ -38,7 +38,7 @@ namespace NPLEditor.GUI.Widgets
                 var sColor = $"{xColor.R},{xColor.G},{xColor.B},{xColor.A}";
 
                 nplItem.Property(parameterKey).Value = sColor;
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = sColor;
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = sColor;
                 return true;
             }
             return false;
@@ -50,7 +50,7 @@ namespace NPLEditor.GUI.Widgets
             if (ImGui.Checkbox(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value.ToString();
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
                 return true;
             }
             return false;
@@ -62,7 +62,7 @@ namespace NPLEditor.GUI.Widgets
             if (ImGui.InputInt(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value;
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
                 return true;
             }
             return false;
@@ -74,7 +74,7 @@ namespace NPLEditor.GUI.Widgets
             if (ImGui.InputDouble(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value;
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
                 return true;
             }
             return false;
@@ -86,7 +86,7 @@ namespace NPLEditor.GUI.Widgets
             if (ImGui.InputFloat(parameterKey, ref value))
             {
                 nplItem.Property(parameterKey).Value = value;
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = value.ToString();
                 return true;
             }
             return false;
@@ -120,7 +120,7 @@ namespace NPLEditor.GUI.Widgets
             var names = Enum.GetNames(nplItem.Property(parameterKey).Type);
             if (Combo(nplItem, parameterKey, names))
             {
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = nplItem.Property(parameterKey).Value.ToString();
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = nplItem.Property(parameterKey).Value.ToString();
                 return true;
             }
             return false;
@@ -164,7 +164,7 @@ namespace NPLEditor.GUI.Widgets
             if (ImGui.InputText(parameterKey, ref paramValue, 9999))
             {
                 nplItem.Property(parameterKey).Value = paramValue;
-                ContentBuilder._jsonObject["content"][nplItem.Category][itemKey][parameterKey] = paramValue;
+                ContentBuilder.JsonObject["content"][nplItem.Category][itemKey][parameterKey] = paramValue;
                 return true;
             }
             return false;

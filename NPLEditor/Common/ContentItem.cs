@@ -114,8 +114,8 @@ namespace NPLEditor.Common
                 GetImporterIndex();
                 GetProcessorIndex();
 
-                ContentBuilder._jsonObject["content"][Category]["importer"] = Importer.TypeName;
-                ContentBuilder._jsonObject["content"][Category]["processor"] = Processor.TypeName;
+                ContentBuilder.JsonObject["content"][Category]["importer"] = Importer.TypeName;
+                ContentBuilder.JsonObject["content"][Category]["processor"] = Processor.TypeName;
                 Main.WriteJsonProcessorParameters(this);
                 Main.WriteContentNPL();
             }

@@ -31,9 +31,9 @@ namespace NPLEditor.Data
         public static bool Compress = false;
         public static bool CancelBuildContent = false;
         public static bool BuildContentRunning = false;
+        public static JsonNode JsonObject;
 
         private static List<string> _tempReferences = [];
-        internal static JsonNode _jsonObject;
 
         public static void Init()
         {
@@ -45,19 +45,19 @@ namespace NPLEditor.Data
                 {
                     jsonString = reader.ReadToEnd();
                 }
-                _jsonObject = JsonNode.Parse(jsonString);
+                JsonObject = JsonNode.Parse(jsonString);
 
-                ContentRoot = _jsonObject["root"]?.ToString() ?? "";
-                IntermediateDir = _jsonObject["intermediateDir"]?.ToString() ?? "obj";
-                OutputDir = _jsonObject["outputDir"]?.ToString() ?? "bin";
+                ContentRoot = JsonObject["root"]?.ToString() ?? "";
+                IntermediateDir = JsonObject["intermediateDir"]?.ToString() ?? "obj";
+                OutputDir = JsonObject["outputDir"]?.ToString() ?? "bin";
 
-                var platformParsed = Enum.TryParse<TargetPlatform>(_jsonObject["platform"]?.ToString(), true, out var targetPlatform);
+                var platformParsed = Enum.TryParse<TargetPlatform>(JsonObject["platform"]?.ToString(), true, out var targetPlatform);
                 TargetPlatform = platformParsed ? targetPlatform : TargetPlatform.DesktopGL;
 
-                var graphicsParsed = Enum.TryParse<GraphicsProfile>(_jsonObject["graphicsProfile"]?.ToString(), true, out var graphicsProfile);
+                var graphicsParsed = Enum.TryParse<GraphicsProfile>(JsonObject["graphicsProfile"]?.ToString(), true, out var graphicsProfile);
                 GraphicsProfile = graphicsParsed ? graphicsProfile : GraphicsProfile.Reach;
 
-                var compressParsed = bool.TryParse(_jsonObject["compress"]?.ToString(), out var compressed);
+                var compressParsed = bool.TryParse(JsonObject["compress"]?.ToString(), out var compressed);
                 Compress = compressParsed ? compressed : false;
 
                 RuntimeBuilder = new RuntimeBuilder(
@@ -72,7 +72,7 @@ namespace NPLEditor.Data
                 };
 
                 GetAllReferences();
-                ParseAllContentFiles(_jsonObject["content"]);
+                ParseAllContentFiles(JsonObject["content"]);
             }
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
 
@@ -222,7 +222,7 @@ namespace NPLEditor.Data
             RuntimeBuilder.ClearAllReferences();
 
             var combinedReferences = new List<string>();
-            foreach (var item in _jsonObject["references"].AsArray())
+            foreach (var item in JsonObject["references"].AsArray())
             {
                 var reference = Environment.ExpandEnvironmentVariables(item.ToString());
                 if (File.Exists(reference.ToString()))
