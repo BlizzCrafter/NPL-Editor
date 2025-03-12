@@ -34,6 +34,8 @@ namespace NPLEditor.Common
 
         public static void Init()
         {
+            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "INITIALIZE CONTENT BUILDER");
+
             try
             {
                 string jsonString;
@@ -74,6 +76,7 @@ namespace NPLEditor.Common
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
 
             Initialized = true;
+            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "CONTENT BUILDER INITIALIZED");
         }
 
         public static async Task BuildContent(bool rebuildNow = false)

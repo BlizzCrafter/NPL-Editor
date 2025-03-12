@@ -66,7 +66,7 @@ namespace NPLEditor
 
             base.Initialize();
 
-            NPLLog.LogInfoHeadline(FontAwesome.FlagCheckered, "APP-INITIALIZED");
+            NPLLog.LogInfoHeadline(FontAwesome.FlagCheckered, "APP INITIALIZED");
         }
 
         protected override void Draw(GameTime gameTime)

@@ -11,9 +11,6 @@ public partial class Program
 {
     public static async Task Main(string[] args)
     {
-        // Logging the launch arguments.
-        Log.Verbose($"Launch Arguments: {args}");
-
         // Initialize app settings (working dir, other directories, etc).
         AppSettings.Init(args);
 
@@ -35,7 +32,6 @@ public partial class Program
                 restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose)
             .CreateLogger();
 
-        // Initialize the content builder.
         ContentBuilder.Init();
 
         // Log some pathes before building content or launching the app.
@@ -44,6 +40,9 @@ public partial class Program
         Log.Debug($"IntermediateDir: {ContentBuilder.IntermediatePath}");
         Log.Debug($"OutputDir: {ContentBuilder.OutputPath}");
         Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
+        Log.Debug("");
+        Log.Debug("Launch Arguments: {0}", args);
+        Log.Debug("");
 
         // Only build the content or just launch the app.
         if (AppSettings.LaunchArguments.ContainsKey("build"))
@@ -60,7 +59,7 @@ public partial class Program
     private static void RunApp()
     {
         // Log that main initialize begins.
-        NPLLog.LogInfoHeadline(FontAwesome.Flag, "INITIALIZE");
+        NPLLog.LogInfoHeadline(FontAwesome.Flag, "INITIALIZE APP");
 
         // Ensure DPI-Awareness isn't lost for the dotnet tool.
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
