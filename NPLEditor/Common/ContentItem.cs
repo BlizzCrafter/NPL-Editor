@@ -29,7 +29,7 @@ namespace NPLEditor.Common
         public bool Recursive;
         public int SelectedImporterIndex;
         public int SelectedProcessorIndex;
-        public List<string> Watch = [];
+        public List<string> Dependencies = [];
         public string[] Parameters;
         public BuildAction Action;
         public ImporterTypeDescription Importer;
@@ -69,12 +69,12 @@ namespace NPLEditor.Common
                 case "action":
                     Action = (BuildAction)Enum.Parse(typeof(BuildAction), value.ToString(), true);
                     break;
-                case "watch":
+                case "dependencies":
                     {
                         var itemArray = (JsonArray)value;
                         foreach (var item in itemArray)
                         {
-                            Watch.Add(item.ToString());
+                            Dependencies.Add(item.ToString());
                         }
                     }
                     break;

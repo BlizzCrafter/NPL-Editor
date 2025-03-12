@@ -163,9 +163,9 @@ namespace NPLEditor.Common
                 ContentRoot = ContentRoot.Substring(2, ContentRoot.Length - 2);
             }
 
-            foreach (var item in ContentList)
+            foreach (var nplItem in ContentList)
             {
-                string path = item.Value.Path.ToString().Replace("\\", "/");
+                string path = nplItem.Value.Path.ToString().Replace("\\", "/");
                 if (path.Contains("../"))
                 {
                     throw new Exception("'path' is not allowed to contain '../'! Use 'root' property to specify a different root instead.");
@@ -182,35 +182,52 @@ namespace NPLEditor.Common
                     path = Path.Combine(ContentRoot, path);
                 }
 
-                var fileName = Path.GetFileName(path);
-                var filePath = Path.GetDirectoryName(path);
-                if (string.IsNullOrEmpty(filePath))
-                {
-                    filePath = Directory.GetCurrentDirectory();
-                }
+                GetFilePath(path, out var fileName, out var filePath);
 
                 try
                 {
                     var searchOpt = SearchOption.TopDirectoryOnly;
-                    if (item.Value.Recursive)
+                    if (nplItem.Value.Recursive)
                     {
                         searchOpt = SearchOption.AllDirectories;
                     }
                     else searchOpt = SearchOption.TopDirectoryOnly;
 
-                    if (item.Value.Action == Enums.BuildAction.Copy)
+                    if (nplItem.Value.Action == Enums.BuildAction.Copy)
                     {
                         copyFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
                     }
-                    else if (item.Value.Action == Enums.BuildAction.Build)
+                    else if (nplItem.Value.Action == Enums.BuildAction.Build)
                     {
                         buildFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
+
+                        if (nplItem.Value.Dependencies != null)
+                        {
+                            foreach (var dependency in nplItem.Value.Dependencies)
+                            {
+                                GetFilePath(dependency, out var dependencyFileName, out var dependencyFilePath);
+                                foreach (var buildFile in buildFiles)
+                                {
+                                    RuntimeBuilder.AddDependencies(Path.GetFileName(buildFile), Directory.GetFiles(Path.Combine(dependencyFilePath, filePath), dependencyFileName, searchOpt).ToList());
+                                }
+                            }
+                        }
                     }
                 }
                 catch (Exception e)
                 {
                     NPLLog.LogException(e);
                 }
+            }
+        }
+
+        private static void GetFilePath(string path, out string fileName, out string filePath)
+        {
+            fileName = Path.GetFileName(path);
+            filePath = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(filePath))
+            {
+                filePath = Directory.GetCurrentDirectory();
             }
         }
 

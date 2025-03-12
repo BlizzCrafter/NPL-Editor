@@ -219,16 +219,16 @@ namespace NPLEditor.Common
                     }
                     ImGui.PopItemWidth();
 
-                    Widgets.ListEditor("Watcher", nplItem.Watch, out var itemAdded, out var itemRemoved, out var itemChanged);
+                    Widgets.ListEditor("Dependencies", nplItem.Dependencies, out var itemAdded, out var itemRemoved, out var itemChanged);
                     {
                         if (itemAdded || itemChanged || itemRemoved)
                         {
-                            var jsonNode = new JsonNode[nplItem.Watch.Count];
-                            for (int x = 0; x < nplItem.Watch.Count; x++)
+                            var jsonNode = new JsonNode[nplItem.Dependencies.Count];
+                            for (int x = 0; x < nplItem.Dependencies.Count; x++)
                             {
-                                jsonNode[x] = nplItem.Watch[x];
+                                jsonNode[x] = nplItem.Dependencies[x];
                             }
-                            JsonObject["content"][nplItem.Category]["watch"] = new JsonArray(jsonNode);
+                            JsonObject["content"][nplItem.Category]["dependencies"] = new JsonArray(jsonNode);
                             Main.WriteContentNPL();
                         }
                     }
