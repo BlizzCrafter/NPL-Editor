@@ -136,7 +136,11 @@ namespace NPLEditor
                         ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
 
                         ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg]);
-                        ImGui.TextUnformatted(NPLEditorSink.Output.ToString());
+                        try
+                        {
+                            ImGui.TextUnformatted(NPLEditorSink.Output.ToString());
+                        }
+                        catch { }
                         ImGui.PopStyleColor();
 
                         ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing(); ImGui.Spacing();
