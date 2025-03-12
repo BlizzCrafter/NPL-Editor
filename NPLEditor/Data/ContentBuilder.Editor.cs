@@ -84,44 +84,8 @@ namespace NPLEditor.Data
                     }
                     _jsonObject["references"] = new JsonArray(jsonNode);
                     Main.WriteContentNPL();
-                    PipelineTypes.Reset(); // -> PipelineTypes.IsDirty = true;
-                    RuntimeBuilder.ClearAllReferences();
+                    GetAllReferences();
                 }
-            }
-
-            if (PipelineTypes.IsDirty)
-            {
-                var combinedReferences = new List<string>();
-                foreach (var item in _tempReferences)
-                {
-                    var reference = Environment.ExpandEnvironmentVariables(item.ToString());
-                    if (File.Exists(reference.ToString()))
-                    {
-                        combinedReferences.Add(Path.GetFullPath(reference.ToString()));
-                    }
-                    else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
-                    {
-                        var dir = Path.GetDirectoryName(reference.ToString());
-                        var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
-                        foreach (var file in matchingFiles)
-                        {
-                            combinedReferences.Add(Path.GetFullPath(file));
-                        }
-                    }
-                    else
-                    {
-                        var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
-                        foreach (var file in matchingFiles)
-                        {
-                            combinedReferences.Add(Path.GetFullPath(file));
-                        }
-                    }
-                }
-                var combinedReferencesArray = combinedReferences.Distinct()
-                    .Where(x => !string.IsNullOrEmpty(x.ToString()))
-                    .ToArray();
-                PipelineTypes.Load(combinedReferencesArray);
-                RuntimeBuilder.AddReferences(combinedReferencesArray);
             }
         }
 

@@ -206,8 +206,6 @@ namespace NPLEditor.Common
         private static List<ImporterInfo> _importers;
         private static List<ProcessorInfo> _processors;
 
-        public static bool IsDirty { get; private set; } = true;
-
         public static void GetTypeDescriptions(
             string fileExtension,
             out ImporterTypeDescription outImporter,
@@ -241,29 +239,9 @@ namespace NPLEditor.Common
             return index;
         }
 
-        public static bool Initialized
-        {
-            get
-            {
-                if (_importers == null || _processors == null)
-                {
-                    return false;
-                }
-                else return true;
-            }
-        }
-
-        public static void Reset()
-        {
-            _importers = null;
-            _processors = null;
-
-            IsDirty = true;
-        }
-
         public static void Load(string[] references)
         {
-            if (!Initialized) ResolveAssemblies(references);
+            ResolveAssemblies(references);
         }
 
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
@@ -431,8 +409,6 @@ namespace NPLEditor.Common
                 processorDescriptions[^1] = temp;
             }
             Processors = processorDescriptions;
-            
-            IsDirty = false;
 
             NPLLog.LogInfoHeadline(FontAwesome.Box, $"LOADED {assemblyCount - assemblyErrors} OF {assemblyCount} REFERENCES.");
         }

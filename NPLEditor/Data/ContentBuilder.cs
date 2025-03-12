@@ -71,10 +71,7 @@ namespace NPLEditor.Data
                     Logger = new NPLBuildLogger()
                 };
 
-                var references = GetAllReferences(_jsonObject["references"].AsArray());
-                PipelineTypes.Load(references);
-                RuntimeBuilder.AddReferences(references);
-
+                GetAllReferences();
                 ParseAllContentFiles(_jsonObject["content"]);
             }
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
@@ -220,41 +217,40 @@ namespace NPLEditor.Data
             }
         }
 
-        private static string[] GetAllReferences(JsonArray references)
+        private static void GetAllReferences()
         {
-            if (PipelineTypes.IsDirty)
+            RuntimeBuilder.ClearAllReferences();
+
+            var combinedReferences = new List<string>();
+            foreach (var item in _jsonObject["references"].AsArray())
             {
-                var combinedReferences = new List<string>();
-                foreach (var item in references)
+                var reference = Environment.ExpandEnvironmentVariables(item.ToString());
+                if (File.Exists(reference.ToString()))
                 {
-                    var reference = Environment.ExpandEnvironmentVariables(item.ToString());
-                    if (File.Exists(reference.ToString()))
+                    combinedReferences.Add(Path.GetFullPath(reference.ToString()));
+                }
+                else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
+                {
+                    var dir = Path.GetDirectoryName(reference.ToString());
+                    var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
+                    foreach (var file in matchingFiles)
                     {
-                        combinedReferences.Add(Path.GetFullPath(reference.ToString()));
-                    }
-                    else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
-                    {
-                        var dir = Path.GetDirectoryName(reference.ToString());
-                        var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
-                        foreach (var file in matchingFiles)
-                        {
-                            combinedReferences.Add(Path.GetFullPath(file));
-                        }
-                    }
-                    else
-                    {
-                        var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
-                        foreach (var file in matchingFiles)
-                        {
-                            combinedReferences.Add(Path.GetFullPath(file));
-                        }
+                        combinedReferences.Add(Path.GetFullPath(file));
                     }
                 }
-                return combinedReferences.Distinct()
-                    .Where(x => !string.IsNullOrEmpty(x.ToString()))
-                    .ToArray();
+                else
+                {
+                    var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
+                    foreach (var file in matchingFiles)
+                    {
+                        combinedReferences.Add(Path.GetFullPath(file));
+                    }
+                }
             }
-            return null;
+            var references = combinedReferences.Distinct()
+                .Where(x => !string.IsNullOrEmpty(x.ToString())).ToArray();
+            PipelineTypes.Load(references);
+            RuntimeBuilder.AddReferences(references);
         }
     }
 }
