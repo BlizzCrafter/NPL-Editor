@@ -188,29 +188,29 @@ namespace NPLEditor.Data
 
                                 if (nplItem.Property(parameter.Name).Type == typeof(bool))
                                 {
-                                    Widgets.Checkbox(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                    Widgets.Checkbox(nplItem, "processorParam", parameter.Name);
                                 }
                                 else if (nplItem.Property(parameter.Name).Type == typeof(int))
                                 {
-                                    Widgets.InputInt(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                    Widgets.InputInt(nplItem, "processorParam", parameter.Name);
                                 }
                                 else if (nplItem.Property(parameter.Name).Type == typeof(double))
                                 {
-                                    Widgets.InputDouble(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                    Widgets.InputDouble(nplItem, "processorParam", parameter.Name);
                                 }
                                 else if (nplItem.Property(parameter.Name).Type == typeof(float))
                                 {
-                                    Widgets.InputFloat(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                    Widgets.InputFloat(nplItem, "processorParam", parameter.Name);
                                 }
                                 else if (nplItem.Property(parameter.Name).Type == typeof(Color))
                                 {
-                                    Widgets.ColorEdit(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                    Widgets.ColorEdit(nplItem, "processorParam", parameter.Name);
                                 }
                                 else if (nplItem.Property(parameter.Name).Type.IsEnum)
                                 {
-                                    Widgets.ComboContentItem(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                    Widgets.ComboContentItem(nplItem, "processorParam", parameter.Name);
                                 }
-                                else Widgets.TextInput(nplItem, nplItem.Category, "processorParam", parameter.Name);
+                                else Widgets.TextInput(nplItem, "processorParam", parameter.Name);
                             }
                         }
                         ImGui.EndTable();

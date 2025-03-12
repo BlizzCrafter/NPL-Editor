@@ -28,7 +28,7 @@ namespace NPLEditor.GUI.Widgets
             }
         }
 
-        public static bool ColorEdit(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool ColorEdit(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var value = nplItem.Vector4Property(parameterKey);
             if (ImGui.ColorEdit4(parameterKey, ref value,
@@ -44,7 +44,7 @@ namespace NPLEditor.GUI.Widgets
             return false;
         }
 
-        public static bool Checkbox(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool Checkbox(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var value = nplItem.BoolProperty(parameterKey);
             if (ImGui.Checkbox(parameterKey, ref value))
@@ -56,7 +56,7 @@ namespace NPLEditor.GUI.Widgets
             return false;
         }
 
-        public static bool InputInt(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool InputInt(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var value = nplItem.IntProperty(parameterKey);
             if (ImGui.InputInt(parameterKey, ref value))
@@ -68,7 +68,7 @@ namespace NPLEditor.GUI.Widgets
             return false;
         }
 
-        public static bool InputDouble(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool InputDouble(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var value = nplItem.DoubleProperty(parameterKey);
             if (ImGui.InputDouble(parameterKey, ref value))
@@ -80,7 +80,7 @@ namespace NPLEditor.GUI.Widgets
             return false;
         }
 
-        public static bool InputFloat(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool InputFloat(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var value = nplItem.FloatProperty(parameterKey);
             if (ImGui.InputFloat(parameterKey, ref value))
@@ -115,7 +115,7 @@ namespace NPLEditor.GUI.Widgets
             return false;
         }
 
-        public static bool ComboContentItem(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool ComboContentItem(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var names = Enum.GetNames(nplItem.Property(parameterKey).Type);
             if (Combo(nplItem, parameterKey, names))
@@ -158,7 +158,7 @@ namespace NPLEditor.GUI.Widgets
             return false;
         }
 
-        public static bool TextInput(ContentItem nplItem, string dataKey, string itemKey, string parameterKey)
+        public static bool TextInput(ContentItem nplItem, string itemKey, string parameterKey)
         {
             var paramValue = nplItem.Property(parameterKey).Value.ToString();
             if (ImGui.InputText(parameterKey, ref paramValue, 9999))
