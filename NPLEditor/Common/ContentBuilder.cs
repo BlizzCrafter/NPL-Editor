@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.RuntimeBuilder;
-using NPLEditor.Common;
+using NPLEditor.Data;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -11,9 +11,8 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using ContentItem = NPLEditor.Common.ContentItem;
 
-namespace NPLEditor.Data
+namespace NPLEditor.Common
 {
     public static partial class ContentBuilder
     {

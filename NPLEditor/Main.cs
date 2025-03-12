@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using NPLEditor.Common;
 using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;

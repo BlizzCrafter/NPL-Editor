@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.RuntimeBuilder;
+using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI.Widgets;
 using Serilog;
@@ -11,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
 
-namespace NPLEditor.Data
+namespace NPLEditor.Common
 {
     public static partial class ContentBuilder
     {
