@@ -33,8 +33,6 @@ namespace NPLEditor.Data
         public static bool BuildContentRunning = false;
         public static JsonNode JsonObject;
 
-        private static List<string> _tempReferences = [];
-
         public static void Init()
         {
             try

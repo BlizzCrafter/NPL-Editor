@@ -3,13 +3,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.RuntimeBuilder;
-using NPLEditor.Common;
 using NPLEditor.Enums;
 using NPLEditor.GUI.Widgets;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json.Nodes;
 
@@ -17,6 +15,8 @@ namespace NPLEditor.Data
 {
     public static partial class ContentBuilder
     {
+        private static List<string> _tempReferences = [];
+
         /// <summary>
         /// Main settings of a Content.npl file (References, OutputDir, IntermediateDir, etc).
         /// Also loads pipeline types (TextureImporter, TextureProcessor, etc).
