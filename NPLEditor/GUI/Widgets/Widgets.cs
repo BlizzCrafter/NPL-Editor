@@ -230,7 +230,7 @@ namespace NPLEditor.GUI.Widgets
                 for (int i = 0; i < list.Count; i++)
                 {
                     var data = list[i];
-                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing * 2f);
+                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing * 1.5f);
                     if (ImGui.InputText($"##{i}", ref data, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         itemChanged = true;
