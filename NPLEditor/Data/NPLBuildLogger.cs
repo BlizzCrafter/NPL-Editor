@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Content.Pipeline;
 using Serilog;
-using System;
 
 namespace NPLEditor.Data
 {
