@@ -167,57 +167,60 @@ namespace NPLEditor.Common
                         Main.WriteContentNPL();
                     }
 
-                    ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
-                    if (ImGui.TreeNodeEx("processorParam", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
+                    if (nplItem.Processor.Properties.Count() > 0)
                     {
-                        if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
+                        ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
+                        if (ImGui.TreeNodeEx("processorParam", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
                         {
-                            var itemCount = 0;
-                            foreach (var parameter in nplItem.Processor.Properties)
+                            if (ImGui.BeginTable("Parameter", 2, ImGuiTableFlags.NoClip))
                             {
-                                itemCount++;
-                                var columnPos = itemCount % 2;
+                                var itemCount = 0;
+                                foreach (var parameter in nplItem.Processor.Properties)
+                                {
+                                    itemCount++;
+                                    var columnPos = itemCount % 2;
 
-                                if (columnPos == 1)
-                                {
-                                    ImGui.TableNextRow();
-                                    ImGui.TableSetupColumn("Column 1");
-                                    ImGui.TableSetupColumn("Column 2");
-                                    ImGui.TableSetColumnIndex(0);
-                                }
-                                else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
+                                    if (columnPos == 1)
+                                    {
+                                        ImGui.TableNextRow();
+                                        ImGui.TableSetupColumn("Column 1");
+                                        ImGui.TableSetupColumn("Column 2");
+                                        ImGui.TableSetColumnIndex(0);
+                                    }
+                                    else if (columnPos == 0) ImGui.TableSetColumnIndex(1);
 
-                                if (nplItem.Property(parameter.Name).Type == typeof(bool))
-                                {
-                                    Widgets.Checkbox(nplItem, "processorParam", parameter.Name);
+                                    if (nplItem.Property(parameter.Name).Type == typeof(bool))
+                                    {
+                                        Widgets.Checkbox(nplItem, "processorParam", parameter.Name);
+                                    }
+                                    else if (nplItem.Property(parameter.Name).Type == typeof(int))
+                                    {
+                                        Widgets.InputInt(nplItem, "processorParam", parameter.Name);
+                                    }
+                                    else if (nplItem.Property(parameter.Name).Type == typeof(double))
+                                    {
+                                        Widgets.InputDouble(nplItem, "processorParam", parameter.Name);
+                                    }
+                                    else if (nplItem.Property(parameter.Name).Type == typeof(float))
+                                    {
+                                        Widgets.InputFloat(nplItem, "processorParam", parameter.Name);
+                                    }
+                                    else if (nplItem.Property(parameter.Name).Type == typeof(Color))
+                                    {
+                                        Widgets.ColorEdit(nplItem, "processorParam", parameter.Name);
+                                    }
+                                    else if (nplItem.Property(parameter.Name).Type.IsEnum)
+                                    {
+                                        Widgets.ComboContentItem(nplItem, "processorParam", parameter.Name);
+                                    }
+                                    else Widgets.TextInput(nplItem, "processorParam", parameter.Name);
                                 }
-                                else if (nplItem.Property(parameter.Name).Type == typeof(int))
-                                {
-                                    Widgets.InputInt(nplItem, "processorParam", parameter.Name);
-                                }
-                                else if (nplItem.Property(parameter.Name).Type == typeof(double))
-                                {
-                                    Widgets.InputDouble(nplItem, "processorParam", parameter.Name);
-                                }
-                                else if (nplItem.Property(parameter.Name).Type == typeof(float))
-                                {
-                                    Widgets.InputFloat(nplItem, "processorParam", parameter.Name);
-                                }
-                                else if (nplItem.Property(parameter.Name).Type == typeof(Color))
-                                {
-                                    Widgets.ColorEdit(nplItem, "processorParam", parameter.Name);
-                                }
-                                else if (nplItem.Property(parameter.Name).Type.IsEnum)
-                                {
-                                    Widgets.ComboContentItem(nplItem, "processorParam", parameter.Name);
-                                }
-                                else Widgets.TextInput(nplItem, "processorParam", parameter.Name);
                             }
+                            ImGui.EndTable();
+                            ImGui.TreePop();
                         }
-                        ImGui.EndTable();
-                        ImGui.TreePop();
+                        ImGui.PopItemWidth();
                     }
-                    ImGui.PopItemWidth();
 
                     Widgets.ListEditor("Dependencies", nplItem.Dependencies, out var itemAdded, out var itemRemoved, out var itemChanged);
                     {
