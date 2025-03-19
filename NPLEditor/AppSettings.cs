@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace NPLEditor
 {
@@ -42,9 +43,10 @@ namespace NPLEditor
 
             // Parsing launch arguments.
             LaunchArguments = ParseArguments(args);
-            if (LaunchArguments.ContainsKey("content"))
+            if (LaunchArguments.Count >= 1)
             {
-                NPLJsonFilePath = LaunchArguments["content"];
+                // A .npl content file is always argument #1.
+                NPLJsonFilePath = LaunchArguments.Values.ToList()[1];
             }
             else NPLJsonFilePath = Path.Combine(contentDir, "Content.npl");
         }
