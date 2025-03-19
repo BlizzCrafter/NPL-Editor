@@ -32,14 +32,10 @@ namespace NPLEditor
             string projectDir = Directory.GetParent(LocalContentPath).Parent.Parent.FullName;
             string contentDir = Path.Combine(projectDir, "Content");
             Directory.SetCurrentDirectory(contentDir);
-#else
-            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
-#endif
-            // Create the logs directory.
-            Directory.CreateDirectory(LogsPath);
 
-            // The general log file should always regenerate.
-            if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
+            NPLJsonFilePath = Path.Combine(contentDir, "Content.npl");
+#else
+            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));                      
 
             // Parsing launch arguments.
             LaunchArguments = ParseArguments(args);
@@ -48,7 +44,13 @@ namespace NPLEditor
                 // A .npl content file is always argument #1.
                 NPLJsonFilePath = LaunchArguments.Values.ToList()[1];
             }
-            else NPLJsonFilePath = Path.Combine(contentDir, "Content.npl");
+            else throw new ArgumentException("This app needs to have at least one launch argument with a path pointing to a Content.npl file.");
+#endif
+            // Create the logs directory.
+            Directory.CreateDirectory(LogsPath);
+
+            // The general log file should always regenerate.
+            if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
         }
 
         private static Dictionary<string, string> ParseArguments(string[] args)
