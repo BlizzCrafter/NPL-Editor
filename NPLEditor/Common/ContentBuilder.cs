@@ -241,6 +241,8 @@ namespace NPLEditor.Common
             var combinedReferences = new List<string>();
             foreach (var item in JsonObject["references"].AsArray())
             {
+                _tempReferences.Add(item.ToString());
+
                 var reference = Environment.ExpandEnvironmentVariables(item.ToString());
                 if (File.Exists(reference.ToString()))
                 {
