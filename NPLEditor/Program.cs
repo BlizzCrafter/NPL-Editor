@@ -11,9 +11,6 @@ public partial class Program
 {
     public static async Task Main(string[] args)
     {
-        // Initialize app settings (working dir, other directories, etc).
-        AppSettings.Init(args);
-
         // Create the serilog logger.
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -32,6 +29,12 @@ public partial class Program
                 restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose)
             .CreateLogger();
 
+        Log.Debug("Logger Initilized");
+
+        // Initialize app settings (working dir, other directories, etc).
+        AppSettings.Init(args);
+
+        // Initialize the ContentBuilder (reading the Content.npl file, etc).
         ContentBuilder.Init();
 
         // Log some pathes before building content or launching the app.
@@ -40,9 +43,6 @@ public partial class Program
         Log.Debug($"IntermediateDir: {ContentBuilder.IntermediatePath}");
         Log.Debug($"OutputDir: {ContentBuilder.OutputPath}");
         Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
-        Log.Debug("");
-        Log.Debug("Launch Arguments: {0}", args);
-        Log.Debug("");
 
         // Only build the content or just launch the app.
         if (AppSettings.LaunchArguments.ContainsKey("build"))

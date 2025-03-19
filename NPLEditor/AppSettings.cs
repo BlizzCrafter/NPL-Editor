@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace NPLEditor
 {
@@ -27,6 +27,22 @@ namespace NPLEditor
 
         public static void Init(string[] args)
         {
+            Log.Debug("Launch Arguments: {0}", args);
+
+            // Create the logs directory.
+            Directory.CreateDirectory(LogsPath);
+
+            try
+            {
+                // The general log file should always regenerate.
+                if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
+            }
+            catch { }
+
+            // Parsing launch arguments.
+            // Need to be happen on release AND debug builds.
+            LaunchArguments = ParseArguments(args);
+
             // Set the working directory.
 #if DEBUG
             string projectDir = Directory.GetParent(LocalContentPath).Parent.Parent.FullName;
@@ -35,22 +51,15 @@ namespace NPLEditor
 
             NPLJsonFilePath = Path.Combine(contentDir, "Content.npl");
 #else
-            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));                      
-
-            // Parsing launch arguments.
-            LaunchArguments = ParseArguments(args);
-            if (LaunchArguments.Count >= 1)
+            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
+            
+            if (args.Length >= 0)
             {
-                // A .npl content file is always argument #1.
-                NPLJsonFilePath = LaunchArguments.Values.ToList()[1];
+                // A .npl content file is always the first argument.
+                NPLJsonFilePath = args[0];
             }
             else throw new ArgumentException("This app needs to have at least one launch argument with a path pointing to a Content.npl file.");
 #endif
-            // Create the logs directory.
-            Directory.CreateDirectory(LogsPath);
-
-            // The general log file should always regenerate.
-            if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
         }
 
         private static Dictionary<string, string> ParseArguments(string[] args)
