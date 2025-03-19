@@ -167,7 +167,7 @@ namespace NPLEditor.Common
                         Main.WriteContentNPL();
                     }
 
-                    if (nplItem.Processor.Properties.Count() > 0)
+                    if (nplItem.Processor?.Properties?.Count() > 0)
                     {
                         ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
                         if (ImGui.TreeNodeEx("processorParam", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
