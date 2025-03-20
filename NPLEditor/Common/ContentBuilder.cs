@@ -160,6 +160,8 @@ namespace NPLEditor.Common
             copyFiles = new List<string>();
             buildFiles = new List<string>();
 
+            RuntimeBuilder.ClearAllDependencies();
+
             ContentRoot = ContentRoot.Replace("\\", "/");
             if (ContentRoot.StartsWith("./"))
             {
@@ -168,6 +170,9 @@ namespace NPLEditor.Common
 
             foreach (var nplItem in ContentList)
             {
+                buildFiles.Clear();
+                copyFiles.Clear();
+
                 string path = nplItem.Value.Path.ToString().Replace("\\", "/");
                 if (path.Contains("../"))
                 {
