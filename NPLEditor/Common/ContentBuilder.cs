@@ -211,7 +211,7 @@ namespace NPLEditor.Common
                                 GetFilePath(dependency, out var dependencyFileName, out var dependencyFilePath);
                                 foreach (var buildFile in buildFiles)
                                 {
-                                    RuntimeBuilder.AddDependencies(Path.GetFileName(buildFile), Directory.GetFiles(Path.Combine(dependencyFilePath, filePath), dependencyFileName, searchOpt).ToList());
+                                    RuntimeBuilder.AddDependencies(Path.GetFileName(buildFile), Directory.GetFiles(Path.Combine(filePath, dependencyFilePath), dependencyFileName, searchOpt).ToList());
                                 }
                             }
                         }
