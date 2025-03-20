@@ -155,12 +155,13 @@ namespace NPLEditor.Common
             }
         }
 
-        public static void GetAllContentFiles(out List<string> copyFiles, out List<string> buildFiles)
+        public static void GetAllContentFiles(out List<string> allCopyFiles, out List<string> allBuildFiles)
         {
-            copyFiles = new List<string>();
-            buildFiles = new List<string>();
+            allCopyFiles = new List<string>();
+            allBuildFiles = new List<string>();
 
             RuntimeBuilder.ClearAllDependencies();
+            RuntimeBuilder.ClearAllImportersAndProcessors();
 
             ContentRoot = ContentRoot.Replace("\\", "/");
             if (ContentRoot.StartsWith("./"))
@@ -168,29 +169,29 @@ namespace NPLEditor.Common
                 ContentRoot = ContentRoot.Substring(2, ContentRoot.Length - 2);
             }
 
-            foreach (var nplItem in ContentList)
+            try
             {
-                string path = nplItem.Value.Path.ToString().Replace("\\", "/");
-                if (path.Contains("../"))
+                foreach (var nplItem in ContentList)
                 {
-                    throw new Exception("'path' is not allowed to contain '../'! Use 'root' property to specify a different root instead.");
-                }
+                    string path = nplItem.Value.Path.ToString().Replace("\\", "/");
+                    if (path.Contains("../"))
+                    {
+                        throw new Exception("'path' is not allowed to contain '../'! Use 'root' property to specify a different root instead.");
+                    }
 
-                if (path.StartsWith('$'))
-                {
-                    // $ means that the path will not have the root appended to it.
-                    path = path.TrimStart('$');
-                }
-                else if (ContentRoot != "")
-                {
-                    // Appending root now so that we would work with full paths.
-                    path = Path.Combine(ContentRoot, path);
-                }
+                    if (path.StartsWith('$'))
+                    {
+                        // $ means that the path will not have the root appended to it.
+                        path = path.TrimStart('$');
+                    }
+                    else if (ContentRoot != "")
+                    {
+                        // Appending root now so that we would work with full paths.
+                        path = Path.Combine(ContentRoot, path);
+                    }
 
-                GetFilePath(path, out var fileName, out var filePath);
+                    GetFilePath(path, out var fileName, out var filePath);
 
-                try
-                {
                     var searchOpt = SearchOption.TopDirectoryOnly;
                     if (nplItem.Value.Recursive)
                     {
@@ -200,14 +201,21 @@ namespace NPLEditor.Common
 
                     if (nplItem.Value.Action == Enums.BuildAction.Copy)
                     {
-                        copyFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
+                        allCopyFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
                     }
                     else if (nplItem.Value.Action == Enums.BuildAction.Build)
                     {
-                        buildFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
-                        
-                        var nplItemBuildFiles = new string[buildFiles.Count];
-                        buildFiles.CopyTo(nplItemBuildFiles);
+                        var nplItemBuildFiles = Directory.GetFiles(filePath, fileName, searchOpt);
+                        allBuildFiles.AddRange(nplItemBuildFiles);
+
+                        foreach (var nplItemBuildFile in nplItemBuildFiles)
+                        {
+                            RuntimeBuilder.SetImporterAndProcessor(
+                                Path.GetFileName(nplItemBuildFile), 
+                                nplItem.Value.Importer.TypeName, 
+                                nplItem.Value.Processor.TypeName);
+                        }
+
                         if (nplItem.Value.Dependencies != null)
                         {
                             foreach (var dependency in nplItem.Value.Dependencies)
@@ -221,10 +229,10 @@ namespace NPLEditor.Common
                         }
                     }
                 }
-                catch (Exception e)
-                {
-                    NPLLog.LogException(e);
-                }
+            }
+            catch (Exception e)
+            {
+                NPLLog.LogException(e);
             }
         }
 
