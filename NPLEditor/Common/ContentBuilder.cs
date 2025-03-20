@@ -137,8 +137,8 @@ namespace NPLEditor.Common
                 var data = content.ToArray()[i];
                 var categoryObject = jsonContent[data.Key];
 
-                var importerName = data.Value["importer"].ToString();
-                var processorName = data.Value["processor"].ToString();
+                var importerName = data.Value["importer"]?.ToString();
+                var processorName = data.Value["processor"]?.ToString();
 
                 PipelineTypes.GetTypeDescriptions(Path.GetExtension(data.Value["path"].ToString()),
                                 out var outImporter, out var outProcessor);
