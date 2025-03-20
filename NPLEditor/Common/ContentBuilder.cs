@@ -170,9 +170,6 @@ namespace NPLEditor.Common
 
             foreach (var nplItem in ContentList)
             {
-                buildFiles.Clear();
-                copyFiles.Clear();
-
                 string path = nplItem.Value.Path.ToString().Replace("\\", "/");
                 if (path.Contains("../"))
                 {
@@ -208,15 +205,17 @@ namespace NPLEditor.Common
                     else if (nplItem.Value.Action == Enums.BuildAction.Build)
                     {
                         buildFiles.AddRange(Directory.GetFiles(filePath, fileName, searchOpt));
-
+                        
+                        var nplItemBuildFiles = new string[buildFiles.Count];
+                        buildFiles.CopyTo(nplItemBuildFiles);
                         if (nplItem.Value.Dependencies != null)
                         {
                             foreach (var dependency in nplItem.Value.Dependencies)
                             {
                                 GetFilePath(dependency, out var dependencyFileName, out var dependencyFilePath);
-                                foreach (var buildFile in buildFiles)
+                                foreach (var nplItemBuildFile in nplItemBuildFiles)
                                 {
-                                    RuntimeBuilder.AddDependencies(Path.GetFileName(buildFile), Directory.GetFiles(Path.Combine(filePath, dependencyFilePath), dependencyFileName, searchOpt).ToList());
+                                    RuntimeBuilder.AddDependencies(Path.GetFileName(nplItemBuildFile), Directory.GetFiles(Path.Combine(filePath, dependencyFilePath), dependencyFileName, searchOpt).ToList());
                                 }
                             }
                         }
