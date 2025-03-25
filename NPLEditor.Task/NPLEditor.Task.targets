@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- This disables the IDE feature that skips executing msbuild in some build situations. -->
+	<PropertyGroup>
+		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+	</PropertyGroup>
+
+	<!-- Include all .npl content files-->
+	<ItemGroup>
+		<NPLContentReferences Include="**/*.npl"/>
+	</ItemGroup>
+
+	<!-- Read .npl content files (Json) and regex 'outputDir' and 'platform' out of it. -->
+	<Target Name="ReadNPLContentReferences" BeforeTargets="RunNPLBuilder">
+		<PropertyGroup>
+			<JsonContent>$([System.IO.File]::ReadAllText(%(NPLContentReferences.FullPath)))</JsonContent>
+
+			<NPLOutputDir>$([System.Text.RegularExpressions.Regex]::Match($(JsonContent), `"outputDir"\s*:\s*"(.*?)"`).Groups[1].Value)</NPLOutputDir>
+			<NPLPlatform>$([System.Text.RegularExpressions.Regex]::Match($(JsonContent), `"platform"\s*:\s*"(.*?)"`).Groups[1].Value)</NPLPlatform>
+			
+			<!-- e.g. bin\DesktopGL -->
+			<NPLOutputPath>$(NPLOutputDir)\$(NPLPlatform)</NPLOutputPath>
+
+			<!-- e.g. ..\Content\bin\DesktopGL -->
+			<ContentInputPath>$(MSBuildProjectDirectory)\Content\$(NPLOutputPath)</ContentInputPath>
+
+			<!-- e.g. ..\bin\Debug\Content -->
+			<ContentOutputPath>$(MSBuildProjectDirectory)\$(OutputPath)Content</ContentOutputPath>
+		</PropertyGroup>
+
+		<!-- Get pre-existing produced content files (first run scenario - probably content files were already produced). -->
+		<ItemGroup>
+			<ProducedFiles Include="$(ContentInputPath)\**\*.*" />
+		</ItemGroup>
+
+		<Message Text="ContentInputPath: $(ContentInputPath)" Importance="Normal" />
+		<Message Text="ContentOutputPath: $(ContentOutputPath)" Importance="Normal" />
+	</Target>
+
+	<Target
+		Name="RunNPLBuilder"
+		AfterTargets="Build"
+		Outputs="@(ProducedFiles)">
+
+		<!-- Run all .npl content files through the npl editor with the 'build' parameter 
+		to just building the content and not showing the editor window. -->
+		<Exec Command="npl-editor &quot;%(NPLContentReferences.FullPath)&quot; build"
+			Condition="'%(NPLContentReferences.FullPath)' != ''" />
+	</Target>
+
+	<!-- The output dir for the produced content files probably needs to be created first. -->
+	<Target Name="MakeOutputDir" AfterTargets="RunNPLBuilder">
+		<MakeDir Directories="$(ContentOutputPath)" Condition="!Exists('$(ContentOutputPath)')" />
+	</Target>
+
+	<!-- Copy all the produced content files to the output dir. -->
+	<Target
+	    Name="CopyProducedFiles"
+		AfterTargets="MakeOutputDir">
+
+		<!-- Get freshly produced content files. -->
+		<ItemGroup>
+			<ProducedFiles Include="$(ContentInputPath)\**\*.*" />
+		</ItemGroup>
+
+		<Message Text="ProducedFiles: %(ProducedFiles.Identity)" Importance="Low" />
+
+		<Copy SourceFiles="@(ProducedFiles)"
+			DestinationFolder="$(ContentOutputPath)"
+			SkipUnchangedFiles="false"
+			Condition="Exists('$(ContentOutputPath)')" />
+	</Target>
+</Project>
