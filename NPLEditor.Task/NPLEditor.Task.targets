@@ -1,7 +1,9 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<!-- This disables the IDE feature that skips executing msbuild in some build situations. -->
 	<PropertyGroup>
+		<!-- This disables the IDE feature that skips executing msbuild in some build situations. -->
 		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+		<!-- Initialy set MultipleNPLFiles to false. -->
+		<MultipleNPLFiles>false</MultipleNPLFiles>
 	</PropertyGroup>
 
 	<!-- Include all .npl content files-->
@@ -16,7 +18,7 @@
 
 			<NPLOutputDir>$([System.Text.RegularExpressions.Regex]::Match($(JsonContent), `"outputDir"\s*:\s*"(.*?)"`).Groups[1].Value)</NPLOutputDir>
 			<NPLPlatform>$([System.Text.RegularExpressions.Regex]::Match($(JsonContent), `"platform"\s*:\s*"(.*?)"`).Groups[1].Value)</NPLPlatform>
-			
+
 			<!-- e.g. bin\DesktopGL -->
 			<NPLOutputPath>$(NPLOutputDir)\$(NPLPlatform)</NPLOutputPath>
 
@@ -25,6 +27,11 @@
 
 			<!-- e.g. ..\bin\Debug\Content -->
 			<ContentOutputPath>$(MSBuildProjectDirectory)\$(OutputPath)Content</ContentOutputPath>
+
+			<!-- When more than 1 content file was found, we need to run the tool in 'incremental'-mode. 
+				 Otherwise the content builder will override the build results of the last content files.
+				 Put here because this check needs to run inside a task. -->
+			<MultipleNPLFiles Condition="@(NPLContentReferences->Count()) &gt; 1">true</MultipleNPLFiles>
 		</PropertyGroup>
 
 		<!-- Get pre-existing produced content files (first run scenario - probably content files were already produced). -->
@@ -34,6 +41,7 @@
 
 		<Message Text="ContentInputPath: $(ContentInputPath)" Importance="Normal" />
 		<Message Text="ContentOutputPath: $(ContentOutputPath)" Importance="Normal" />
+		<Message Text="MultipleNPLFiles: $(MultipleNPLFiles)" Importance="Normal" />
 	</Target>
 
 	<Target
@@ -43,7 +51,7 @@
 
 		<!-- Run all .npl content files through the npl editor with the 'build' parameter 
 		to just building the content and not showing the editor window. -->
-		<Exec Command="npl-editor &quot;%(NPLContentReferences.FullPath)&quot; build"
+		<Exec Command="npl-editor &quot;%(NPLContentReferences.FullPath)&quot; build incremental=$(MultipleNPLFiles)"
 			Condition="'%(NPLContentReferences.FullPath)' != ''" />
 	</Target>
 
@@ -53,19 +61,16 @@
 	</Target>
 
 	<!-- Copy all the produced content files to the output dir. -->
-	<Target
-	    Name="CopyProducedFiles"
-		AfterTargets="MakeOutputDir">
-
-		<!-- Get freshly produced content files. -->
+	<Target Name="CopyProducedFiles" AfterTargets="MakeOutputDir">
 		<ItemGroup>
+			<!-- Get freshly produced content files. -->
 			<ProducedFiles Include="$(ContentInputPath)\**\*.*" />
+			<!-- Filter only the files that actually exist (in case ProducedFiles contains cached old content files). -->
+			<ExistingProducedFiles Include="@(ProducedFiles)" Condition="Exists('%(ProducedFiles.FullPath)')" />
 		</ItemGroup>
 
-		<Message Text="ProducedFiles: %(ProducedFiles.Identity)" Importance="Low" />
-
-		<Copy SourceFiles="@(ProducedFiles)"
-			DestinationFiles="@(ProducedFiles->'$(ContentOutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
+		<Copy SourceFiles="@(ExistingProducedFiles)"
+			DestinationFiles="@(ExistingProducedFiles->'$(ContentOutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
 			SkipUnchangedFiles="false"
 			Condition="Exists('$(ContentOutputPath)')" />
 	</Target>
