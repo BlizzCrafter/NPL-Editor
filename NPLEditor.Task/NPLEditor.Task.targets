@@ -65,7 +65,7 @@
 		<Message Text="ProducedFiles: %(ProducedFiles.Identity)" Importance="Low" />
 
 		<Copy SourceFiles="@(ProducedFiles)"
-			DestinationFolder="$(ContentOutputPath)"
+			DestinationFiles="@(ProducedFiles->'$(ContentOutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
 			SkipUnchangedFiles="false"
 			Condition="Exists('$(ContentOutputPath)')" />
 	</Target>
