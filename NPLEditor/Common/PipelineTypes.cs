@@ -268,7 +268,7 @@ namespace NPLEditor.Common
 
                     assemblyCount++;
 
-                    Log.Information($"Load Assembly '{Path.GetFileName(file)}'");
+                    Log.Debug($"Load Assembly '{Path.GetFileName(file)}'");
 
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
@@ -287,7 +287,7 @@ namespace NPLEditor.Common
 
                 try
                 {
-                    Log.Information($"Load Assembly '{Path.GetFileName(newAssemblyName)}'");
+                    Log.Debug($"Load Assembly '{Path.GetFileName(newAssemblyName)}'");
 
                     var assembly = Assembly.LoadFrom(path);
                     var types = assembly.GetTypes();
