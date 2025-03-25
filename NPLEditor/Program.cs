@@ -74,6 +74,13 @@ public partial class Program
         {
             try
             {
+                if (_launchParameter.ContainsKey(LaunchParameter.Incremental))
+                {
+                    if (bool.TryParse(_launchParameter[LaunchParameter.Incremental], out var incrementalBuild))
+                    {
+                        ContentBuilder.RuntimeBuilder.Incremental = incrementalBuild;
+                    }
+                }
                 await ContentBuilder.BuildContent();
             }
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }

@@ -28,6 +28,17 @@ namespace NPLEditor.Enums
         Build,
 
         /// <summary>
+        /// Skip cleaning files not included in the current build.
+        /// </summary>
+        /// <remarks>
+        /// <example> 
+        /// With the following code you could 'Stack' multiple content files together:
+        /// <code>Example: Incremental=True</code> 
+        /// </example> 
+        /// </remarks>
+        Incremental,
+
+        /// <summary>
         /// <see cref="Serilog.Events.LogEventLevel"/>
         /// <code>Example: Verbosity=Debug</code> 
         /// </summary>
