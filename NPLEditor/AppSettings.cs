@@ -1,6 +1,4 @@
-﻿using Serilog;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 
 namespace NPLEditor
@@ -23,12 +21,8 @@ namespace NPLEditor
 
         public static readonly bool ImGuiINI = false;
 
-        internal static Dictionary<string, string> LaunchArguments;
-
         public static void Init(string[] args)
         {
-            Log.Debug("Launch Arguments: {0}", args);
-
             // Create the logs directory.
             Directory.CreateDirectory(LogsPath);
 
@@ -38,10 +32,6 @@ namespace NPLEditor
                 if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
             }
             catch { }
-
-            // Parsing launch arguments.
-            // Need to be happen on release AND debug builds.
-            LaunchArguments = ParseArguments(args);
 
             // Set the working directory.
 #if DEBUG
@@ -58,26 +48,8 @@ namespace NPLEditor
                 // A .npl content file is always the first argument.
                 NPLJsonFilePath = args[0];
             }
-            else throw new ArgumentException("This app needs to have at least one launch argument with a path pointing to a Content.npl file.");
+            else throw new ArgumentException("This app needs to have at least one launch argument with a path pointing to a .npl content file.");
 #endif
-        }
-
-        private static Dictionary<string, string> ParseArguments(string[] args)
-        {
-            var arguments = new Dictionary<string, string>();
-            foreach (var arg in args)
-            {
-                var splitArg = arg.Split('=');
-                if (splitArg.Length == 2)
-                {
-                    arguments[splitArg[0]] = splitArg[1];
-                }
-                else
-                {
-                    arguments[splitArg[0]] = null;
-                }
-            }
-            return arguments;
         }
     }
 }
