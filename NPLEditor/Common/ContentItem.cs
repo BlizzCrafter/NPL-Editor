@@ -69,7 +69,7 @@ namespace NPLEditor.Common
                 case "action":
                     Action = (BuildAction)Enum.Parse(typeof(BuildAction), value.ToString(), true);
                     break;
-                case "dependencies":
+                case "dependencies" or "watch":
                     {
                         var itemArray = (JsonArray)value;
                         foreach (var item in itemArray)

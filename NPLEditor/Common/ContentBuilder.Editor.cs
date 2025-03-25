@@ -231,7 +231,12 @@ namespace NPLEditor.Common
                             {
                                 jsonNode[x] = nplItem.Dependencies[x];
                             }
-                            JsonObject["content"][nplItem.Category]["dependencies"] = new JsonArray(jsonNode);
+
+                            // Add backward compatibility for npl files coming from NoPipeline
+                            // (https://github.com/Martenfur/Nopipeline).
+                            var dependencyKeyword = "dependencies";
+                            if (JsonObject["content"][nplItem.Category]["watch"] != null) dependencyKeyword = "watch";                            
+                            JsonObject["content"][nplItem.Category][dependencyKeyword] = new JsonArray(jsonNode);
                             Main.WriteContentNPL();
                         }
                     }
