@@ -45,18 +45,20 @@ namespace NPLEditor.Common
                     jsonString = reader.ReadToEnd();
                 }
                 JsonObject = JsonNode.Parse(jsonString);
+                
+                ParseSettings();
 
-                ContentRoot = JsonObject["root"]?.ToString() ?? "";
-                IntermediateDir = JsonObject["intermediateDir"]?.ToString() ?? "obj";
-                OutputDir = JsonObject["outputDir"]?.ToString() ?? "bin";
+                ContentRoot = JsonObject["root"].ToString();
+                IntermediateDir = JsonObject["intermediateDir"].ToString();
+                OutputDir = JsonObject["outputDir"].ToString();
 
-                var platformParsed = Enum.TryParse<TargetPlatform>(JsonObject["platform"]?.ToString(), true, out var targetPlatform);
+                var platformParsed = Enum.TryParse<TargetPlatform>(JsonObject["platform"].ToString(), true, out var targetPlatform);
                 TargetPlatform = platformParsed ? targetPlatform : TargetPlatform.DesktopGL;
 
-                var graphicsParsed = Enum.TryParse<GraphicsProfile>(JsonObject["graphicsProfile"]?.ToString(), true, out var graphicsProfile);
+                var graphicsParsed = Enum.TryParse<GraphicsProfile>(JsonObject["graphicsProfile"].ToString(), true, out var graphicsProfile);
                 GraphicsProfile = graphicsParsed ? graphicsProfile : GraphicsProfile.Reach;
 
-                var compressParsed = bool.TryParse(JsonObject["compress"]?.ToString(), out var compressed);
+                var compressParsed = bool.TryParse(JsonObject["compress"].ToString(), out var compressed);
                 Compress = compressParsed ? compressed : false;
 
                 RuntimeBuilder = new RuntimeBuilder(
@@ -71,12 +73,46 @@ namespace NPLEditor.Common
                 };
 
                 GetAllReferences();
-                ParseAllContentFiles(JsonObject["content"]);
+                ParseAllContentFiles();
             }
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
 
             Initialized = true;
             NPLLog.LogInfoHeadline(FontAwesome.Igloo, "CONTENT BUILDER INITIALIZED");
+        }
+
+        /// <summary>
+        /// Parsing the meta-info of a .npl file.
+        /// This also ensures that this data is written to a .npl file without this meta-info.
+        /// </summary>
+        private static void ParseSettings()
+        {
+            // Reorder process so that "settings" or meta-data will be at the top of the json file.
+            // Since these are dictionary-entries we can not reorder the index like with lists unfortunately.
+            //
+            // 1. Save refs and remove content and references entries.
+            var contentRef = JsonObject["content"];
+            var referencesRef = JsonObject["references"];
+            JsonObject.AsObject().Remove("content");
+            JsonObject.AsObject().Remove("references");
+
+            // 2. Create "settings" or meta-data entries if they are not exist.
+            if (JsonObject["root"] == null) JsonObject["root"] = "";
+            if (JsonObject["intermediateDir"] == null) JsonObject["intermediateDir"] = "obj";
+            if (JsonObject["outputDir"] == null) JsonObject["outputDir"] = "bin";
+            if (JsonObject["platform"] == null) JsonObject["platform"] = nameof(TargetPlatform.DesktopGL);
+            if (JsonObject["graphicsProfile"] == null) JsonObject["graphicsProfile"] = nameof(GraphicsProfile.Reach);
+            if (JsonObject["compress"] == null) JsonObject["compress"] = "true";
+
+            // 3. Re-Add references and content entries.
+            JsonObject.AsObject().Add("references", referencesRef);
+            JsonObject.AsObject().Add("content", contentRef);
+            
+            // 4. Save the new json-file with the following order:
+            // settings
+            // references
+            // content
+            Main.WriteContentNPL();
         }
 
         public static async Task BuildContent(bool rebuildNow = false)
@@ -129,13 +165,13 @@ namespace NPLEditor.Common
             RuntimeBuilder.Rebuild = false;
         }
 
-        private static void ParseAllContentFiles(JsonNode jsonContent)
+        private static void ParseAllContentFiles()
         {
-            var content = jsonContent.AsObject().AsEnumerable();
+            var content = JsonObject["content"].AsObject().AsEnumerable();
             for (int i = 0; i < content.Count(); i++)
             {
                 var data = content.ToArray()[i];
-                var categoryObject = jsonContent[data.Key];
+                var categoryObject = JsonObject["content"][data.Key];
 
                 var importerName = data.Value["importer"]?.ToString();
                 var processorName = data.Value["processor"]?.ToString();
