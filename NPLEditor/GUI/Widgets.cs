@@ -4,6 +4,7 @@ using NPLEditor.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace NPLEditor.GUI
 {
@@ -12,15 +13,22 @@ namespace NPLEditor.GUI
         public static void SimpleTooltip(
             string title,
             string text,
-            float width = 450f)
+            float width = 450f,
+            Vector4 titleColor = default,
+            Vector4 textColor = default)
         {
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
             {
                 ImGui.BeginTooltip();
                 ImGui.PushTextWrapPos(width);
 
-                ImGui.TextColored(
-                    ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled], $"{title}: "); ImGui.SameLine(); ImGui.Text(text);
+                var cTitle = titleColor == default ? ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled] : titleColor;
+                ImGui.TextColored(cTitle, $"{title}: "); 
+                
+                ImGui.SameLine();
+
+                var cText = textColor == default ? ImGui.GetStyle().Colors[(int)ImGuiCol.Text] : textColor;
+                ImGui.TextColored(cText, text);
 
                 ImGui.PopTextWrapPos();
                 ImGui.EndTooltip();
