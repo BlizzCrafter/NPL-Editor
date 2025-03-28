@@ -4,6 +4,8 @@
 		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
 		<!-- Initialy set MultipleNPLFiles to false. -->
 		<MultipleNPLFiles>false</MultipleNPLFiles>
+		<!-- Additional tool arguments. -->
+		<NPLToolArguments>verbosity=debug</NPLToolArguments>
 	</PropertyGroup>
 
 	<!-- Include all .npl content files-->
@@ -51,7 +53,7 @@
 
 		<!-- Run all .npl content files through the npl editor with the 'build' parameter 
 		to just building the content and not showing the editor window. -->
-		<Exec Command="npl-editor &quot;%(NPLContentReferences.FullPath)&quot; build incremental=$(MultipleNPLFiles)"
+		<Exec Command="npl-editor &quot;%(NPLContentReferences.FullPath)&quot; build incremental=$(MultipleNPLFiles) $(NPLToolArguments)"
 			Condition="'%(NPLContentReferences.FullPath)' != ''" />
 	</Target>
 
