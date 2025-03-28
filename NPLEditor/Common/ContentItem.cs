@@ -1,5 +1,4 @@
-﻿using NPLEditor.Data;
-using NPLEditor.Enums;
+﻿using NPLEditor.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
