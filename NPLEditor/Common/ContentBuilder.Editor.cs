@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.RuntimeBuilder;
 using NPLEditor.Data;
 using NPLEditor.Enums;
-using NPLEditor.GUI.Widgets;
+using NPLEditor.GUI;
 using Serilog;
 using System;
 using System.Collections.Generic;

@@ -1,12 +1,11 @@
 ﻿using ImGuiNET;
 using NPLEditor.Common;
-using NPLEditor.Data;
 using NPLEditor.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NPLEditor.GUI.Widgets
+namespace NPLEditor.GUI
 {
     public static class Widgets
     {

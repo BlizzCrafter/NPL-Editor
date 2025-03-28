@@ -5,7 +5,6 @@ using NPLEditor.Common;
 using NPLEditor.Data;
 using NPLEditor.Enums;
 using NPLEditor.GUI;
-using NPLEditor.GUI.Widgets;
 using Serilog;
 using System;
 using System.Collections.Generic;
