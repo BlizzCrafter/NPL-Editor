@@ -5,7 +5,7 @@
 		<!-- Initialy set MultipleNPLFiles to false. -->
 		<MultipleNPLFiles>false</MultipleNPLFiles>
 		<!-- Additional tool arguments. -->
-		<NPLToolArguments>verbosity=debug</NPLToolArguments>
+		<NPLToolArguments>verbosity=information</NPLToolArguments>
 	</PropertyGroup>
 
 	<!-- Include all .npl content files-->
