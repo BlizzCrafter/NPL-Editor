@@ -116,8 +116,8 @@ namespace NPLEditor.Common
 
                 ContentBuilder.JsonObject["content"][Category]["importer"] = Importer.TypeName;
                 ContentBuilder.JsonObject["content"][Category]["processor"] = Processor.TypeName;
-                Main.WriteJsonProcessorParameters(this);
-                Main.WriteContentNPL();
+                ContentBuilder.WriteJsonProcessorParameters(this);
+                ContentBuilder.SaveContentNPL();
             }
         }
 

@@ -112,7 +112,7 @@ namespace NPLEditor.Common
             // settings
             // references
             // content
-            Main.WriteContentNPL();
+            SaveContentNPL();
         }
 
         public static async Task BuildContent(bool rebuildNow = false)

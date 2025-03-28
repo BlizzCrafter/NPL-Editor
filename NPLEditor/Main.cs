@@ -174,42 +174,14 @@ namespace NPLEditor
             }
         }
 
-        public static void WriteJsonProcessorParameters(ContentItem nplItem)
+        public static void SaveAll()
         {
-            var props = new JsonObject();
-            var properties = nplItem.Processor.Properties;
-            if (properties != null && properties.Any())
-            {
-                foreach (var property in properties)
-                {
-                    props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
-                }
-            }
-            ContentBuilder.JsonObject["content"][nplItem.Category]["processorParam"] = props;
-        }
-
-        public static void WriteContentNPL()
-        {
-            try
-            {
-                string jsonString = JsonSerializer.Serialize(ContentBuilder.JsonObject, new JsonSerializerOptions()
-                {
-                    WriteIndented = true
-                });
-                using (var fs = new FileStream(AppSettings.NPLJsonFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-                using (var writer = new StreamWriter(fs))
-                {
-                    writer.Write(jsonString);
-                }
-
-                Log.Debug("Content file successfully saved.");
-            }
-            catch (Exception e) { NPLLog.LogException(e, "SAVE ERROR"); }
+            ContentBuilder.SaveContentNPL();
         }
 
         protected override void OnExiting(object sender, ExitingEventArgs args)
         {
-            WriteContentNPL();
+            SaveAll();
             base.OnExiting(sender, args);
         }
 
@@ -228,11 +200,11 @@ namespace NPLEditor
                     ImGui.SeparatorText("App");
                     if (ImGui.MenuItem($"{FontAwesome.Save} Save"))
                     {
-                        WriteContentNPL();
+                        SaveAll();
                     }
                     if (ImGui.MenuItem($"{FontAwesome.WindowClose} Exit"))
                     {
-                        WriteContentNPL();
+                        SaveAll();
                         Exit();
                     }
                     ImGui.EndMenu();
@@ -451,7 +423,7 @@ namespace NPLEditor
                     {
                         ContentBuilder.JsonObject["content"].AsObject().Remove(ContentDescriptor.Category);
                         ContentBuilder.ContentList.Remove(ContentDescriptor.Category);
-                        WriteContentNPL();
+                        ContentBuilder.SaveContentNPL();
                         ClosePopupModal();
                         return true;
                     }
@@ -474,7 +446,7 @@ namespace NPLEditor
 
                         ContentBuilder.JsonObject["content"].AsObject().Add(ContentDescriptor.Name, content);
                         ContentBuilder.ContentList.Add(ContentDescriptor.Name, new ContentItem(ContentDescriptor.Name, ContentDescriptor.Path));
-                        WriteContentNPL();
+                        ContentBuilder.SaveContentNPL();
 
                         ScrollContentToBottom = true;
                     }
@@ -498,7 +470,7 @@ namespace NPLEditor
                         ContentBuilder.ContentList[ContentDescriptor.Category].Category = ContentDescriptor.Name;
                         ContentBuilder.ContentList[ContentDescriptor.Category].Path = ContentDescriptor.Path;
                         ContentBuilder.ContentList.ChangeKey(ContentDescriptor.Category, ContentDescriptor.Name);
-                        WriteContentNPL();
+                        ContentBuilder.SaveContentNPL();
                     }
                     ClosePopupModal();
                     return true;

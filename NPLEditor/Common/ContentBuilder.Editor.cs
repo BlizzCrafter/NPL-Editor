@@ -9,7 +9,9 @@ using NPLEditor.GUI;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace NPLEditor.Common
@@ -27,7 +29,7 @@ namespace NPLEditor.Common
             if (ImGui.InputText("root", ref ContentRoot, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
             {
                 JsonObject["root"] = ContentRoot;
-                Main.WriteContentNPL();
+                SaveContentNPL();
             }
 
             if (ImGui.InputText("intermediateDir", ref IntermediateDir, 9999, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -35,7 +37,7 @@ namespace NPLEditor.Common
                 JsonObject["intermediateDir"] = IntermediateDir;
                 RuntimeBuilder.SetIntermediateDir(IntermediatePath);
                 Log.Debug($"IntermediateDir: {IntermediatePath}");
-                Main.WriteContentNPL();
+                SaveContentNPL();
             }
             Widgets.SimpleTooltip("Path", IntermediatePath, 800f);
 
@@ -44,7 +46,7 @@ namespace NPLEditor.Common
                 JsonObject["outputDir"] = OutputDir;
                 RuntimeBuilder.SetOutputDir(OutputPath);
                 Log.Debug($"OutputDir: {OutputPath}");
-                Main.WriteContentNPL();
+                SaveContentNPL();
             }
             Widgets.SimpleTooltip("Path", OutputPath, 800f);
 
@@ -56,7 +58,7 @@ namespace NPLEditor.Common
                 RuntimeBuilder.SetPlatform(TargetPlatform);
                 Log.Debug($"IntermediateDir: {IntermediatePath}");
                 Log.Debug($"OutputDir: {OutputPath}");
-                Main.WriteContentNPL();
+                SaveContentNPL();
             }
 
             var graphicsProfile = GraphicsProfile.ToString();
@@ -65,7 +67,7 @@ namespace NPLEditor.Common
                 JsonObject["graphicsProfile"] = graphicsProfile;
                 GraphicsProfile = Enum.Parse<GraphicsProfile>(graphicsProfile);
                 RuntimeBuilder.SetGraphicsProfile(GraphicsProfile);
-                Main.WriteContentNPL();
+                SaveContentNPL();
             }
 
             if (ImGui.Checkbox("compress", ref Compress))
@@ -84,7 +86,7 @@ namespace NPLEditor.Common
                         jsonNode[i] = _tempReferences[i];
                     }
                     JsonObject["references"] = new JsonArray(jsonNode);
-                    Main.WriteContentNPL();
+                    SaveContentNPL();
                     GetAllReferences();
                 }
             }
@@ -136,13 +138,13 @@ namespace NPLEditor.Common
                         nplItem.Path = path;
 
                         JsonObject["content"][nplItem.Category]["path"] = nplItem.Path;
-                        Main.WriteContentNPL();
+                        SaveContentNPL();
                     }
                     ImGui.SameLine();
                     if (ImGui.Checkbox("recursive", ref nplItem.Recursive))
                     {
                         JsonObject["content"][nplItem.Category]["recursive"] = nplItem.Recursive;
-                        Main.WriteContentNPL();
+                        SaveContentNPL();
                     }
 
                     var actionIndex = nplItem.GetActionIndex();
@@ -152,19 +154,19 @@ namespace NPLEditor.Common
                         var itemValue = actionNames[actionIndex].ToLowerInvariant();
                         nplItem.Action = (BuildAction)Enum.Parse(typeof(BuildAction), itemValue.ToString(), true);
                         JsonObject["content"][nplItem.Category]["action"] = itemValue;
-                        Main.WriteContentNPL();
+                        SaveContentNPL();
                     }
 
                     if (Widgets.ComboImporterDesciptor(nplItem, out var importer))
                     {
                         JsonObject["content"][nplItem.Category]["importer"] = importer.TypeName;
-                        Main.WriteContentNPL();
+                        SaveContentNPL();
                     }
                     if (Widgets.ComboProcessorDesciptor(nplItem, out var processor))
                     {
                         JsonObject["content"][nplItem.Category]["processor"] = processor.TypeName;
-                        Main.WriteJsonProcessorParameters(nplItem);
-                        Main.WriteContentNPL();
+                        WriteJsonProcessorParameters(nplItem);
+                        SaveContentNPL();
                     }
 
                     if (nplItem.Processor?.Properties?.Count() > 0)
@@ -237,7 +239,7 @@ namespace NPLEditor.Common
                             var dependencyKeyword = "dependencies";
                             if (JsonObject["content"][nplItem.Category]["watch"] != null) dependencyKeyword = "watch";                            
                             JsonObject["content"][nplItem.Category][dependencyKeyword] = new JsonArray(jsonNode);
-                            Main.WriteContentNPL();
+                            SaveContentNPL();
                         }
                     }
                     ImGui.TreePop();
@@ -245,6 +247,20 @@ namespace NPLEditor.Common
                 ImGui.PopStyleColor();
                 ImGui.PopItemWidth();
             }
+        }
+
+        internal static void WriteJsonProcessorParameters(ContentItem nplItem)
+        {
+            var props = new JsonObject();
+            var properties = nplItem.Processor.Properties;
+            if (properties != null && properties.Any())
+            {
+                foreach (var property in properties)
+                {
+                    props.Add(property.Name, property.DefaultValue?.ToString() ?? "");
+                }
+            }
+            JsonObject["content"][nplItem.Category]["processorParam"] = props;
         }
 
         private static void MoveTreeItem(int i, bool down)
@@ -280,7 +296,26 @@ namespace NPLEditor.Common
             }
             ContentList = sortedContentList;
 
-            Main.WriteContentNPL();
+            SaveContentNPL();
+        }
+
+        public static void SaveContentNPL()
+        {
+            try
+            {
+                string jsonString = JsonSerializer.Serialize(JsonObject, new JsonSerializerOptions()
+                {
+                    WriteIndented = true
+                });
+                using (var fs = new FileStream(AppSettings.NPLJsonFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                using (var writer = new StreamWriter(fs))
+                {
+                    writer.Write(jsonString);
+                }
+
+                Log.Debug("Content file successfully saved.");
+            }
+            catch (Exception e) { NPLLog.LogException(e, "SAVE ERROR"); }
         }
     }
 }
