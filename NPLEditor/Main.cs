@@ -213,42 +213,6 @@ namespace NPLEditor
             base.OnExiting(sender, args);
         }
 
-        public static void MoveTreeItem(int i, bool down)
-        {
-            var content = ContentBuilder.JsonObject["content"].AsObject().ToList();
-
-            foreach (var item in content)
-            {
-                ContentBuilder.JsonObject["content"].AsObject().Remove(item.Key);
-            }
-
-            for (int x = 0; x < content.Count; x++)
-            {
-                if (down)
-                {
-                    if (x == i + 1) ContentBuilder.JsonObject["content"].AsObject().Add(content[i]);
-                    else if (x == i) ContentBuilder.JsonObject["content"].AsObject().Add(content[i + 1]);
-                    else ContentBuilder.JsonObject["content"].AsObject().Add(content[x]);
-                }
-                else
-                {
-                    if (x == i - 1) ContentBuilder.JsonObject["content"].AsObject().Add(content[i]);
-                    else if (x == i) ContentBuilder.JsonObject["content"].AsObject().Add(content[i - 1]);
-                    else ContentBuilder.JsonObject["content"].AsObject().Add(content[x]);
-                }
-            }
-
-            // Sort ContentList based on the new order in _jsonObject
-            var sortedContentList = new Dictionary<string, ContentItem>();
-            foreach (var item in ContentBuilder.JsonObject["content"].AsObject())
-            {
-                sortedContentList.Add(item.Key, ContentBuilder.ContentList[item.Key]);
-            }
-            ContentBuilder.ContentList = sortedContentList;
-
-            WriteContentNPL();
-        }
-
         private void MenuBar()
         {
             bool changeTreeVisibility = false;

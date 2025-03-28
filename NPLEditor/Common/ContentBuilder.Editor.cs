@@ -105,12 +105,12 @@ namespace NPLEditor.Common
                     editButtonCount++;
                     if (Widgets.EditButton(EditButtonPosition.Before, FontAwesome.ArrowDown, id, true, i == ContentList.Count - 1))
                     {
-                        Main.MoveTreeItem(i, true);
+                        MoveTreeItem(i, true);
                     }
                     editButtonCount++;
                     if (Widgets.EditButton(EditButtonPosition.Before, FontAwesome.ArrowUp, id - 1, true, i == 0))
                     {
-                        Main.MoveTreeItem(i, false);
+                        MoveTreeItem(i, false);
                     }
                 }
                 editButtonCount++;
@@ -245,6 +245,42 @@ namespace NPLEditor.Common
                 ImGui.PopStyleColor();
                 ImGui.PopItemWidth();
             }
+        }
+
+        private static void MoveTreeItem(int i, bool down)
+        {
+            var content = JsonObject["content"].AsObject().ToList();
+
+            foreach (var item in content)
+            {
+                JsonObject["content"].AsObject().Remove(item.Key);
+            }
+
+            for (int x = 0; x < content.Count; x++)
+            {
+                if (down)
+                {
+                    if (x == i + 1) JsonObject["content"].AsObject().Add(content[i]);
+                    else if (x == i) JsonObject["content"].AsObject().Add(content[i + 1]);
+                    else JsonObject["content"].AsObject().Add(content[x]);
+                }
+                else
+                {
+                    if (x == i - 1) JsonObject["content"].AsObject().Add(content[i]);
+                    else if (x == i) JsonObject["content"].AsObject().Add(content[i - 1]);
+                    else JsonObject["content"].AsObject().Add(content[x]);
+                }
+            }
+
+            // Sort ContentList based on the new order in _jsonObject
+            var sortedContentList = new Dictionary<string, ContentItem>();
+            foreach (var item in JsonObject["content"].AsObject())
+            {
+                sortedContentList.Add(item.Key, ContentList[item.Key]);
+            }
+            ContentList = sortedContentList;
+
+            Main.WriteContentNPL();
         }
     }
 }
