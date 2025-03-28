@@ -313,7 +313,7 @@ namespace NPLEditor.Common
                     writer.Write(jsonString);
                 }
 
-                Log.Debug("Content file successfully saved.");
+                Log.Verbose("Content file successfully saved.");
             }
             catch (Exception e) { NPLLog.LogException(e, "SAVE ERROR"); }
         }

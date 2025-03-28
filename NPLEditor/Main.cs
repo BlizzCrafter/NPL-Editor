@@ -62,7 +62,7 @@ namespace NPLEditor
 
             base.Initialize();
 
-            NPLLog.LogInfoHeadline(FontAwesome.FlagCheckered, "APP INITIALIZED");
+            NPLLog.LogDebugHeadline(FontAwesome.FlagCheckered, "APP INITIALIZED");
         }
 
         protected override void Draw(GameTime gameTime)
@@ -260,7 +260,7 @@ namespace NPLEditor
                         if (_clearLogViewOnBuild) NPLEditorSink.Output.Clear();
 
                         ContentBuilder.RuntimeBuilder.CleanContent();
-                        NPLLog.LogInfoHeadline(FontAwesome.Broom, "CONTENT CLEANED");
+                        NPLLog.LogDebugHeadline(FontAwesome.Broom, "CONTENT CLEANED");
                     }
                     ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                     ImGui.SeparatorText("Options");

@@ -34,7 +34,7 @@ namespace NPLEditor.Common
 
         public static void Init()
         {
-            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "INITIALIZE CONTENT BUILDER");
+            NPLLog.LogDebugHeadline(FontAwesome.Igloo, "INITIALIZE CONTENT BUILDER");
 
             try
             {
@@ -78,7 +78,7 @@ namespace NPLEditor.Common
             catch (Exception e) { NPLLog.LogException(e, "ERROR", true); }
 
             Initialized = true;
-            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "CONTENT BUILDER INITIALIZED");
+            NPLLog.LogDebugHeadline(FontAwesome.Igloo, "CONTENT BUILDER INITIALIZED");
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace NPLEditor.Common
 
         public static async Task BuildContent(bool rebuildNow = false)
         {
-            NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CONTENT");
+            NPLLog.LogDebugHeadline(FontAwesome.Igloo, "BUILD CONTENT");
 
             RuntimeBuilder.Rebuild = rebuildNow;
             try
@@ -154,9 +154,9 @@ namespace NPLEditor.Common
 
                     await RuntimeBuilder.BuildContent();
 
-                    NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD FINISHED");
+                    NPLLog.LogDebugHeadline(FontAwesome.Igloo, "BUILD FINISHED");
                 }
-                else NPLLog.LogInfoHeadline(FontAwesome.Igloo, "BUILD CANCELD");
+                else NPLLog.LogDebugHeadline(FontAwesome.Igloo, "BUILD CANCELD");
             }
             catch (Exception e) { NPLLog.LogException(e, "BUILD FAILED"); }
 

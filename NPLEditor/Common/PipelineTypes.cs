@@ -248,7 +248,7 @@ namespace NPLEditor.Common
 
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
         {
-            NPLLog.LogInfoHeadline(FontAwesome.BoxOpen, "LOADING REFERENCES");
+            NPLLog.LogDebugHeadline(FontAwesome.BoxOpen, "LOADING REFERENCES");
             
             _loadedPipelineTypes = 0;
 
@@ -403,7 +403,7 @@ namespace NPLEditor.Common
             }
             Processors = processorDescriptions;
 
-            NPLLog.LogInfoHeadline(FontAwesome.Box, $"LOADED {_loadedPipelineTypes} PIPELINE-TYPES.");
+            NPLLog.LogDebugHeadline(FontAwesome.Box, $"LOADED {_loadedPipelineTypes} PIPELINE-TYPES.");
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)

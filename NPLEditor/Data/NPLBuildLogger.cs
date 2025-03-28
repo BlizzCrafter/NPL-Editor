@@ -12,7 +12,7 @@ namespace NPLEditor.Data
 
         public override void LogMessage(string message, params object[] messageArgs)
         {
-            Log.Debug(string.Format(message, messageArgs));
+            Log.Information(string.Format(message, messageArgs));
         }
 
         public override void LogWarning(string helpLink, ContentIdentity contentIdentity, string message, params object[] messageArgs)

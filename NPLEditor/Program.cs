@@ -77,7 +77,7 @@ public partial class Program
     private static void RunApp()
     {
         // Log that main initialize begins.
-        NPLLog.LogInfoHeadline(FontAwesome.Flag, "INITIALIZE APP");
+        NPLLog.LogDebugHeadline(FontAwesome.Flag, "INITIALIZE APP");
 
         // Ensure DPI-Awareness isn't lost for the dotnet tool.
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
