@@ -206,6 +206,8 @@ namespace NPLEditor.Common
         private static List<ImporterInfo> _importers;
         private static List<ProcessorInfo> _processors;
 
+        private static int _loadedPipelineTypes;
+
         public static void GetTypeDescriptions(
             string fileExtension,
             out ImporterTypeDescription outImporter,
@@ -247,12 +249,11 @@ namespace NPLEditor.Common
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
         {
             NPLLog.LogInfoHeadline(FontAwesome.BoxOpen, "LOADING REFERENCES");
+            
+            _loadedPipelineTypes = 0;
 
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
-
-            var assemblyCount = 0;
-            var assemblyErrors = 0;
 
             var monogameLibsDir = Directory.GetParent(AppSettings.LocalContentPath).FullName;
             Log.Debug($"Load MonoGame Assemblies from '{monogameLibsDir}'");
@@ -266,14 +267,12 @@ namespace NPLEditor.Common
                     if (!assembly.ToString().Contains("MonoGame"))
                         continue;
 
-                    assemblyCount++;
-
                     Log.Debug($"Load Assembly '{Path.GetFileName(file)}'");
 
                     var types = assembly.GetTypes();
                     ProcessTypes(types);
                 }
-                catch { assemblyErrors++; }
+                catch { }
             }
 
             List<string> assemblyNames = new List<string>();
@@ -282,8 +281,6 @@ namespace NPLEditor.Common
                 var newAssemblyName = Path.GetFileName(path);
                 if (assemblyNames.Contains(newAssemblyName)) continue;
                 else assemblyNames.Add(newAssemblyName);
-
-                assemblyCount++;
 
                 try
                 {
@@ -295,7 +292,6 @@ namespace NPLEditor.Common
                 }
                 catch (Exception e)
                 {
-                    assemblyErrors++;
                     Log.Error($"Failed to load assembly '{Path.GetFileName(path)}': {e.Message}");
                     continue;
                 }
@@ -410,7 +406,7 @@ namespace NPLEditor.Common
             }
             Processors = processorDescriptions;
 
-            NPLLog.LogInfoHeadline(FontAwesome.Box, $"LOADED {assemblyCount - assemblyErrors} OF {assemblyCount} REFERENCES.");
+            NPLLog.LogInfoHeadline(FontAwesome.Box, $"LOADED {_loadedPipelineTypes} PIPELINE-TYPES.");
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
@@ -431,6 +427,7 @@ namespace NPLEditor.Common
                         {
                             _importers.Add(importer);
                             Log.Verbose($"Importer Added: '{importer.Name}'");
+                            _loadedPipelineTypes++;
                         }
                         else Log.Warning($"Importer NOT Added: '{importer.Name} [Reason: Already Added]'");
                     }
@@ -445,6 +442,7 @@ namespace NPLEditor.Common
                         {
                             _importers.Add(importer);
                             Log.Verbose($"Importer Added: '{importer.Name}'");
+                            _loadedPipelineTypes++;
                         }
                         else Log.Warning($"Importer NOT Added: '{importer.Name} [Reason: Already Added]'");
                     }
@@ -460,6 +458,7 @@ namespace NPLEditor.Common
                         {
                             _processors.Add(processor);
                             Log.Verbose($"Processor Added: '{processor.Name}'");
+                            _loadedPipelineTypes++;
                         }
                         else Log.Warning($"Processor NOT Added: '{processor.Name} [Reason: Already Added]'");
                     }
