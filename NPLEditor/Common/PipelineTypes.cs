@@ -255,26 +255,23 @@ namespace NPLEditor.Common
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
 
-            var monogameLibsDir = Directory.GetParent(AppSettings.LocalContentPath).FullName;
-            Log.Debug($"Load MonoGame Assemblies from '{monogameLibsDir}'");
-            foreach (var file in Directory.GetFiles(monogameLibsDir, "*.dll"))
+            var libsDir = Directory.GetParent(AppSettings.LocalContentPath).FullName;
+
+            // Load MonoGame.Framework.Content.Pipeline.dll
+            var monogamePipelineDir = Path.Combine(libsDir, "MonoGame.Framework.Content.Pipeline.dll");
+            if (File.Exists(monogamePipelineDir))
             {
-                try
-                {
-                    var assemblyName = Path.GetFileNameWithoutExtension(file);
-                    var assembly = Assembly.Load(assemblyName);
+                var assemblyName = Path.GetFileNameWithoutExtension(monogamePipelineDir);
+                var assembly = Assembly.Load(assemblyName);
 
-                    if (!assembly.ToString().Contains("MonoGame"))
-                        continue;
+                Log.Debug($"Load Assembly '{Path.GetFileName(monogamePipelineDir)}'");
 
-                    Log.Debug($"Load Assembly '{Path.GetFileName(file)}'");
-
-                    var types = assembly.GetTypes();
-                    ProcessTypes(types);
-                }
-                catch { }
+                var types = assembly.GetTypes();
+                ProcessTypes(types);
             }
+            else Log.Error($"MonoGame.Framework.Content.Pipeline.dll not found in '{libsDir}'.");
 
+            // Load all custom assemblies (pipeline references set by the tool)
             List<string> assemblyNames = new List<string>();
             foreach (var path in assemblyPaths)
             {
