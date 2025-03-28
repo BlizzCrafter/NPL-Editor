@@ -20,8 +20,8 @@ public partial class Program
         // Parsing launch arguments.
         _launchParameter = ParseArguments(args);
 
-        var logLevel = LogEventLevel.Verbose;
-        if (_launchParameter.ContainsKey(LaunchParameter.Verbosity))
+        // Initialize app settings (working dir, other directories, etc).
+        AppSettings.Init(args);
         {
             if (string.Equals("Silent", _launchParameter[LaunchParameter.Verbosity], StringComparison.OrdinalIgnoreCase))
             {
@@ -55,9 +55,6 @@ public partial class Program
 
         Log.Debug("Main Running & Logger Initilized");
         Log.Debug("Launch Arguments: {0}", args);
-
-        // Initialize app settings (working dir, other directories, etc).
-        AppSettings.Init(args);
 
         // Initialize the ContentBuilder (reading the Content.npl file, etc).
         ContentBuilder.Init();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.IO;
 
 namespace NPLEditor
@@ -12,10 +13,10 @@ namespace NPLEditor
         public static readonly string GitHubRepoURL = "https://github.com/BlizzCrafter/NPL-Editor";
 
         public static readonly string LocalContentPath = Path.Combine(AppContext.BaseDirectory, "Content");
-        public static readonly string LogsPath = Path.Combine(AppContext.BaseDirectory, "logs");
-        public static readonly string AllLogPath = Path.Combine(LogsPath, "log.txt");
-        public static readonly string ImportantLogPath = Path.Combine(LogsPath, "important-log.txt");
-        public static readonly string BuildContentLogPath = Path.Combine(LogsPath, "build.txt");
+        public static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Title);
+        public static readonly string LogPath = Path.Combine(AppDataPath, "logs");
+        public static readonly string AllLogPath = Path.Combine(LogPath, "log.txt");
+        public static readonly string ImportantLogPath = Path.Combine(LogPath, "important-log.txt");
 
         public static string NPLJsonFilePath = LocalContentPath;
 
@@ -23,15 +24,19 @@ namespace NPLEditor
 
         public static void Init(string[] args)
         {
-            // Create the logs directory.
-            Directory.CreateDirectory(LogsPath);
+            // Create the app-data directory.
+            Directory.CreateDirectory(AppDataPath);
 
             try
             {
                 // The general log file should always regenerate.
                 if (File.Exists(AllLogPath)) File.Delete(AllLogPath);
             }
-            catch { }
+            catch (IOException e)
+            {
+                // Handle the exception if the file is being used by another process.
+                Log.Warning(e, $"Error deleting file: {AllLogPath}");
+            }
 
             // Set the working directory.
 #if DEBUG
