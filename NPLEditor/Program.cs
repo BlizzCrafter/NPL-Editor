@@ -22,22 +22,10 @@ public partial class Program
 
         // Initialize app settings (working dir, other directories, etc).
         AppSettings.Init(args);
-        {
-            if (string.Equals("Silent", _launchParameter[LaunchParameter.Verbosity], StringComparison.OrdinalIgnoreCase))
-            {
-                // Since serilog has no real silent mode we are just setting the log level to the highest one,
-                // which is kinda a "silent" mode, because fatal errors will likely be thrown anyway.
-                logLevel = LogEventLevel.Fatal;
-            }
-            else if (Enum.TryParse<LogEventLevel>(_launchParameter[LaunchParameter.Verbosity], true, out var verbosity))
-            {
-                logLevel = verbosity;
-            }
-        }
 
         // Create the serilog logger.
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.ControlledBy(new LoggingLevelSwitch(logLevel))
+            .MinimumLevel.ControlledBy(new LoggingLevelSwitch(SetLogLevel()))
             .WriteTo.File(AppSettings.AllLogPath,
                 restrictedToMinimumLevel: LogEventLevel.Verbose,
                 rollOnFileSizeLimit: true)
@@ -65,6 +53,7 @@ public partial class Program
         Log.Debug($"IntermediateDir: {ContentBuilder.IntermediatePath}");
         Log.Debug($"OutputDir: {ContentBuilder.OutputPath}");
         Log.Debug($"LocalContentDir: {AppSettings.LocalContentPath}");
+        Log.Debug($"AppDataDir: {AppSettings.AppDataPath}");
 
         // Only build the content or just launch the app.
         if (_launchParameter.ContainsKey(LaunchParameter.Build))
@@ -100,6 +89,25 @@ public partial class Program
         }
         using var app = new Main();
         app.Run();
+    }
+
+    private static LogEventLevel SetLogLevel()
+    {
+        var logLevel = LogEventLevel.Verbose;
+        if (_launchParameter.ContainsKey(LaunchParameter.Verbosity))
+        {
+            if (string.Equals("Silent", _launchParameter[LaunchParameter.Verbosity], StringComparison.OrdinalIgnoreCase))
+            {
+                // Since serilog has no real silent mode we are just setting the log level to the highest one,
+                // which is kinda a "silent" mode, because fatal errors will likely be thrown anyway.
+                logLevel = LogEventLevel.Fatal;
+            }
+            else if (Enum.TryParse<LogEventLevel>(_launchParameter[LaunchParameter.Verbosity], true, out var verbosity))
+            {
+                logLevel = verbosity;
+            }
+        }
+        return logLevel;
     }
 
     private static Dictionary<LaunchParameter, string> ParseArguments(string[] args)
