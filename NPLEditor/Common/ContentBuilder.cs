@@ -285,6 +285,7 @@ namespace NPLEditor.Common
         private static void GetAllReferences()
         {
             RuntimeBuilder.ClearAllReferences();
+            _tempReferences.Clear();
 
             var combinedReferences = new List<string>();
             foreach (var item in JsonObject["references"].AsArray())
