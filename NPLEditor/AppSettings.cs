@@ -8,7 +8,7 @@ namespace NPLEditor
     {
         public static readonly string Title = "NPL Editor";
         public static readonly string Author = "BlizzCrafter";
-        public static readonly string Description = "A graphical editor for '.npl' files used together with 'Nopipeline' to produce '.mgcb' files for MonoGame projects.";
+        public static readonly string Description = "The NPLEditor is a heavenly modernized and improved version of the MonoGame Pipeline Tool.";
         public static readonly string License = "The MIT License (MIT)";
         public static readonly string GitHubRepoURL = "https://github.com/BlizzCrafter/NPL-Editor";
 
