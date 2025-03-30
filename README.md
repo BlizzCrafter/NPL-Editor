@@ -1,7 +1,7 @@
 # Welcome to NPL Editor!
 [![NPLEditor](https://img.shields.io/nuget/v/NPLEditor?style=for-the-badge&logo=nuget&logoSize=auto&label=NPLEditor&labelColor=0956CC&color=707070)](https://www.nuget.org/packages/NPLEditor/) [![NPLEditor.Task](https://img.shields.io/nuget/v/NPLEditor.Task?style=for-the-badge&logo=nuget&logoSize=auto&label=NPLEditor.Task&labelColor=0956CC&color=707070)](https://www.nuget.org/packages/NPLEditor.Task/) [![Visual Studio](https://img.shields.io/badge/Visual%20Studio-Extension-blue.svg?style=for-the-badge&logo=visual-studio-code&labelColor=8962CC&logoSize=auto&colorA=262626&colorB=707070)](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) 
 
-The NPL Editor is a heavenly modernized and improved version of the [MonoGame Pipeline Tool (MGCB Editor)](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html).
+NPL Editor is a modern, powerful, and completely standalone tool that revolutionizes your MonoGame content pipeline workflow. Building upon the robust foundations of **[MGCB Editor](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html)** and **[NoPipeline](https://github.com/Martenfur/Nopipeline)**, it delivers an enhanced, user-friendly experience designed for speed, flexibility, and reliability.
 
 # Setup NPL Editor
 
@@ -15,23 +15,34 @@ Yes! It should be possible now to double click the **Content.npl** file inside y
 
 Everything you change inside this editor will modify the corresponding **Content.npl** file now 🥳.
 
-# Benefits
+# Benefits of NPL Editor
 
-✨ No JSON-Formatting Erros Anymore 
+## 🔄 Seamless Integration
+- Completely free from NoPipeline and MonoGame.ContentBuilder.Task dependencies, NPL Editor runs 100% on its own!
 
-Just manage your content and **NPL Editor** takes care about the correct formatting of your **.npl** files.
+## ⚡ Performance & Efficiency
+- **Incremental Build Mode:** Automatically rebuild only the changed content within multiple `.npl` content files simultaneously!
 
-✨ Automatic Pipeline Imports 
+## 🛠️ Advanced Build & Logging
+- **Dynamic Pipeline Imports:** Automatically detects and imports pipeline references of MonoGame and your own custom ones!
+- **Enhanced Logging:** Real-time, organized logging with adjustable verbosity keeps you informed at every step!
+- **Smart Build Process:** Powered by [MonoGame.RuntimeBuilder](https://www.nuget.org/packages/MonoGame.RuntimeBuilder), it tracks file dependencies and supports dynamic runtime modifications to the build process as well as detecting multiple importers with the same file extensions!
 
-Just add your content pipeline references and **NPL Editor** extracts importers and processors from it.
+## 📝 Error-Free Editing & Automated Resource Management
+- **Seamless Content Editing:** Eliminate JSON formatting errors – NPL Editor handles your `.npl` files flawlessly!
+- **Intelligent Dependency Tracking:** Modify one content item and see all dependent assets automatically rebuilt!
 
-✨ No "Name-Guessing" Anymore 
+## 📦 Flexibility & Future-Proofing
+- **Backward Compatibility:** Supports legacy NPL keywords (like "watch") from NoPipeline for a smooth transition!
+- **Debug-Friendly Task Integration:** Use the new NPLEditor.Task nuget to build content on the fly during debugging without launching the full GUI!
+- **Advanced Parameter Parsing:** Control log levels and other settings easily via additional launch parameters.
+- **Extended Content Management:** Enjoy enhanced content handling that supports environment variables and wildcards. For example, you can add content as follows:
 
-Just with importers and processors, you don't need to guess the correct names of parameters or anything else anymore; just select what you need inside the **NPL Editor**.
+>     "%PROGRAMFILES%\YourLibDir\Library.dll"
+>     "..\RelativePath\RelativeLibrary.dll"
+>     "D:\OtherPath\**\*.png"
 
-✨ Logging 
-
-Realtime logging events directly inside the **NPL Editor**.
+By combining robust performance with a flexible and intuitive design, **NPL Editor** is your go-to tool for managing MonoGame content effortlessly.
  
 # Impressions
 
