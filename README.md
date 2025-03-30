@@ -7,7 +7,7 @@ NPL Editor is a modern, powerful, and completely standalone tool that revolution
 
 1. Open or create a [MonoGame](https://monogame.net/) project via Visual Studio.
 3. Install the [NPLEditor](https://www.nuget.org/packages/NPLEditor/) as a **GLOBAL** dotnet tool.
-2. Install the [NPLEditor.Task]().
+2. Install the [NPLEditor.Task](https://www.nuget.org/packages/NPLEditor.Task/).
 4. Install the [NPLEditor.VSExtension](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) via Visual Studio.
 5. Profit ???
 
