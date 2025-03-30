@@ -31,9 +31,9 @@ namespace NPLEditor
         private bool _launchDebuggerContent = false;
         private bool _incrementalContent = false;
         private bool _treeNodesOpen = true;
-        private bool _logOpen = false;
         private bool _settingsVisible = true;
         private bool _dummyBoolIsOpen = true;
+        private static bool _logOpen = false;
 
         public Main()
         {
@@ -180,6 +180,12 @@ namespace NPLEditor
         {
             SaveAll();
             base.OnExiting(sender, args);
+        }
+
+        public static void OpenLog()
+        {
+            ScrollLogToBottom = true;
+            _logOpen = true;
         }
 
         private void MenuBar()
@@ -341,7 +347,6 @@ namespace NPLEditor
                 }
             }
         }
-
         private bool PopupModal(string title, string message)
         {
             ImGuiWindowFlags modalWindowFlags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration
@@ -487,7 +492,6 @@ namespace NPLEditor
             }
             return false;
         }
-
         private void ClosePopupModal()
         {
             ContentDescriptor.Reset();
