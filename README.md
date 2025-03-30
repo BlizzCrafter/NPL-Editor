@@ -1,15 +1,13 @@
 # Welcome to NPL Editor!
 [![NuGet](https://img.shields.io/badge/NuGet-Tool-blue.svg?style=flat-square&logo=NuGet&colorA=555555&colorB=D1A300)](https://www.nuget.org/packages/NPLEditor/) [![Visual Studio](https://img.shields.io/badge/Visual%20Studio-Extension-lightgrey.svg?style=flat-square&logo=visual-studio-code&colorB=af70f2)](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor)
 
-A graphical editor for '.npl' files used together with '[Nopipeline](https://github.com/Martenfur/Nopipeline)' to produce '.mgcb' files for MonoGame projects.
-
-Inspired by the [MGCB Editor](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html).
+The NPL Editor is a heavenly modernized and improved version of the [MonoGame Pipeline Tool (MGCB Editor)](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html).
 
 # Setup NPL Editor
 
 1. Open or create a [MonoGame](https://monogame.net/) project via Visual Studio.
-2. Install the [Nopipeline.Task](https://www.nuget.org/packages/Nopipeline.Task).
 3. Install the [NPLEditor](https://www.nuget.org/packages/NPLEditor/) as a **GLOBAL** dotnet tool.
+2. Install the [NPLEditor.Task]().
 4. Install the [NPLEditor.VSExtension](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) via Visual Studio.
 5. Profit ???
 
