@@ -206,7 +206,7 @@ namespace NPLEditor.Common
         private static List<ImporterInfo> _importers;
         private static List<ProcessorInfo> _processors;
 
-        public static bool IsDirty { get; private set; } = true;
+        private static int _loadedPipelineTypes;
 
         public static void GetTypeDescriptions(
             string fileExtension,
@@ -241,63 +241,37 @@ namespace NPLEditor.Common
             return index;
         }
 
-        public static bool Initialized
-        {
-            get
-            {
-                if (_importers == null || _processors == null)
-                {
-                    return false;
-                }
-                else return true;
-            }
-        }
-
-        public static void Reset()
-        {
-            _importers = null;
-            _processors = null;
-
-            IsDirty = true;
-        }
-
         public static void Load(string[] references)
         {
-            if (!Initialized) ResolveAssemblies(references);
+            ResolveAssemblies(references);
         }
 
         private static void ResolveAssemblies(IEnumerable<string> assemblyPaths)
         {
-            NPLLog.LogInfoHeadline(FontAwesome.BoxOpen, "LOADING REFERENCES");
+            NPLLog.LogDebugHeadline(FontAwesome.BoxOpen, "LOADING REFERENCES");
+            
+            _loadedPipelineTypes = 0;
 
             _importers = new List<ImporterInfo>();
             _processors = new List<ProcessorInfo>();
 
-            var assemblyCount = 0;
-            var assemblyErrors = 0;
+            var libsDir = Directory.GetParent(AppSettings.LocalContentPath).FullName;
 
-            var monogameLibsDir = Directory.GetParent(AppSettings.LocalContentPath).FullName;
-            Log.Debug($"Load MonoGame Assemblies from '{monogameLibsDir}'");
-            foreach (var file in Directory.GetFiles(monogameLibsDir, "*.dll"))
+            // Load MonoGame.Framework.Content.Pipeline.dll
+            var monogamePipelineDir = Path.Combine(libsDir, "MonoGame.Framework.Content.Pipeline.dll");
+            if (File.Exists(monogamePipelineDir))
             {
-                try
-                {
-                    var assemblyName = Path.GetFileNameWithoutExtension(file);
-                    var assembly = Assembly.Load(assemblyName);
+                var assemblyName = Path.GetFileNameWithoutExtension(monogamePipelineDir);
+                var assembly = Assembly.Load(assemblyName);
 
-                    if (!assembly.ToString().Contains("MonoGame"))
-                        continue;
+                Log.Debug($"Load Assembly '{Path.GetFileName(monogamePipelineDir)}'");
 
-                    assemblyCount++;
-
-                    Log.Information($"Load Assembly '{Path.GetFileName(file)}'");
-
-                    var types = assembly.GetTypes();
-                    ProcessTypes(types);
-                }
-                catch { assemblyErrors++; }
+                var types = assembly.GetTypes();
+                ProcessTypes(types);
             }
+            else Log.Error($"MonoGame.Framework.Content.Pipeline.dll not found in '{libsDir}'.");
 
+            // Load all custom assemblies (pipeline references set by the tool)
             List<string> assemblyNames = new List<string>();
             foreach (var path in assemblyPaths)
             {
@@ -305,11 +279,9 @@ namespace NPLEditor.Common
                 if (assemblyNames.Contains(newAssemblyName)) continue;
                 else assemblyNames.Add(newAssemblyName);
 
-                assemblyCount++;
-
                 try
                 {
-                    Log.Information($"Load Assembly '{Path.GetFileName(newAssemblyName)}'");
+                    Log.Debug($"Load Assembly '{Path.GetFileName(newAssemblyName)}'");
 
                     var assembly = Assembly.LoadFrom(path);
                     var types = assembly.GetTypes();
@@ -317,7 +289,6 @@ namespace NPLEditor.Common
                 }
                 catch (Exception e)
                 {
-                    assemblyErrors++;
                     Log.Error($"Failed to load assembly '{Path.GetFileName(path)}': {e.Message}");
                     continue;
                 }
@@ -431,10 +402,8 @@ namespace NPLEditor.Common
                 processorDescriptions[^1] = temp;
             }
             Processors = processorDescriptions;
-            
-            IsDirty = false;
 
-            NPLLog.LogInfoHeadline(FontAwesome.Box, $"LOADED {assemblyCount - assemblyErrors} OF {assemblyCount} REFERENCES.");
+            NPLLog.LogDebugHeadline(FontAwesome.Box, $"LOADED {_loadedPipelineTypes} PIPELINE-TYPES.");
         }
 
         private static void ProcessTypes(IEnumerable<Type> types)
@@ -455,6 +424,7 @@ namespace NPLEditor.Common
                         {
                             _importers.Add(importer);
                             Log.Verbose($"Importer Added: '{importer.Name}'");
+                            _loadedPipelineTypes++;
                         }
                         else Log.Warning($"Importer NOT Added: '{importer.Name} [Reason: Already Added]'");
                     }
@@ -469,6 +439,7 @@ namespace NPLEditor.Common
                         {
                             _importers.Add(importer);
                             Log.Verbose($"Importer Added: '{importer.Name}'");
+                            _loadedPipelineTypes++;
                         }
                         else Log.Warning($"Importer NOT Added: '{importer.Name} [Reason: Already Added]'");
                     }
@@ -484,6 +455,7 @@ namespace NPLEditor.Common
                         {
                             _processors.Add(processor);
                             Log.Verbose($"Processor Added: '{processor.Name}'");
+                            _loadedPipelineTypes++;
                         }
                         else Log.Warning($"Processor NOT Added: '{processor.Name} [Reason: Already Added]'");
                     }

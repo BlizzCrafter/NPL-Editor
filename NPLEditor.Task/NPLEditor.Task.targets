@@ -1,0 +1,79 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<!-- This disables the IDE feature that skips executing msbuild in some build situations. -->
+		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+		<!-- Initialy set MultipleNPLFiles to false. -->
+		<MultipleNPLFiles>false</MultipleNPLFiles>
+		<!-- Additional tool arguments. -->
+		<NPLToolArguments>verbosity=information</NPLToolArguments>
+	</PropertyGroup>
+
+	<!-- Include all .npl content files-->
+	<ItemGroup>
+		<NPLContentReferences Include="**/*.npl"/>
+	</ItemGroup>
+
+	<!-- Read .npl content files (Json) and regex 'outputDir' and 'platform' out of it. -->
+	<Target Name="ReadNPLContentReferences" BeforeTargets="RunNPLBuilder">
+		<PropertyGroup>
+			<JsonContent>$([System.IO.File]::ReadAllText(%(NPLContentReferences.FullPath)))</JsonContent>
+
+			<NPLOutputDir>$([System.Text.RegularExpressions.Regex]::Match($(JsonContent), `"outputDir"\s*:\s*"(.*?)"`).Groups[1].Value)</NPLOutputDir>
+			<NPLPlatform>$([System.Text.RegularExpressions.Regex]::Match($(JsonContent), `"platform"\s*:\s*"(.*?)"`).Groups[1].Value)</NPLPlatform>
+
+			<!-- e.g. bin\DesktopGL -->
+			<NPLOutputPath>$(NPLOutputDir)\$(NPLPlatform)</NPLOutputPath>
+
+			<!-- e.g. ..\Content\bin\DesktopGL -->
+			<ContentInputPath>$(MSBuildProjectDirectory)\Content\$(NPLOutputPath)</ContentInputPath>
+
+			<!-- e.g. ..\bin\Debug\Content -->
+			<ContentOutputPath>$(MSBuildProjectDirectory)\$(OutputPath)Content</ContentOutputPath>
+
+			<!-- When more than 1 content file was found, we need to run the tool in 'incremental'-mode. 
+				 Otherwise the content builder will override the build results of the last content files.
+				 Put here because this check needs to run inside a task. -->
+			<MultipleNPLFiles Condition="@(NPLContentReferences->Count()) &gt; 1">true</MultipleNPLFiles>
+		</PropertyGroup>
+
+		<!-- Get pre-existing produced content files (first run scenario - probably content files were already produced). -->
+		<ItemGroup>
+			<ProducedFiles Include="$(ContentInputPath)\**\*.*" />
+		</ItemGroup>
+
+		<Message Text="ContentInputPath: $(ContentInputPath)" Importance="Normal" />
+		<Message Text="ContentOutputPath: $(ContentOutputPath)" Importance="Normal" />
+		<Message Text="MultipleNPLFiles: $(MultipleNPLFiles)" Importance="Normal" />
+	</Target>
+
+	<Target
+		Name="RunNPLBuilder"
+		AfterTargets="Build"
+		Outputs="@(ProducedFiles)">
+
+		<!-- Run all .npl content files through the npl editor with the 'build' parameter 
+		to just building the content and not showing the editor window. -->
+		<Exec Command="npl-editor &quot;%(NPLContentReferences.FullPath)&quot; build incremental=$(MultipleNPLFiles) $(NPLToolArguments)"
+			Condition="'%(NPLContentReferences.FullPath)' != ''" />
+	</Target>
+
+	<!-- The output dir for the produced content files probably needs to be created first. -->
+	<Target Name="MakeOutputDir" AfterTargets="RunNPLBuilder">
+		<MakeDir Directories="$(ContentOutputPath)" Condition="!Exists('$(ContentOutputPath)')" />
+	</Target>
+
+	<!-- Copy all the produced content files to the output dir. -->
+	<Target Name="CopyProducedFiles" AfterTargets="MakeOutputDir">
+		<ItemGroup>
+			<!-- Get freshly produced content files. -->
+			<ProducedFiles Include="$(ContentInputPath)\**\*.*" />
+			<!-- Filter only the files that actually exist (in case ProducedFiles contains cached old content files). -->
+			<ExistingProducedFiles Include="@(ProducedFiles)" Condition="Exists('%(ProducedFiles.FullPath)')" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(ExistingProducedFiles)"
+			DestinationFiles="@(ExistingProducedFiles->'$(ContentOutputPath)\%(RecursiveDir)%(Filename)%(Extension)')"
+			SkipUnchangedFiles="false"
+			Condition="Exists('$(ContentOutputPath)')" />
+	</Target>
+</Project>

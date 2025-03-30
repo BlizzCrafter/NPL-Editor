@@ -1,8 +1,9 @@
-﻿using System;
+﻿using NPLEditor.Enums;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
-using NPLEditor.Enums;
 using static NPLEditor.Common.ProcessorTypeDescription;
 
 namespace NPLEditor.Common
@@ -19,18 +20,25 @@ namespace NPLEditor.Common
                 {
                     _path = Path.Substring(1);
                 }
+                if (ContentBuilder.Initialized) CheckImportersProcessors();
             }
         }
         private string _path;
-        public readonly string Category;
+        public string Category;
         public bool Recursive;
         public int SelectedImporterIndex;
         public int SelectedProcessorIndex;
-        public string[] Watch;
+        public List<string> Dependencies = [];
         public string[] Parameters;
         public BuildAction Action;
         public ImporterTypeDescription Importer;
         public ProcessorTypeDescription Processor;
+
+        public ContentItem(string category, string path)
+        {
+            Category = category;
+            Path = path;
+        }
 
         public ContentItem(string category, string importerKey, string processorKey)
         {
@@ -60,13 +68,12 @@ namespace NPLEditor.Common
                 case "action":
                     Action = (BuildAction)Enum.Parse(typeof(BuildAction), value.ToString(), true);
                     break;
-                case "watch":
+                case "dependencies" or "watch":
                     {
                         var itemArray = (JsonArray)value;
-                        Watch ??= new string[itemArray.Count];
-                        for (int i = 0; i < itemArray.Count; i++)
+                        foreach (var item in itemArray)
                         {
-                            Watch[i] = itemArray[i].ToString();
+                            Dependencies.Add(item.ToString());
                         }
                     }
                     break;
@@ -90,6 +97,26 @@ namespace NPLEditor.Common
                         Parameters[^1] = GetParameterString(param, value);
                     }
                     break;
+            }
+        }
+
+        private void CheckImportersProcessors()
+        {
+            PipelineTypes.GetTypeDescriptions(System.IO.Path.GetExtension(Path),
+                out var outImporter, out var outProcessor);
+
+            if (outImporter != null && outProcessor != null)
+            {
+                Importer = outImporter;
+                Processor = outProcessor;
+
+                GetImporterIndex();
+                GetProcessorIndex();
+
+                ContentBuilder.JsonObject["content"][Category]["importer"] = Importer.TypeName;
+                ContentBuilder.JsonObject["content"][Category]["processor"] = Processor.TypeName;
+                ContentBuilder.WriteJsonProcessorParameters(this);
+                ContentBuilder.SaveContentNPL();
             }
         }
 

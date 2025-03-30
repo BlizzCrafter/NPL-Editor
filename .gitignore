@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /NPLEditor/Content/Content-Demo.npl
 /NPLEditor/Content/MonoGo.Pipeline.dll
 /NPLEditor/Content/StbImageSharp.dll
+/NPLEditor/Content/Graphics
+/NPLEditor/Properties/launchSettings.json

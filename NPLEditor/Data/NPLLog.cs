@@ -5,11 +5,32 @@ namespace NPLEditor.Data
 {
     public static class NPLLog
     {
+        public static void LogVerboseHeadline(string icon, string message)
+        {
+            Log.Verbose("");
+            Log.Verbose($"{icon} {message}");
+            Log.Verbose("");
+        }
+
+        public static void LogDebugHeadline(string icon, string message)
+        {
+            Log.Debug("");
+            Log.Debug($"{icon} {message}");
+            Log.Debug("");
+        }
+
         public static void LogInfoHeadline(string icon, string message)
         {
             Log.Information("");
             Log.Information($"{icon} {message}");
             Log.Information("");
+        }
+
+        public static void LogWarningHeadline(string icon, string message)
+        {
+            Log.Warning("");
+            Log.Warning($"{icon} {message}");
+            Log.Warning("");
         }
 
         public static void LogErrorHeadline(string icon, string message)

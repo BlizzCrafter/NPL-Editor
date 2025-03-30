@@ -4,7 +4,7 @@
 		<Authors>Marcel Härtel</Authors>
 		<Product>NPL-Editor</Product>
 		<Title>NPL Editor</Title>
-		<Description>A graphical editor for '.npl' files used together with 'Nopipeline' to produce '.mgcb' files for MonoGame projects.</Description>
+		<Description>The NPL Editor is a heavenly modernized and improved version of the MonoGame Pipeline Tool.</Description>
 		<PackageProjectUrl>https://github.com/BlizzCrafter/NPL-Editor</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/BlizzCrafter/NPL-Editor.git</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
