@@ -1,5 +1,5 @@
 # Welcome to NPL Editor!
-[![NuGet](https://img.shields.io/badge/NuGet-Tool-blue.svg?style=flat-square&logo=NuGet&colorA=555555&colorB=D1A300)](https://www.nuget.org/packages/NPLEditor/) [![Visual Studio](https://img.shields.io/badge/Visual%20Studio-Extension-lightgrey.svg?style=flat-square&logo=visual-studio-code&colorB=af70f2)](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor)
+[![NPLEditor](https://img.shields.io/nuget/v/NPLEditor?style=for-the-badge&logo=nuget&logoSize=auto&label=NPLEditor&labelColor=0956CC&color=707070)](https://www.nuget.org/packages/NPLEditor/) [![NPLEditor.Task](https://img.shields.io/nuget/v/NPLEditor.Task?style=for-the-badge&logo=nuget&logoSize=auto&label=NPLEditor.Task&labelColor=0956CC&color=707070)](https://www.nuget.org/packages/NPLEditor.Task/) [![Visual Studio](https://img.shields.io/badge/Visual%20Studio-Extension-blue.svg?style=for-the-badge&logo=visual-studio-code&labelColor=8962CC&logoSize=auto&colorA=262626&colorB=707070)](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) 
 
 The NPL Editor is a heavenly modernized and improved version of the [MonoGame Pipeline Tool (MGCB Editor)](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html).
 
@@ -38,5 +38,6 @@ Realtime logging events directly inside the **NPL Editor**.
 ![NPLEditor](https://raw.githubusercontent.com/BlizzCrafter/NPL-Editor/master/docs/npl_tool_00.png)
 ![NPLEditor](https://raw.githubusercontent.com/BlizzCrafter/NPL-Editor/master/docs/npl_tool_01.png)
 ![NPLEditor](https://raw.githubusercontent.com/BlizzCrafter/NPL-Editor/master/docs/npl_tool_02.png)
+![NPLEditor](https://raw.githubusercontent.com/BlizzCrafter/NPL-Editor/master/docs/npl_tool_03.png)
 
 # Now Have Fun with NPL Editor!
