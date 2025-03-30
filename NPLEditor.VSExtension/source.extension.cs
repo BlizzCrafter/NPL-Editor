@@ -10,7 +10,7 @@ namespace NPLEditor.VSExtension
     {
         public const string Id = "NPLEditor.VSExtension.b2fd787a-0ec7-4579-bb6f-9fa3334677cf";
         public const string Name = "NPL Editor Extension";
-        public const string Description = @"The NPLEditor is a heavenly modernized and improved version of the MonoGame Pipeline Tool.";
+        public const string Description = @"The NPL Editor is a heavenly modernized and improved version of the MonoGame Pipeline Tool.";
         public const string Language = "en-US";
         public const string Version = "1.1.3";
         public const string Author = "BlizzCrafter";

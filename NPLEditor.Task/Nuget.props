@@ -4,7 +4,7 @@
 		<Authors>Marcel Härtel</Authors>
 		<Product>NPL-Editor-Task</Product>
 		<Title>NPL Editor Task</Title>
-		<Description>A task to build and copy content via NPLEditor.</Description>
+		<Description>A task to build and copy content via NPL Editor.</Description>
 		<PackageProjectUrl>https://github.com/BlizzCrafter/NPL-Editor</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/BlizzCrafter/NPL-Editor.git</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
