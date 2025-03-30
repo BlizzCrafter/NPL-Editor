@@ -45,7 +45,7 @@ namespace NPLEditor.Common
                     jsonString = reader.ReadToEnd();
                 }
                 JsonObject = JsonNode.Parse(jsonString);
-                
+
                 ParseSettings();
 
                 ContentRoot = JsonObject["root"].ToString();
@@ -107,7 +107,7 @@ namespace NPLEditor.Common
             // 3. Re-Add references and content entries.
             JsonObject.AsObject().Add("references", referencesRef);
             JsonObject.AsObject().Add("content", contentRef);
-            
+
             // 4. Save the new json-file with the following order:
             // settings
             // references
@@ -247,8 +247,8 @@ namespace NPLEditor.Common
                         foreach (var nplItemBuildFile in nplItemBuildFiles)
                         {
                             RuntimeBuilder.SetImporterAndProcessor(
-                                Path.GetFileName(nplItemBuildFile), 
-                                nplItem.Value.Importer.TypeName, 
+                                Path.GetFileName(nplItemBuildFile),
+                                nplItem.Value.Importer.TypeName,
                                 nplItem.Value.Processor.TypeName);
                         }
 
@@ -299,19 +299,33 @@ namespace NPLEditor.Common
                 }
                 else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
                 {
-                    var dir = Path.GetDirectoryName(reference.ToString());
-                    var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
-                    foreach (var file in matchingFiles)
+                    try
                     {
-                        combinedReferences.Add(Path.GetFullPath(file));
+                        var dir = Path.GetDirectoryName(reference.ToString());
+                        var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
+                        foreach (var file in matchingFiles)
+                        {
+                            combinedReferences.Add(Path.GetFullPath(file));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        NPLLog.LogException(e, "GET-REFERENCE");
                     }
                 }
                 else
                 {
-                    var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
-                    foreach (var file in matchingFiles)
+                    try
                     {
-                        combinedReferences.Add(Path.GetFullPath(file));
+                        var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
+                        foreach (var file in matchingFiles)
+                        {
+                            combinedReferences.Add(Path.GetFullPath(file));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        NPLLog.LogException(e, "GET-REFERENCE:");
                     }
                 }
             }
