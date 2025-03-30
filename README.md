@@ -3,7 +3,7 @@
 
 A graphical editor for '.npl' files used together with '[Nopipeline](https://github.com/Martenfur/Nopipeline)' to produce '.mgcb' files for MonoGame projects.
 
-Inspired by the [MGCB Editor](https://docs.monogame.net/articles/content_pipeline/using_mgcb_editor.html).
+Inspired by the [MGCB Editor](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html).
 
 # Setup NPL Editor
 
