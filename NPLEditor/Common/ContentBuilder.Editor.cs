@@ -223,6 +223,7 @@ namespace NPLEditor.Common
                         }
                         ImGui.PopItemWidth();
                     }
+                    ImGui.TreePop();
 
                     Widgets.ListEditor("Dependencies", nplItem.Dependencies, out var itemAdded, out var itemRemoved, out var itemChanged);
                     {
@@ -242,7 +243,6 @@ namespace NPLEditor.Common
                             SaveContentNPL();
                         }
                     }
-                    ImGui.TreePop();
                 }
                 ImGui.PopStyleColor();
                 ImGui.PopItemWidth();

@@ -225,8 +225,9 @@ namespace NPLEditor.GUI
             itemRemoved = false;
             itemChanged = false;
 
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() - (ImGui.GetStyle().IndentSpacing / 3f));
             ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
-            if (ImGui.TreeNodeEx($"{FontAwesome.Plus} Add {name}", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
+            if (ImGui.TreeNodeEx($"{FontAwesome.PlusSquare} Add {name}", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
             {
                 if (ImGui.IsItemClicked())
                 {
