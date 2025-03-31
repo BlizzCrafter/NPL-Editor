@@ -293,41 +293,38 @@ namespace NPLEditor.Common
                 _tempReferences.Add(item.ToString());
 
                 var reference = Environment.ExpandEnvironmentVariables(item.ToString());
-                if (File.Exists(reference.ToString()))
+                if (File.Exists(reference))
                 {
-                    combinedReferences.Add(Path.GetFullPath(reference.ToString()));
+                    combinedReferences.Add(Path.GetFullPath(reference));
                 }
-                else if (Directory.Exists(Path.GetDirectoryName(reference.ToString())))
+                else if (reference.Contains('*'))
                 {
                     try
                     {
-                        var dir = Path.GetDirectoryName(reference.ToString());
-                        var matchingFiles = Directory.GetFiles(dir, "*.dll", SearchOption.AllDirectories).ToList();
-                        foreach (var file in matchingFiles)
+                        var dir = Path.GetDirectoryName(reference);
+                        if (!Directory.Exists(dir)) dir = Directory.GetCurrentDirectory();
+
+                        var searchPattern = Path.GetFileName(reference);
+                        var searchOption = reference.Contains("**") ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+                        try
                         {
-                            combinedReferences.Add(Path.GetFullPath(file));
+                            var matchingFiles = Directory.GetFiles(dir, searchPattern, searchOption).ToList();
+                            foreach (var file in matchingFiles)
+                            {
+                                combinedReferences.Add(Path.GetFullPath(file));
+                            }
+                        }
+                        catch (UnauthorizedAccessException e)
+                        {
+                            NPLLog.LogException(e);
                         }
                     }
                     catch (Exception e)
                     {
-                        NPLLog.LogException(e, "GET-REFERENCE");
+                        NPLLog.LogException(e, "GET-REFERENCES");
                     }
                 }
-                else
-                {
-                    try
-                    {
-                        var matchingFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll", SearchOption.AllDirectories).ToList();
-                        foreach (var file in matchingFiles)
-                        {
-                            combinedReferences.Add(Path.GetFullPath(file));
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        NPLLog.LogException(e, "GET-REFERENCE:");
-                    }
-                }
+                else NPLLog.LogWarningHeadline(FontAwesome.ExclamationTriangle, $"Reference '{reference}' does not exist.");
             }
             var references = combinedReferences.Distinct()
                 .Where(x => !string.IsNullOrEmpty(x.ToString())).ToArray();
