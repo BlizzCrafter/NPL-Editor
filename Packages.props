@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup>
-		<NPLEditorVersion>1.4.3</NPLEditorVersion>
+		<NPLEditorVersion>1.4.4</NPLEditorVersion>
 		<NPLTaskVersion>1.0.0</NPLTaskVersion>
 	</PropertyGroup>
 </Project>
