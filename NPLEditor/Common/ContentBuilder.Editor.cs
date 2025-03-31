@@ -76,7 +76,7 @@ namespace NPLEditor.Common
                 RuntimeBuilder.SetCompressContent(Compress);
             }
 
-            Widgets.ListEditor("Reference", _tempReferences, out bool itemAdded, out bool itemRemoved, out bool itemChanged);
+            Widgets.ListEditor("Pipeline Reference", _tempReferences, out bool itemAdded, out bool itemRemoved, out bool itemChanged);
             {
                 if (itemAdded || itemChanged || itemRemoved)
                 {
