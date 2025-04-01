@@ -1,4 +1,4 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project InitialTargets="CopyContentBuildFiles" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<!-- This disables the IDE feature that skips executing msbuild in some build situations. -->
 		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<!-- Read .npl content files (Json) and regex 'outputDir' and 'platform' out of it. -->
-	<Target Name="ReadNPLContentReferences" BeforeTargets="RunNPLBuilder">
+	<Target Name="ReadNPLContentReferences" BeforeTargets="RunContentBuilder">
 		<PropertyGroup>
 			<JsonContent>$([System.IO.File]::ReadAllText(%(NPLContentReferences.FullPath)))</JsonContent>
 
@@ -47,7 +47,7 @@
 	</Target>
 
 	<Target
-		Name="RunNPLBuilder"
+		Name="RunContentBuilder"
 		AfterTargets="Build"
 		Outputs="@(ProducedFiles)">
 
@@ -58,7 +58,7 @@
 	</Target>
 
 	<!-- The output dir for the produced content files probably needs to be created first. -->
-	<Target Name="MakeOutputDir" AfterTargets="RunNPLBuilder">
+	<Target Name="MakeOutputDir" AfterTargets="RunContentBuilder">
 		<MakeDir Directories="$(ContentOutputPath)" Condition="!Exists('$(ContentOutputPath)')" />
 	</Target>
 
