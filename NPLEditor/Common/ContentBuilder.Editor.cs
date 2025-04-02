@@ -76,7 +76,7 @@ namespace NPLEditor.Common
                 RuntimeBuilder.SetCompressContent(Compress);
             }
 
-            Widgets.ListEditor("Pipeline Reference", _tempReferences, out bool itemAdded, out bool itemRemoved, out bool itemChanged);
+            Widgets.ListEditor("Pipeline Reference", -1, _tempReferences, out bool itemAdded, out bool itemRemoved, out bool itemChanged);
             {
                 if (itemAdded || itemChanged || itemRemoved)
                 {
@@ -225,7 +225,7 @@ namespace NPLEditor.Common
                     }
                     ImGui.TreePop();
 
-                    Widgets.ListEditor("Dependencies", nplItem.Dependencies, out var itemAdded, out var itemRemoved, out var itemChanged);
+                    Widgets.ListEditor("Dependencies", id, nplItem.Dependencies, out var itemAdded, out var itemRemoved, out var itemChanged);
                     {
                         if (itemAdded || itemChanged || itemRemoved)
                         {

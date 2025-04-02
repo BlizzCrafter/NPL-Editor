@@ -216,6 +216,7 @@ namespace NPLEditor.GUI
         
         public static void ListEditor(
             string name,
+            int id,
             List<string> list,
             out bool itemAdded,
             out bool itemRemoved,
@@ -225,6 +226,7 @@ namespace NPLEditor.GUI
             itemRemoved = false;
             itemChanged = false;
 
+            ImGui.PushID(id);
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() - (ImGui.GetStyle().IndentSpacing / 3f));
             ImGui.PushItemWidth(ImGui.CalcItemWidth() - ImGui.GetStyle().IndentSpacing);
             if (ImGui.TreeNodeEx($"{FontAwesome.PlusSquare} Add {name}", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.SpanAllColumns))
@@ -254,6 +256,7 @@ namespace NPLEditor.GUI
                 }
                 ImGui.TreePop();
             }
+            ImGui.PopID();
         }
     }
 }
