@@ -226,7 +226,7 @@ namespace NPLEditor.Common
                         path = Path.Combine(ContentRoot, path);
                     }
 
-                    GetFilePath(path, out var fileName, out var filePath);
+                    GetFilePath(path, string.Empty, out var fileName, out var filePath);
 
                     var searchOpt = SearchOption.TopDirectoryOnly;
                     if (nplItem.Value.Recursive)
@@ -256,7 +256,7 @@ namespace NPLEditor.Common
                         {
                             foreach (var dependency in nplItem.Value.Dependencies)
                             {
-                                GetFilePath(dependency, out var dependencyFileName, out var dependencyFilePath);
+                                GetFilePath(dependency, filePath, out var dependencyFileName, out var dependencyFilePath);
                                 foreach (var nplItemBuildFile in nplItemBuildFiles)
                                 {
                                     RuntimeBuilder.AddDependencies(Path.GetFileName(nplItemBuildFile), Directory.GetFiles(Path.Combine(filePath, dependencyFilePath), dependencyFileName, searchOpt).ToList());
@@ -272,13 +272,13 @@ namespace NPLEditor.Common
             }
         }
 
-        private static void GetFilePath(string path, out string fileName, out string filePath)
+        private static void GetFilePath(string path, string root, out string fileName, out string filePath)
         {
             fileName = Path.GetFileName(path);
             filePath = Path.GetDirectoryName(path);
             if (string.IsNullOrEmpty(filePath))
             {
-                filePath = Directory.GetCurrentDirectory();
+                filePath = Path.Combine(Directory.GetCurrentDirectory(), root);
             }
         }
 
