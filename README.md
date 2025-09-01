@@ -5,13 +5,13 @@ NPL Editor is a modern, powerful, and completely standalone tool that revolution
 
 # Setup NPL Editor
 
-1. Build NPLEditor in Release mode which generates the nuget packages inside the root of the project.
+1. Build the whole project in "Release" mode (which generates nuget packages inside the root of the project and the vsix extension).
 2. Now open the root, click inside the adress bar of the explorer and type-in "cmd" (which opens a command prompt pointing to the root).
 3. Install NPLEditor as a global dotnet tool like this: `dotnet tool install NPLEditor --add-source ..\ -g`
 4. Install NPLEditor.Task locally to your desired MonoGame project.
    - You probably want to move the nuget package to a custom directory beforehand.
    - Alternatively: Copy the NPLEditor.Task.targets file directly to your MonoGame project root.
-5. Install the [NPLEditor.VSExtension](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) via Visual Studio.
+5. Go to "NPLEditor.VSExtension\bin\Release" and double click on "NPLEditor.VSExtension.vsix" to install the visual studio extension.
 6. Profit ???
 
 Yes! It should be possible now to double click the **Content.npl** file inside your **Content** folder to open the **NPL Editor**. 
