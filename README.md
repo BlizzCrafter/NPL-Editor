@@ -1,6 +1,4 @@
 # Welcome to NPL Editor!
-[![Visual Studio](https://img.shields.io/badge/Visual%20Studio-Extension-blue.svg?style=for-the-badge&logo=visual-studio-code&labelColor=8962CC&logoSize=auto&colorA=262626&colorB=707070)](https://marketplace.visualstudio.com/items?itemName=BlizzCrafter.NPLEditor) 
-
 NPL Editor is a modern, powerful, and completely standalone tool that revolutionizes your MonoGame content pipeline workflow. Building upon the robust foundations of **[MGCB Editor](https://docs.monogame.net/articles/getting_started/tools/mgcb_editor.html)** and **[NoPipeline](https://github.com/Martenfur/Nopipeline)**, it delivers an enhanced, user-friendly experience designed for speed, flexibility, and reliability.
 
 # Setup NPL Editor
