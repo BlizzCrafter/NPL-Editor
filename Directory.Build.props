@@ -2,6 +2,6 @@
 	<Import Project="Packages.props" />
 	<Import Project="$(MSBuildProjectDirectory)\Nuget.props" Condition="Exists('$(MSBuildProjectDirectory)\Nuget.props')" />
 	<PropertyGroup>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 </Project>
