@@ -48,7 +48,7 @@ namespace NPLEditor
 #else
             Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Content"));
             
-            if (args.Length >= 0)
+            if (args != null && args.Length > 0)
             {
                 // A .npl content file is always the first argument.
                 NPLJsonFilePath = args[0];
