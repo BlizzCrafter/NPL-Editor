@@ -8,7 +8,7 @@ NPL Editor is a modern, powerful, and completely standalone tool that revolution
 3. Install NPLEditor as a global dotnet tool like this: `dotnet tool install NPLEditor --add-source ..\ -g`
 4. Install NPLEditor.Task locally to your desired MonoGame project.
    - You probably want to move the nuget package to a custom directory beforehand.
-   - Alternatively: Copy the NPLEditor.Task.targets file directly to your MonoGame project root.
+   - Alternatively: Copy the NPLEditor.Task.targets file directly to your MonoGame project root and import it inside your .csproj file.
 5. Go to "NPLEditor.VSExtension\bin\Release" and double click on "NPLEditor.VSExtension.vsix" to install the visual studio extension.
 6. Profit ???
 
